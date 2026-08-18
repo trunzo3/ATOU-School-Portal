@@ -1,0 +1,30 @@
+uploads = []
+generated = []
+
+[[outputs]]
+id = "RACkoX8MywRabw188dJcx"
+uri = "file://exports/hackathon-schools.csv"
+type = "table"
+title = "Hackathon schools"
+description = "The 6 Hackathon school records: name, code, workshop date, lock status, Airtable record id, approx students."
+
+[[outputs]]
+id = "deBNIyG8Pvbac4m38ufjA"
+uri = "file://exports/hackathon-answers.csv"
+type = "table"
+title = "Hackathon answers (current)"
+description = "The latest saved answer for each question, per school."
+
+[[outputs]]
+id = "jpLQtecOLaQquqoMHU-L-"
+uri = "file://exports/hackathon-answer-history.csv"
+type = "table"
+title = "Hackathon answer history"
+description = "Every answer save, including who entered it and when."
+
+[[outputs]]
+id = "94BSBmt_f0GFqRVl-RKju"
+uri = "file://exports/hackathon-teachers.csv"
+type = "table"
+title = "Hackathon teacher rows"
+description = "Teacher rows from each school's latest teacher list save."

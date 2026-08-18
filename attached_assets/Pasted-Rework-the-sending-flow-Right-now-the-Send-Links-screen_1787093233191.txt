@@ -1,0 +1,35 @@
+Rework the sending flow. Right now the Send Links screen only shows schools with a workshop within 30 days, which hides the schools Pam wants to reach out to earlier.
+
+THE DASHBOARD at /admin
+
+Show every school, sorted by workshop date with the soonest first. No date window, nothing hidden.
+
+Add a search box that filters by school name.
+
+Add sorting by workshop date, school name, send status, or answer status.
+
+Add filters for date range, send status (never sent, sent and waiting, answered), and answer completeness. Filters combine.
+
+Add a checkbox on each row, plus select-all for whatever is currently visible after search and filters. Schools that are locked show a lock icon in place of the checkbox and cannot be selected; hovering the icon explains that edits are locked for that school.
+
+When one or more schools are selected, show a bar with the count, a Clear option, and a Compose email button that opens the send screen carrying that selection.
+
+THE SEND SCREEN at /admin/send
+
+This screen has two parts: a compose area at the top and a sent log below it.
+
+Compose shows the selected schools grouped by school, each with its contact email addresses listed underneath. Any school or any individual address can be removed here.
+
+Below that, the subject and message. Both prefill from a saved template using merge fields for the school name, the workshop date, and the school's private link, so Pam never types a name or pastes a link. She can edit either before sending. A Save as template button makes an edit the new default for future sends.
+
+A Preview button shows the message with the merge fields filled in for one of the selected schools.
+
+The send button reads how many schools and how many recipients it will go to. After sending, confirm on this same screen — no dialog — and add the sends to the log.
+
+Reaching this screen with nothing selected is normal. In that case the log is the main content, and the compose area shows an empty state with a type-ahead field where Pam can add schools by name.
+
+Add a Back to schools link that returns to the dashboard with the previous search, filters, and sort still applied.
+
+THE SENT LOG
+
+Below

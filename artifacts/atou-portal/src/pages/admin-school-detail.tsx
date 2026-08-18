@@ -128,7 +128,6 @@ function AdminSchoolFormWrapper({ schoolId, detail, adminEmail, handleSaveAnswer
         initialAnswers={answers}
         onSaveAnswer={handleSaveAnswer}
         onSaveTeachers={handleSaveTeachers}
-        onDone={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
         isReadOnly={detail.locked}
       />
     </AdminLayout>

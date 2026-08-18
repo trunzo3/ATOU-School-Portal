@@ -46,7 +46,7 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
 
       {/* Sidebar */}
       <div className={cn(
-        "fixed inset-y-0 left-0 z-40 w-64 bg-card border-r flex-col shadow-sm transition-transform duration-200 ease-in-out md:relative md:flex md:translate-x-0 no-print",
+        "fixed inset-y-0 left-0 z-40 w-64 bg-card border-r flex flex-col shadow-sm transition-transform duration-200 ease-in-out md:sticky md:top-0 md:h-[100dvh] md:translate-x-0 no-print",
         mobileMenuOpen ? "translate-x-0" : "-translate-x-full"
       )}>
         <div className="p-6 border-b hidden md:block">

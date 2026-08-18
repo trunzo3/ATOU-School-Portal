@@ -82,10 +82,6 @@ export function PortalEntry() {
     loadForm(email)
   }
 
-  const handleDone = () => {
-    setLocation(`/s/${code}/done`)
-  }
-
   if (!identified) {
     return (
       <PortalLayout>
@@ -151,7 +147,6 @@ export function PortalEntry() {
           initialAnswers={answers}
           onSaveAnswer={handleSaveAnswer}
           onSaveTeachers={handleSaveTeachers}
-          onDone={handleDone}
           isReadOnly={answers.school.locked}
         />
       )}

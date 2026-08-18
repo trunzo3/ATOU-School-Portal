@@ -14,11 +14,12 @@ interface SchoolFormProps {
   initialAnswers: SchoolAnswers;
   onSaveAnswer: (key: string, value: string) => Promise<void>;
   onSaveTeachers: (rows: any[]) => Promise<void>;
-  onDone: () => void;
   isReadOnly?: boolean;
 }
 
-export function SchoolForm({ code, email, initialAnswers, onSaveAnswer, onSaveTeachers, onDone, isReadOnly }: SchoolFormProps) {
+type SaveState = "dirty" | "saving" | "saved";
+
+export function SchoolForm({ code, email, initialAnswers, onSaveAnswer, onSaveTeachers, isReadOnly }: SchoolFormProps) {
   // Extract state per question
   const getQ = (key: string) => initialAnswers.questions.find(q => q.questionKey === key)
   
@@ -39,16 +40,84 @@ export function SchoolForm({ code, email, initialAnswers, onSaveAnswer, onSaveTe
   const [teachersSaved, setTeachersSaved] = useState(true) // Track dirty state
   const [savingTeacher, setSavingTeacher] = useState(false)
 
+  // Per-question save state so each section can show a Save button / "Saved" label
+  const [saveStates, setSaveStates] = useState<Record<string, SaveState>>({})
+  // Values saved during this session (the prop may lag behind a refetch)
+  const lastSavedRef = useRef<Record<string, string>>({})
+  // Latest draft value per key, so a completing save can tell if it's still current
+  const draftRef = useRef<Record<string, string>>({})
+  // Value currently being saved per key (dedupes blur-save + Save-button click)
+  const inFlightRef = useRef<Record<string, string | undefined>>({})
+  // Monotonic save counter per key so an older save can't clobber a newer one
+  const saveSeqRef = useRef<Record<string, number>>({})
+
+  const markEdited = (key: string, value: string, savedValue: string | undefined) => {
+    draftRef.current[key] = value
+    const baseline = lastSavedRef.current[key] ?? savedValue ?? ""
+    setSaveStates(s => {
+      if (value === baseline) {
+        if (s[key] !== "dirty") return s
+        const next = { ...s }
+        delete next[key]
+        return next
+      }
+      if (s[key] === "dirty") return s
+      return { ...s, [key]: "dirty" }
+    })
+  }
+
   // Local helper to handle confirmation for existing answers
   const handleSave = async (key: string, value: string, currentValue: string | undefined) => {
-    if (value === currentValue) return; // No change
+    const baseline = lastSavedRef.current[key] ?? currentValue
+    if (value === baseline) return; // No change
     if (!value.trim()) return; // Server rejects empty values; nothing to save
-    if (currentValue && !confirm("This will overwrite a previously saved answer. Are you sure?")) {
+    if (inFlightRef.current[key] === value) return; // Same save already running (blur + click)
+    if (baseline && !confirm("This will overwrite a previously saved answer. Are you sure?")) {
       // Revert state if cancelled - this is simplistic; in a real app we'd keep local draft state separate
       // For now, if they cancel, we'll let it stay in input but not save to server.
       return;
     }
-    await onSaveAnswer(key, value);
+    if (inFlightRef.current[key] === value) return; // Re-check after the blocking confirm
+    const seq = (saveSeqRef.current[key] = (saveSeqRef.current[key] ?? 0) + 1)
+    inFlightRef.current[key] = value
+    setSaveStates(s => ({ ...s, [key]: "saving" }))
+    try {
+      await onSaveAnswer(key, value);
+      if (saveSeqRef.current[key] === seq) {
+        lastSavedRef.current[key] = value
+        const latest = draftRef.current[key] ?? value
+        // Only report "saved" if the field hasn't been edited again meanwhile
+        setSaveStates(s => ({ ...s, [key]: latest === value ? "saved" : "dirty" }))
+      }
+    } catch (err) {
+      if (saveSeqRef.current[key] === seq) {
+        setSaveStates(s => ({ ...s, [key]: "dirty" }))
+      }
+      throw err
+    } finally {
+      if (inFlightRef.current[key] === value) inFlightRef.current[key] = undefined
+    }
+  }
+
+  // One Save button / "Saved" label per section, driven by that section's question keys
+  const renderSectionSave = (keys: string[], onSave: () => void) => {
+    if (isReadOnly || initialAnswers.school.locked) return null
+    const states = keys.map(k => saveStates[k]).filter(Boolean)
+    if (states.length === 0) return null
+    const state: SaveState = states.includes("saving") ? "saving" : states.includes("dirty") ? "dirty" : "saved"
+    return (
+      <div className="flex justify-end no-print">
+        {state === "saved" ? (
+          <span className="flex items-center gap-2 text-sm font-medium text-primary">
+            <CheckCircle2 className="h-4 w-4" /> Saved
+          </span>
+        ) : (
+          <Button size="sm" onClick={onSave} disabled={state === "saving"}>
+            <Save className="h-4 w-4 mr-2" /> {state === "saving" ? "Saving..." : "Save"}
+          </Button>
+        )}
+      </div>
+    )
   }
 
   const computeBreakTimes = (startTimeStr: string) => {
@@ -136,18 +205,38 @@ export function SchoolForm({ code, email, initialAnswers, onSaveAnswer, onSaveTe
 
   const renderTeacherHistory = (history: any[]) => {
     if (!history || history.length === 0) return null;
+    const sorted = [...history].sort(
+      (a, b) => new Date(b.enteredAt).getTime() - new Date(a.enteredAt).getTime()
+    );
     return (
-      <div className="mt-4 text-sm text-muted-foreground bg-muted/20 p-3 rounded-md border border-dashed no-print">
+      <div className="mt-4 text-sm text-muted-foreground no-print">
         <p className="font-medium text-xs uppercase tracking-wider mb-2">Previous Teacher Lists</p>
         <div className="space-y-3">
-          {history.map((h, i) => (
-            <div key={i} className="border-l-2 border-muted pl-3">
-              <div className="text-xs mb-1 font-medium">{h.enteredBy} • {formatPacificTime(h.enteredAt)} ({h.totalStudents} total)</div>
-              <ul className="text-xs space-y-1">
-                {h.rows.map((r: any, ri: number) => (
-                  <li key={ri}>{r.firstName} {r.lastName} ({r.studentCount} students)</li>
-                ))}
-              </ul>
+          {sorted.map((h, i) => (
+            <div key={i} className="bg-muted/20 p-3 rounded-md border border-dashed">
+              <div className="text-xs mb-2 font-medium text-foreground/80">
+                Changed by {h.enteredBy} · {formatPacificTime(h.enteredAt)} · {h.rows.length} teacher{h.rows.length === 1 ? "" : "s"}, {h.totalStudents} student{h.totalStudents === 1 ? "" : "s"}
+              </div>
+              <table className="w-full text-xs">
+                <thead>
+                  <tr className="text-left text-muted-foreground/70">
+                    <th className="font-medium pb-1 pr-3">First name</th>
+                    <th className="font-medium pb-1 pr-3">Last name</th>
+                    <th className="font-medium pb-1 pr-3">Email</th>
+                    <th className="font-medium pb-1 text-right">Students</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {h.rows.map((r: any, ri: number) => (
+                    <tr key={ri}>
+                      <td className="py-0.5 pr-3">{r.firstName}</td>
+                      <td className="py-0.5 pr-3">{r.lastName}</td>
+                      <td className="py-0.5 pr-3 break-all">{r.email}</td>
+                      <td className="py-0.5 text-right">{r.studentCount}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
           ))}
         </div>
@@ -162,7 +251,7 @@ export function SchoolForm({ code, email, initialAnswers, onSaveAnswer, onSaveTe
   const qNotes = getQ("notes");
 
   return (
-    <div className="space-y-8 print:space-y-6 w-full max-w-3xl mx-auto pb-24">
+    <div className="space-y-8 print:space-y-6 w-full max-w-3xl mx-auto pb-12">
       
       {/* Header Info */}
       <div className="bg-primary/5 border border-primary/10 rounded-lg p-6 print:border-none print:p-0 print:bg-transparent flex justify-between items-start">
@@ -221,7 +310,7 @@ export function SchoolForm({ code, email, initialAnswers, onSaveAnswer, onSaveTe
                 </div>
                 <div className="col-span-2 flex gap-2 items-center">
                   <Input type="number" min="0" placeholder="Count" value={row.studentCount || ""} onChange={(e) => handleTeacherChange(i, "studentCount", parseInt(e.target.value)||0)} disabled={isReadOnly || initialAnswers.school.locked} className="print:border-none print:p-0 print:h-auto" />
-                  {!isReadOnly && !initialAnswers.school.locked && teacherRows.length > 1 && (
+                  {!isReadOnly && !initialAnswers.school.locked && (
                     <Button variant="ghost" size="icon" className="text-destructive h-10 w-10 flex-shrink-0 no-print" onClick={() => removeTeacher(i)}>
                       <Trash2 className="h-4 w-4" />
                     </Button>
@@ -301,7 +390,7 @@ export function SchoolForm({ code, email, initialAnswers, onSaveAnswer, onSaveTe
               <Input 
                 type="time" 
                 value={timeValue} 
-                onChange={e => setTimeValue(e.target.value)} 
+                onChange={e => { setTimeValue(e.target.value); markEdited("workshop_time", e.target.value, isClockTime ? rawTimeValue.trim() : "") }} 
                 onBlur={() => handleSave("workshop_time", timeValue, qTime?.current?.value)}
                 disabled={isReadOnly || initialAnswers.school.locked}
                 className="print:border-none print:p-0 print:h-auto"
@@ -323,13 +412,18 @@ export function SchoolForm({ code, email, initialAnswers, onSaveAnswer, onSaveTe
               <Textarea 
                 placeholder="e.g. Recess is at 10:15 so we must break then..."
                 value={timingNote}
-                onChange={e => setTimingNote(e.target.value)}
+                onChange={e => { setTimingNote(e.target.value); markEdited("timing_note", e.target.value, qNote?.current?.value) }}
                 onBlur={() => handleSave("timing_note", timingNote, qNote?.current?.value)}
                 disabled={isReadOnly || initialAnswers.school.locked}
                 className="min-h-[80px] print:border-none print:p-0"
               />
             </div>
             
+            {renderSectionSave(["workshop_time", "timing_note"], () => {
+              handleSave("workshop_time", timeValue, qTime?.current?.value)
+              handleSave("timing_note", timingNote, qNote?.current?.value)
+            })}
+
             {qTime?.current && (
               <div className="text-xs text-muted-foreground no-print">
                 Last updated by {qTime.current.enteredBy} at {formatPacificTime(qTime.current.enteredAt)}
@@ -357,12 +451,13 @@ export function SchoolForm({ code, email, initialAnswers, onSaveAnswer, onSaveTe
           <div className="space-y-2">
             <Input 
               value={activityArea} 
-              onChange={e => setActivityArea(e.target.value)} 
+              onChange={e => { setActivityArea(e.target.value); markEdited("activity_area", e.target.value, qAct?.current?.value) }} 
               onBlur={() => handleSave("activity_area", activityArea, qAct?.current?.value)}
               disabled={isReadOnly || initialAnswers.school.locked}
               placeholder="Where will activity stations be held?"
               className="print:border-none print:p-0 print:border-b print:rounded-none print:border-gray-300"
             />
+            {renderSectionSave(["activity_area"], () => handleSave("activity_area", activityArea, qAct?.current?.value))}
             {qAct?.current && (
               <div className="text-xs text-muted-foreground mt-2 no-print">
                 Last updated by {qAct.current.enteredBy} at {formatPacificTime(qAct.current.enteredAt)}
@@ -390,12 +485,13 @@ export function SchoolForm({ code, email, initialAnswers, onSaveAnswer, onSaveTe
           <div className="space-y-2">
             <Input 
               value={speakerArea} 
-              onChange={e => setSpeakerArea(e.target.value)} 
+              onChange={e => { setSpeakerArea(e.target.value); markEdited("speaker_area", e.target.value, qSpk?.current?.value) }} 
               onBlur={() => handleSave("speaker_area", speakerArea, qSpk?.current?.value)}
               disabled={isReadOnly || initialAnswers.school.locked}
               placeholder="Where will speakers present?"
               className="print:border-none print:p-0 print:border-b print:rounded-none print:border-gray-300"
             />
+            {renderSectionSave(["speaker_area"], () => handleSave("speaker_area", speakerArea, qSpk?.current?.value))}
             {qSpk?.current && (
               <div className="text-xs text-muted-foreground mt-2 no-print">
                 Last updated by {qSpk.current.enteredBy} at {formatPacificTime(qSpk.current.enteredAt)}
@@ -420,12 +516,13 @@ export function SchoolForm({ code, email, initialAnswers, onSaveAnswer, onSaveTe
           <div className="space-y-2">
             <Textarea 
               value={notes} 
-              onChange={e => setNotes(e.target.value)} 
+              onChange={e => { setNotes(e.target.value); markEdited("notes", e.target.value, qNotes?.current?.value) }} 
               onBlur={() => handleSave("notes", notes, qNotes?.current?.value)}
               disabled={isReadOnly || initialAnswers.school.locked}
               placeholder="Any additional information..."
               className="min-h-[100px] print:border-none print:p-0 print:border-b print:rounded-none print:border-gray-300"
             />
+            {renderSectionSave(["notes"], () => handleSave("notes", notes, qNotes?.current?.value))}
             {qNotes?.current && (
               <div className="text-xs text-muted-foreground mt-2 no-print">
                 Last updated by {qNotes.current.enteredBy} at {formatPacificTime(qNotes.current.enteredAt)}
@@ -435,17 +532,6 @@ export function SchoolForm({ code, email, initialAnswers, onSaveAnswer, onSaveTe
           </div>
         </CardContent>
       </Card>
-
-      {!isReadOnly && !initialAnswers.school.locked && (
-        <div className="fixed bottom-0 left-0 right-0 bg-card border-t p-4 shadow-[0_-10px_40px_rgba(0,0,0,0.05)] z-10 flex justify-center no-print">
-          <div className="max-w-3xl w-full flex justify-between items-center">
-            <p className="text-sm text-muted-foreground hidden sm:block">All changes are saved automatically.</p>
-            <Button size="lg" className="w-full sm:w-auto" onClick={onDone}>
-              <CheckCircle2 className="mr-2 h-5 w-5" /> I'm Done for Now
-            </Button>
-          </div>
-        </div>
-      )}
 
     </div>
   )

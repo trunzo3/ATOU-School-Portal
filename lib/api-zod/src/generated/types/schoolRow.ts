@@ -5,7 +5,9 @@
  * ATOU workshop logistics API
  * OpenAPI spec version: 0.1.0
  */
+import type { Contact } from './contact';
 import type { QuestionState } from './questionState';
+import type { SchoolRowSendStatus } from './schoolRowSendStatus';
 
 export interface SchoolRow {
   id: number;
@@ -19,4 +21,8 @@ export interface SchoolRow {
   approxStudents: string | null;
   questionStates: QuestionState[];
   missingCount: number;
+  contacts: Contact[];
+  sendStatus: SchoolRowSendStatus;
+  /** @nullable */
+  lastSentAt: string | null;
 }

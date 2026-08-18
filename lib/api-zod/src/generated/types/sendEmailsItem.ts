@@ -6,9 +6,8 @@
  * OpenAPI spec version: 0.1.0
  */
 
-export interface EmailTemplateInput {
-  /** @minLength 1 */
-  subject: string;
-  /** @minLength 1 */
-  body: string;
+export interface SendEmailsItem {
+  schoolId: number;
+  /** @minItems 1 */
+  emails: string[];
 }

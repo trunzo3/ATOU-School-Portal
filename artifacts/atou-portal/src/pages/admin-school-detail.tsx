@@ -6,7 +6,7 @@ import { SchoolForm } from "@/components/shared/school-form"
 import { Button } from "@/components/ui/button"
 import { Switch } from "@/components/ui/switch"
 import { Label } from "@/components/ui/label"
-import { Printer, ChevronLeft, Lock, Unlock } from "lucide-react"
+import { Printer, ChevronLeft, Lock, Unlock, Mail } from "lucide-react"
 import { useQueryClient } from "@tanstack/react-query"
 import { useToast } from "@/hooks/use-toast"
 
@@ -81,6 +81,7 @@ function AdminSchoolFormWrapper({ schoolId, detail, adminEmail, handleSaveAnswer
   // Admin session cookie wins.
   const fetchAnswers = useFetchPortalAnswers()
   const [answers, setAnswers] = useState<any>(null)
+  const [, navigate] = useLocation()
 
   const refreshAnswers = () => {
     fetchAnswers.mutate({ code: detail.code, data: { email: adminEmail } }, {
@@ -129,6 +130,15 @@ function AdminSchoolFormWrapper({ schoolId, detail, adminEmail, handleSaveAnswer
             <Label htmlFor="lock-toggle" className="cursor-pointer font-medium pr-1">Lock Form</Label>
           </div>
           
+          {!detail.locked && (
+            <Button variant="outline" onClick={() => {
+              sessionStorage.setItem("atou_send_selection", JSON.stringify([schoolId]))
+              navigate("/admin/send")
+            }}>
+              <Mail className="h-4 w-4 mr-2" /> Send email
+            </Button>
+          )}
+
           <Button variant="outline" onClick={() => window.print()}>
             <Printer className="h-4 w-4 mr-2" /> Print Form
           </Button>

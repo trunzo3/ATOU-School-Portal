@@ -6,11 +6,14 @@
  * OpenAPI spec version: 0.1.0
  */
 
-export interface DueSchool {
+export interface EmailSendRecord {
+  id: number;
   schoolId: number;
-  name: string;
-  workshopDate: string;
-  contactEmails: string[];
-  link: string;
+  schoolName: string;
+  recipients: string[];
   subject: string;
+  isFollowUp: boolean;
+  delivered: boolean;
+  sentBy: string;
+  sentAt: string;
 }

@@ -67,7 +67,24 @@ export const teacherSnapshotsTable = pgTable("teacher_snapshots", {
     .defaultNow(),
 });
 
+// One row per school per send. `delivered` is false until a real email
+// service (Resend) is connected — the send is still recorded in the log.
+export const emailSendsTable = pgTable("email_sends", {
+  id: serial("id").primaryKey(),
+  schoolId: integer("school_id")
+    .notNull()
+    .references(() => schoolsTable.id, { onDelete: "cascade" }),
+  recipients: jsonb("recipients").$type<string[]>().notNull(),
+  subject: text("subject").notNull(),
+  body: text("body").notNull(),
+  isFollowUp: boolean("is_follow_up").notNull().default(false),
+  delivered: boolean("delivered").notNull().default(false),
+  sentBy: text("sent_by").notNull(),
+  sentAt: timestamp("sent_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
 export type School = typeof schoolsTable.$inferSelect;
+export type EmailSend = typeof emailSendsTable.$inferSelect;
 export type Contact = typeof contactsTable.$inferSelect;
 export type Answer = typeof answersTable.$inferSelect;
 export type TeacherSnapshot = typeof teacherSnapshotsTable.$inferSelect;

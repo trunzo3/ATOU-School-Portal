@@ -1,136 +1,389 @@
-import { useGetDueSchools, useGetEmailTemplate, useUpdateEmailTemplate } from "@workspace/api-client-react"
+import {
+  useGetAdminSchools,
+  useGetEmailTemplate,
+  useUpdateEmailTemplate,
+  useGetEmailSends,
+  useGetEmailStatus,
+  useSendEmails,
+  getGetEmailSendsQueryKey,
+  getGetAdminSchoolsQueryKey,
+} from "@workspace/api-client-react"
+import { useQueryClient } from "@tanstack/react-query"
 import { AdminLayout } from "@/components/layout/admin-layout"
-import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card"
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Textarea } from "@/components/ui/input"
+import { Input, Textarea } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Badge } from "@/components/ui/badge"
 import { formatPacificTime } from "@/lib/utils"
-import { Copy, Mail, AlertCircle, Save } from "lucide-react"
-import { useState, useEffect } from "react"
+import { ChevronLeft, Eye, EyeOff, Mail, Save, Search, Send, X, AlertCircle, CheckCircle2 } from "lucide-react"
+import { useEffect, useMemo, useRef, useState } from "react"
+import { Link } from "wouter"
 import { useToast } from "@/hooks/use-toast"
+import { SEND_SELECTION_KEY } from "./admin-dashboard"
+
+// Client-side copy of the server's merge-field rules, for the preview.
+function fillMergeFields(
+  template: string,
+  school: { name: string; workshopDate: string | null; link: string },
+): string {
+  const dateText = school.workshopDate
+    ? new Date(`${school.workshopDate}T12:00:00-08:00`).toLocaleDateString("en-US", {
+        timeZone: "America/Los_Angeles",
+        month: "long",
+        day: "numeric",
+        year: "numeric",
+      })
+    : "TBD"
+  return template
+    .replaceAll("{{school_name}}", school.name)
+    .replaceAll("{{workshop_date}}", dateText)
+    .replaceAll("{{link}}", school.link)
+}
 
 export function AdminSend() {
-  const { data: dueSchools } = useGetDueSchools()
+  const { data: schools } = useGetAdminSchools()
   const { data: template } = useGetEmailTemplate()
+  const { data: sends } = useGetEmailSends()
+  const { data: emailStatus } = useGetEmailStatus()
   const updateTemplate = useUpdateEmailTemplate()
+  const sendEmails = useSendEmails()
+  const queryClient = useQueryClient()
   const { toast } = useToast()
 
-  const [body, setBody] = useState("")
+  // schoolId -> selected recipient emails
+  const [selection, setSelection] = useState<Record<number, string[]>>({})
+  const [subject, setSubject] = useState("")
+  const [message, setMessage] = useState("")
+  const [templateLoaded, setTemplateLoaded] = useState(false)
+  const editedRef = useRef(false)
+  const [showPreview, setShowPreview] = useState(false)
+  const [addQuery, setAddQuery] = useState("")
+  const [confirmation, setConfirmation] = useState<string | null>(null)
+  const consumedRef = useRef(false)
 
+  // Prefill subject/message from the saved template once — but never over
+  // something the user already started typing.
   useEffect(() => {
-    if (template) {
-      setBody(template.body)
-    }
-  }, [template])
-
-  const handleSaveTemplate = () => {
-    updateTemplate.mutate({ data: { body } }, {
-      onSuccess: () => {
-        toast({ title: "Template saved successfully" })
+    if (template && !templateLoaded) {
+      setTemplateLoaded(true)
+      if (!editedRef.current) {
+        setSubject(template.subject)
+        setMessage(template.body)
       }
+    }
+  }, [template, templateLoaded])
+
+  // Consume the selection handed over from the dashboard (or school detail).
+  useEffect(() => {
+    if (!schools || consumedRef.current) return
+    consumedRef.current = true
+    try {
+      const raw = sessionStorage.getItem(SEND_SELECTION_KEY)
+      if (!raw) return
+      sessionStorage.removeItem(SEND_SELECTION_KEY)
+      const ids: number[] = JSON.parse(raw)
+      const next: Record<number, string[]> = {}
+      for (const id of ids) {
+        const school = schools.find(s => s.id === id)
+        // A school locked since it was selected is dropped here.
+        if (school && !school.locked) next[id] = school.contacts.map(c => c.email)
+      }
+      setSelection(next)
+    } catch { /* start empty */ }
+  }, [schools])
+
+  const selectedIds = Object.keys(selection).map(Number)
+  const selectedSchools = (schools || []).filter(s => selectedIds.includes(s.id))
+  const recipientCount = selectedIds.reduce((sum, id) => sum + (selection[id]?.length || 0), 0)
+
+  const addSchool = (id: number, emails?: string[]) => {
+    const school = schools?.find(s => s.id === id)
+    if (!school || school.locked) return
+    setSelection(prev => ({
+      ...prev,
+      [id]: emails ?? school.contacts.map(c => c.email),
+    }))
+    setAddQuery("")
+  }
+
+  const removeSchool = (id: number) => {
+    setSelection(prev => {
+      const next = { ...prev }
+      delete next[id]
+      return next
     })
   }
 
-  const copyText = (text: string) => {
-    navigator.clipboard.writeText(text)
-    toast({ title: "Copied to clipboard" })
+  const removeEmail = (id: number, email: string) => {
+    setSelection(prev => ({ ...prev, [id]: (prev[id] || []).filter(e => e !== email) }))
   }
+
+  const matches = addQuery.trim().length > 0
+    ? (schools || [])
+        .filter(s => !s.locked && !selectedIds.includes(s.id))
+        .filter(s => s.name.toLowerCase().includes(addQuery.trim().toLowerCase()))
+        .slice(0, 8)
+    : []
+
+  const handleSaveTemplate = () => {
+    updateTemplate.mutate({ data: { subject, body: message } }, {
+      onSuccess: () => toast({ title: "Saved as the default template" }),
+    })
+  }
+
+  const previewSchool = selectedSchools[0]
+
+  const handleSend = () => {
+    const items = selectedIds
+      .map(id => ({ schoolId: id, emails: selection[id] || [] }))
+      .filter(i => i.emails.length > 0)
+    if (items.length === 0) return
+    setConfirmation(null)
+    sendEmails.mutate({ data: { items, subject, message } }, {
+      onSuccess: (result) => {
+        const n = result.sends.length
+        const m = result.sends.reduce((sum, s) => sum + s.recipients.length, 0)
+        setConfirmation(
+          result.configured
+            ? `Sent to ${n} school${n === 1 ? "" : "s"} (${m} recipient${m === 1 ? "" : "s"}).`
+            : `Recorded ${n} send${n === 1 ? "" : "s"} (${m} recipient${m === 1 ? "" : "s"}) in the log. No emails were delivered because the email service isn't connected yet.`
+        )
+        if (result.errors.length > 0) {
+          toast({ title: "Some sends had problems", description: result.errors.join(" "), variant: "destructive" })
+        }
+        setSelection({})
+        setShowPreview(false)
+        queryClient.invalidateQueries({ queryKey: getGetEmailSendsQueryKey() })
+        queryClient.invalidateQueries({ queryKey: getGetAdminSchoolsQueryKey() })
+      },
+      onError: () => {
+        toast({ title: "Sending failed", description: "Nothing was sent. Please try again.", variant: "destructive" })
+      },
+    })
+  }
+
+  const resend = (schoolId: number, recipients: string[]) => {
+    const school = schools?.find(s => s.id === schoolId)
+    if (!school) return
+    // Keep only addresses that are still contacts, fall back to current contacts.
+    const stillValid = recipients.filter(r => school.contacts.some(c => c.email === r))
+    addSchool(schoolId, stillValid.length > 0 ? stillValid : undefined)
+    setConfirmation(null)
+    window.scrollTo({ top: 0, behavior: "smooth" })
+  }
+
+  const hasSelection = selectedIds.length > 0
 
   return (
     <AdminLayout>
-      <div className="space-y-6 max-w-4xl">
+      <div className="space-y-6 max-w-4xl pb-12">
         <div>
-          <h1 className="text-2xl font-serif font-semibold text-foreground">Send Form Links</h1>
-          <p className="text-muted-foreground mt-1">Copy and paste these details into your email client.</p>
+          <Link href="/admin">
+            <Button variant="ghost" size="sm" className="mb-2 -ml-2 text-muted-foreground">
+              <ChevronLeft className="h-4 w-4 mr-1" /> Back to schools
+            </Button>
+          </Link>
+          <h1 className="text-2xl font-serif font-semibold text-foreground">Send Emails</h1>
         </div>
 
-        <div className="bg-blue-50 border-blue-200 border text-blue-800 p-4 rounded-lg flex items-start gap-3">
-          <AlertCircle className="h-5 w-5 mt-0.5 flex-shrink-0" />
-          <div className="text-sm">
-            <p className="font-semibold mb-1">No email service is connected yet.</p>
-            <p>For now, please copy the email addresses, subjects, and links below and paste them into your own email client to send to the schools.</p>
+        {emailStatus && !emailStatus.configured && (
+          <div className="bg-amber-50 border-amber-200 border text-amber-900 p-4 rounded-lg flex items-start gap-3 no-print">
+            <AlertCircle className="h-5 w-5 mt-0.5 flex-shrink-0" />
+            <div className="text-sm">
+              <p className="font-semibold mb-1">Email sending isn't connected yet.</p>
+              <p>Sends will be recorded in the log below, but no emails will actually be delivered until the Resend connection is set up.</p>
+            </div>
           </div>
-        </div>
+        )}
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          <div className="space-y-4">
-            <h2 className="text-lg font-serif font-semibold">Schools Due (Next 30 Days)</h2>
-            {dueSchools?.length === 0 ? (
-              <p className="text-muted-foreground bg-muted/30 p-8 rounded-lg text-center border">No schools are currently due for forms.</p>
-            ) : (
-              <div className="space-y-4">
-                {dueSchools?.map(school => (
-                  <Card key={school.schoolId}>
-                    <CardContent className="p-4 space-y-4">
+        {confirmation && (
+          <div className="bg-green-50 border-green-200 border text-green-900 p-4 rounded-lg flex items-start gap-3">
+            <CheckCircle2 className="h-5 w-5 mt-0.5 flex-shrink-0" />
+            <p className="text-sm font-medium">{confirmation}</p>
+          </div>
+        )}
+
+        {/* Compose */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Compose</CardTitle>
+            {!hasSelection && (
+              <CardDescription>
+                No schools are selected yet. Add schools by name below, or pick them on the dashboard and click Compose email.
+              </CardDescription>
+            )}
+          </CardHeader>
+          <CardContent className="space-y-5">
+            {/* Type-ahead to add schools */}
+            <div className="relative max-w-sm">
+              <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Add a school by name..."
+                className="pl-9"
+                value={addQuery}
+                onChange={e => setAddQuery(e.target.value)}
+              />
+              {matches.length > 0 && (
+                <div className="absolute z-20 mt-1 w-full bg-popover border rounded-md shadow-md overflow-hidden">
+                  {matches.map(m => (
+                    <button
+                      key={m.id}
+                      type="button"
+                      className="w-full text-left px-3 py-2 text-sm hover:bg-muted"
+                      onClick={() => addSchool(m.id)}
+                    >
+                      {m.name}
+                      <span className="text-muted-foreground text-xs ml-2">
+                        {m.workshopDate ? formatPacificTime(m.workshopDate).split(',')[0] : "Date TBD"}
+                      </span>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Selected schools with removable addresses */}
+            {hasSelection && (
+              <div className="space-y-3">
+                {selectedSchools.map(school => (
+                  <div key={school.id} className="border rounded-md p-3">
+                    <div className="flex justify-between items-start gap-2">
                       <div>
-                        <h3 className="font-semibold">{school.name}</h3>
-                        <p className="text-sm text-muted-foreground">Workshop: {formatPacificTime(school.workshopDate).split(',')[0]}</p>
+                        <span className="font-medium">{school.name}</span>
+                        <span className="text-xs text-muted-foreground ml-2">
+                          {school.workshopDate ? formatPacificTime(school.workshopDate).split(',')[0] : "Date TBD"}
+                        </span>
                       </div>
-                      
-                      <div className="space-y-2 text-sm">
-                        <div className="flex justify-between items-center gap-2 p-2 bg-muted/50 rounded border">
-                          <div className="truncate flex-1">
-                            <span className="text-muted-foreground text-xs uppercase tracking-wider block mb-1">To:</span>
-                            {school.contactEmails.join(", ")}
-                          </div>
-                          <Button variant="ghost" size="sm" onClick={() => copyText(school.contactEmails.join(", "))}>
-                            <Copy className="h-4 w-4" />
-                          </Button>
-                        </div>
-                        
-                        <div className="flex justify-between items-center gap-2 p-2 bg-muted/50 rounded border">
-                          <div className="truncate flex-1">
-                            <span className="text-muted-foreground text-xs uppercase tracking-wider block mb-1">Subject:</span>
-                            {school.subject}
-                          </div>
-                          <Button variant="ghost" size="sm" onClick={() => copyText(school.subject)}>
-                            <Copy className="h-4 w-4" />
-                          </Button>
-                        </div>
-
-                        <div className="flex justify-between items-center gap-2 p-2 bg-primary/5 border border-primary/20 text-primary rounded">
-                          <div className="truncate flex-1 font-medium">
-                            <span className="text-primary/70 text-xs uppercase tracking-wider block mb-1">Unique Link:</span>
-                            {school.link}
-                          </div>
-                          <Button variant="outline" size="sm" className="bg-white" onClick={() => copyText(school.link)}>
-                            <Copy className="h-4 w-4 mr-2" />
-                            Copy
-                          </Button>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
+                      <Button variant="ghost" size="sm" onClick={() => removeSchool(school.id)} title={`Remove ${school.name}`}>
+                        <X className="h-4 w-4" />
+                      </Button>
+                    </div>
+                    <div className="flex flex-wrap gap-2 mt-2">
+                      {(selection[school.id] || []).length === 0 ? (
+                        <span className="text-xs text-destructive">No addresses left — this school will be skipped.</span>
+                      ) : (
+                        (selection[school.id] || []).map(email => (
+                          <span key={email} className="inline-flex items-center gap-1 bg-muted rounded-full pl-3 pr-1 py-0.5 text-xs">
+                            {email}
+                            <button
+                              type="button"
+                              className="hover:bg-muted-foreground/20 rounded-full p-0.5"
+                              onClick={() => removeEmail(school.id, email)}
+                              aria-label={`Remove ${email}`}
+                            >
+                              <X className="h-3 w-3" />
+                            </button>
+                          </span>
+                        ))
+                      )}
+                    </div>
+                  </div>
                 ))}
               </div>
             )}
-          </div>
 
-          <div>
-            <Card>
-              <CardHeader>
-                <CardTitle>Email Template</CardTitle>
-                <CardDescription>
-                  This template is for your own reference. Make sure you keep the {"{{link}}"} placeholder where you want the school's link to appear.
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <Textarea 
-                  value={body}
-                  onChange={(e) => setBody(e.target.value)}
-                  className="min-h-[300px] font-sans"
-                  placeholder="Hello, please fill out your workshop form at {{link}}"
-                />
-              </CardContent>
-              <CardFooter>
-                <Button onClick={handleSaveTemplate} disabled={updateTemplate.isPending}>
-                  <Save className="h-4 w-4 mr-2" />
-                  Save Template
+            {/* Subject and message */}
+            <div className="space-y-2">
+              <Label htmlFor="email-subject">Subject</Label>
+              <Input id="email-subject" value={subject} onChange={e => { editedRef.current = true; setSubject(e.target.value) }} />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="email-message">Message</Label>
+              <Textarea
+                id="email-message"
+                value={message}
+                onChange={e => { editedRef.current = true; setMessage(e.target.value) }}
+                className="min-h-[260px]"
+              />
+              <p className="text-xs text-muted-foreground">
+                {"{{school_name}}"}, {"{{workshop_date}}"}, and {"{{link}}"} are filled in automatically for each school.
+              </p>
+            </div>
+
+            <div className="flex flex-wrap items-center gap-2">
+              <Button
+                onClick={handleSend}
+                disabled={!hasSelection || recipientCount === 0 || sendEmails.isPending || !subject.trim() || !message.trim()}
+              >
+                <Send className="h-4 w-4 mr-2" />
+                {sendEmails.isPending
+                  ? "Sending..."
+                  : `Send to ${selectedIds.length} school${selectedIds.length === 1 ? "" : "s"} (${recipientCount} recipient${recipientCount === 1 ? "" : "s"})`}
+              </Button>
+              {previewSchool && (
+                <Button variant="outline" onClick={() => setShowPreview(p => !p)}>
+                  {showPreview ? <EyeOff className="h-4 w-4 mr-2" /> : <Eye className="h-4 w-4 mr-2" />}
+                  {showPreview ? "Hide preview" : "Preview"}
                 </Button>
-              </CardFooter>
-            </Card>
-          </div>
-        </div>
+              )}
+              <Button variant="outline" onClick={handleSaveTemplate} disabled={updateTemplate.isPending || !subject.trim() || !message.trim()}>
+                <Save className="h-4 w-4 mr-2" />
+                Save as template
+              </Button>
+            </div>
 
+            {showPreview && previewSchool && (
+              <div className="border rounded-md p-4 bg-muted/20 space-y-3">
+                <p className="text-xs uppercase tracking-wider text-muted-foreground font-medium">
+                  Preview for {previewSchool.name}
+                </p>
+                <div>
+                  <span className="text-xs text-muted-foreground block">Subject</span>
+                  <p className="text-sm font-medium">{fillMergeFields(subject, previewSchool)}</p>
+                </div>
+                <div>
+                  <span className="text-xs text-muted-foreground block">Message</span>
+                  <p className="text-sm whitespace-pre-wrap">{fillMergeFields(message, previewSchool)}</p>
+                </div>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Sent log */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Sent Log</CardTitle>
+            <CardDescription>Past sends, newest first.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            {!sends || sends.length === 0 ? (
+              <p className="text-muted-foreground bg-muted/30 p-8 rounded-lg text-center border">
+                Nothing has been sent yet.
+              </p>
+            ) : (
+              <div className="divide-y">
+                {sends.map(send => (
+                  <div key={send.id} className="py-3 flex items-start justify-between gap-4">
+                    <div className="min-w-0">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <Link href={`/admin/schools/${send.schoolId}`} className="font-medium text-primary hover:underline">
+                          {send.schoolName}
+                        </Link>
+                        <Badge variant={send.isFollowUp ? "secondary" : "default"}>
+                          {send.isFollowUp ? "Follow-up" : "First send"}
+                        </Badge>
+                        {!send.delivered && (
+                          <Badge variant="outline" className="text-amber-700 border-amber-300">Not delivered</Badge>
+                        )}
+                      </div>
+                      <p className="text-sm text-muted-foreground mt-1 break-words">
+                        To: {send.recipients.join(", ")}
+                      </p>
+                      <p className="text-xs text-muted-foreground mt-0.5">
+                        {formatPacificTime(send.sentAt)} · by {send.sentBy}
+                      </p>
+                    </div>
+                    <Button variant="outline" size="sm" onClick={() => resend(send.schoolId, send.recipients)}>
+                      <Mail className="h-4 w-4 mr-2" /> Resend
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
       </div>
     </AdminLayout>
   )

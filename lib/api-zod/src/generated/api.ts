@@ -294,7 +294,14 @@ export const GetAdminSchoolsResponseItem = zod.object({
   "answered": zod.boolean(),
   "summary": zod.string().nullable()
 })),
-  "missingCount": zod.number()
+  "missingCount": zod.number(),
+  "contacts": zod.array(zod.object({
+  "id": zod.number(),
+  "email": zod.string(),
+  "name": zod.string().nullable()
+})),
+  "sendStatus": zod.enum(['never_sent', 'sent_waiting', 'answered']),
+  "lastSentAt": zod.string().nullable()
 })
 export const GetAdminSchoolsResponse = zod.array(GetAdminSchoolsResponseItem)
 
@@ -350,23 +357,70 @@ export const SetSchoolLockResponse = zod.object({
 
 
 /**
- * @summary Schools with workshops about two months out, ready for the logistics email
+ * @summary Whether an email service is connected for real delivery
  */
-export const GetDueSchoolsResponseItem = zod.object({
-  "schoolId": zod.number(),
-  "name": zod.string(),
-  "workshopDate": zod.string(),
-  "contactEmails": zod.array(zod.string()),
-  "link": zod.string(),
-  "subject": zod.string()
+export const GetEmailStatusResponse = zod.object({
+  "configured": zod.boolean()
 })
-export const GetDueSchoolsResponse = zod.array(GetDueSchoolsResponseItem)
+
+
+/**
+ * @summary Sent log, newest first
+ */
+export const GetEmailSendsResponseItem = zod.object({
+  "id": zod.number(),
+  "schoolId": zod.number(),
+  "schoolName": zod.string(),
+  "recipients": zod.array(zod.string()),
+  "subject": zod.string(),
+  "isFollowUp": zod.boolean(),
+  "delivered": zod.boolean(),
+  "sentBy": zod.string(),
+  "sentAt": zod.string()
+})
+export const GetEmailSendsResponse = zod.array(GetEmailSendsResponseItem)
+
+
+/**
+ * @summary Send the logistics email to the selected schools and log it
+ */
+
+
+
+
+
+
+export const SendEmailsBody = zod.object({
+  "items": zod.array(zod.object({
+  "schoolId": zod.number(),
+  "emails": zod.array(zod.string()).min(1)
+})).min(1),
+  "subject": zod.string().min(1),
+  "message": zod.string().min(1)
+})
+
+export const SendEmailsResponse = zod.object({
+  "configured": zod.boolean(),
+  "sends": zod.array(zod.object({
+  "id": zod.number(),
+  "schoolId": zod.number(),
+  "schoolName": zod.string(),
+  "recipients": zod.array(zod.string()),
+  "subject": zod.string(),
+  "isFollowUp": zod.boolean(),
+  "delivered": zod.boolean(),
+  "sentBy": zod.string(),
+  "sentAt": zod.string()
+})),
+  "errors": zod.array(zod.string())
+})
 
 
 /**
  * @summary Editable logistics email template
  */
 export const GetEmailTemplateResponse = zod.object({
+  "subject": zod.string(),
   "body": zod.string(),
   "updatedAt": zod.string().nullable()
 })
@@ -375,11 +429,17 @@ export const GetEmailTemplateResponse = zod.object({
 /**
  * @summary Save the email template
  */
+
+
+
+
 export const UpdateEmailTemplateBody = zod.object({
-  "body": zod.string()
+  "subject": zod.string().min(1),
+  "body": zod.string().min(1)
 })
 
 export const UpdateEmailTemplateResponse = zod.object({
+  "subject": zod.string(),
   "body": zod.string(),
   "updatedAt": zod.string().nullable()
 })

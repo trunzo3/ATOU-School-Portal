@@ -133,6 +133,22 @@ export interface QuestionState {
   summary: string | null;
 }
 
+export type SchoolRowSendStatus = typeof SchoolRowSendStatus[keyof typeof SchoolRowSendStatus];
+
+
+export const SchoolRowSendStatus = {
+  never_sent: 'never_sent',
+  sent_waiting: 'sent_waiting',
+  answered: 'answered',
+} as const;
+
+export interface Contact {
+  id: number;
+  email: string;
+  /** @nullable */
+  name: string | null;
+}
+
 export interface SchoolRow {
   id: number;
   name: string;
@@ -145,13 +161,10 @@ export interface SchoolRow {
   approxStudents: string | null;
   questionStates: QuestionState[];
   missingCount: number;
-}
-
-export interface Contact {
-  id: number;
-  email: string;
+  contacts: Contact[];
+  sendStatus: SchoolRowSendStatus;
   /** @nullable */
-  name: string | null;
+  lastSentAt: string | null;
 }
 
 export interface SchoolDetail {
@@ -171,22 +184,54 @@ export interface SchoolLockUpdate {
   locked: boolean;
 }
 
-export interface DueSchool {
+export interface EmailStatus {
+  configured: boolean;
+}
+
+export interface EmailSendRecord {
+  id: number;
   schoolId: number;
-  name: string;
-  workshopDate: string;
-  contactEmails: string[];
-  link: string;
+  schoolName: string;
+  recipients: string[];
   subject: string;
+  isFollowUp: boolean;
+  delivered: boolean;
+  sentBy: string;
+  sentAt: string;
+}
+
+export interface SendEmailsItem {
+  schoolId: number;
+  /** @minItems 1 */
+  emails: string[];
+}
+
+export interface SendEmailsInput {
+  /** @minItems 1 */
+  items: SendEmailsItem[];
+  /** @minLength 1 */
+  subject: string;
+  /** @minLength 1 */
+  message: string;
+}
+
+export interface SendEmailsResult {
+  configured: boolean;
+  sends: EmailSendRecord[];
+  errors: string[];
 }
 
 export interface EmailTemplate {
+  subject: string;
   body: string;
   /** @nullable */
   updatedAt: string | null;
 }
 
 export interface EmailTemplateInput {
+  /** @minLength 1 */
+  subject: string;
+  /** @minLength 1 */
   body: string;
 }
 

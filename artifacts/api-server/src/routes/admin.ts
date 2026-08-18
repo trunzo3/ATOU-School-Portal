@@ -1,17 +1,21 @@
 import { Router, type IRouter, type Response } from "express";
-import { asc, eq } from "drizzle-orm";
+import { asc, desc, eq } from "drizzle-orm";
 import {
   db,
   adminUsersTable,
+  answersTable,
   appSettingsTable,
   contactsTable,
+  emailSendsTable,
   infoPagesTable,
   schoolsTable,
+  teacherSnapshotsTable,
 } from "@workspace/db";
 import {
   AdminLoginBody,
   SetSchoolLockBody,
   UpdateEmailTemplateBody,
+  SendEmailsBody,
   CreateAdminUserBody,
   UpdateAdminUserBody,
   CreatePageBody,
@@ -29,6 +33,7 @@ import {
 } from "../lib/auth";
 import { schoolLink } from "../lib/appUrl";
 import { getQuestionStates, missingCount, normalizeEmail } from "../lib/answers";
+import { emailConfigured, fillMergeFields, sendEmail } from "../lib/email";
 
 const router: IRouter = Router();
 
@@ -131,11 +136,47 @@ router.get("/admin/summary", requireAdmin, async (_req, res): Promise<void> => {
   });
 });
 
+// Send status per school: never_sent, sent_waiting (sent, no school activity
+// since), or answered (a school contact saved something after the last send).
+async function schoolSendStatus(schoolId: number): Promise<{
+  sendStatus: "never_sent" | "sent_waiting" | "answered";
+  lastSentAt: string | null;
+}> {
+  const [lastSend] = await db
+    .select()
+    .from(emailSendsTable)
+    .where(eq(emailSendsTable.schoolId, schoolId))
+    .orderBy(desc(emailSendsTable.sentAt))
+    .limit(1);
+  if (!lastSend) return { sendStatus: "never_sent", lastSentAt: null };
+  const sentAt = lastSend.sentAt;
+  const isSchoolEntry = (enteredBy: string) =>
+    normalizeEmail(enteredBy) !== PAM_EMAIL && enteredBy !== "Airtable import";
+  const answers = await db
+    .select({ enteredBy: answersTable.enteredBy, enteredAt: answersTable.enteredAt })
+    .from(answersTable)
+    .where(eq(answersTable.schoolId, schoolId));
+  const snapshots = await db
+    .select({ enteredBy: teacherSnapshotsTable.enteredBy, enteredAt: teacherSnapshotsTable.enteredAt })
+    .from(teacherSnapshotsTable)
+    .where(eq(teacherSnapshotsTable.schoolId, schoolId));
+  const answered = [...answers, ...snapshots].some(
+    (r) => r.enteredAt > sentAt && isSchoolEntry(r.enteredBy),
+  );
+  return { sendStatus: answered ? "answered" : "sent_waiting", lastSentAt: sentAt.toISOString() };
+}
+
 router.get("/admin/schools", requireAdmin, async (_req, res): Promise<void> => {
   const schools = await db.select().from(schoolsTable).orderBy(asc(schoolsTable.workshopDate));
   const rows = [];
   for (const school of schools) {
     const states = await getQuestionStates(school.id);
+    const contacts = await db
+      .select()
+      .from(contactsTable)
+      .where(eq(contactsTable.schoolId, school.id))
+      .orderBy(asc(contactsTable.id));
+    const { sendStatus, lastSentAt } = await schoolSendStatus(school.id);
     rows.push({
       id: school.id,
       name: school.name,
@@ -146,6 +187,9 @@ router.get("/admin/schools", requireAdmin, async (_req, res): Promise<void> => {
       approxStudents: school.approxStudents,
       questionStates: states,
       missingCount: missingCount(states),
+      contacts: contacts.map((c) => ({ id: c.id, email: c.email, name: c.name })),
+      sendStatus,
+      lastSentAt,
     });
   }
   res.json(rows);
@@ -189,58 +233,46 @@ router.patch("/admin/schools/:id/lock", requireAdmin, async (req, res): Promise<
   await schoolDetail(id, res);
 });
 
-// --- email sending prep ---
+// --- email sending ---
 
-router.get("/admin/due", requireAdmin, async (_req, res): Promise<void> => {
-  // Due = workshop date about two months out (45-75 day window around 60 days).
-  const schools = await db.select().from(schoolsTable).orderBy(asc(schoolsTable.workshopDate));
-  const now = new Date();
-  const out = [];
-  for (const school of schools) {
-    if (!school.workshopDate) continue;
-    const workshop = new Date(`${school.workshopDate}T12:00:00-08:00`);
-    const daysOut = Math.round((workshop.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
-    if (daysOut < 45 || daysOut > 75) continue;
-    const contacts = await db
-      .select()
-      .from(contactsTable)
-      .where(eq(contactsTable.schoolId, school.id));
-    const dateText = workshop.toLocaleDateString("en-US", {
-      timeZone: "America/Los_Angeles",
-      month: "long",
-      day: "numeric",
-      year: "numeric",
-    });
-    out.push({
-      schoolId: school.id,
-      name: school.name,
-      workshopDate: school.workshopDate,
-      contactEmails: contacts.map((c) => c.email),
-      link: schoolLink(school.code),
-      subject: `Logistics needed for A Touch of Understanding Workshop - ${school.name} - ${dateText}`,
-    });
-  }
-  res.json(out);
-});
+const DEFAULT_SUBJECT =
+  "Logistics needed for A Touch of Understanding Workshop - {{school_name}} - {{workshop_date}}";
 
-const DEFAULT_TEMPLATE = `[Pam — this template needs your wording before it's used. Write the email in your own voice; the school's private link will be inserted where {{link}} appears below.]
+const DEFAULT_TEMPLATE = `[Pam — this template needs your wording before it's used. Write the email in your own voice; {{school_name}}, {{workshop_date}}, and {{link}} are filled in automatically for each school.]
 
 Hello,
 
 ...
 
-Please fill in your workshop logistics here: {{link}}
+Please fill in your workshop logistics for {{school_name}} ({{workshop_date}}) here: {{link}}
 
 Thank you,
 Pam
 A Touch of Understanding`;
+
+async function settingValue(key: string): Promise<string | null> {
+  const [row] = await db.select().from(appSettingsTable).where(eq(appSettingsTable.key, key));
+  return row ? row.value : null;
+}
+
+async function saveSetting(key: string, value: string): Promise<void> {
+  await db
+    .insert(appSettingsTable)
+    .values({ key, value })
+    .onConflictDoUpdate({
+      target: appSettingsTable.key,
+      set: { value, updatedAt: new Date() },
+    });
+}
 
 router.get("/admin/template", requireAdmin, async (_req, res): Promise<void> => {
   const [row] = await db
     .select()
     .from(appSettingsTable)
     .where(eq(appSettingsTable.key, "email_template"));
+  const subject = await settingValue("email_template_subject");
   res.json({
+    subject: subject ?? DEFAULT_SUBJECT,
     body: row ? row.value : DEFAULT_TEMPLATE,
     updatedAt: row ? row.updatedAt.toISOString() : null,
   });
@@ -249,18 +281,119 @@ router.get("/admin/template", requireAdmin, async (_req, res): Promise<void> => 
 router.put("/admin/template", requireAdmin, async (req, res): Promise<void> => {
   const parsed = UpdateEmailTemplateBody.safeParse(req.body);
   if (!parsed.success) {
-    res.status(400).json({ error: "Template body is required." });
+    res.status(400).json({ error: "Template subject and body are required." });
     return;
   }
+  await saveSetting("email_template_subject", parsed.data.subject);
+  await saveSetting("email_template", parsed.data.body);
   const [row] = await db
-    .insert(appSettingsTable)
-    .values({ key: "email_template", value: parsed.data.body })
-    .onConflictDoUpdate({
-      target: appSettingsTable.key,
-      set: { value: parsed.data.body, updatedAt: new Date() },
-    })
-    .returning();
-  res.json({ body: row!.value, updatedAt: row!.updatedAt.toISOString() });
+    .select()
+    .from(appSettingsTable)
+    .where(eq(appSettingsTable.key, "email_template"));
+  res.json({
+    subject: parsed.data.subject,
+    body: parsed.data.body,
+    updatedAt: row ? row.updatedAt.toISOString() : null,
+  });
+});
+
+router.get("/admin/email-status", requireAdmin, async (_req, res): Promise<void> => {
+  res.json({ configured: emailConfigured() });
+});
+
+function sendOut(s: {
+  id: number;
+  schoolId: number;
+  recipients: string[];
+  subject: string;
+  isFollowUp: boolean;
+  delivered: boolean;
+  sentBy: string;
+  sentAt: Date;
+}, schoolName: string) {
+  return {
+    id: s.id,
+    schoolId: s.schoolId,
+    schoolName,
+    recipients: s.recipients,
+    subject: s.subject,
+    isFollowUp: s.isFollowUp,
+    delivered: s.delivered,
+    sentBy: s.sentBy,
+    sentAt: s.sentAt.toISOString(),
+  };
+}
+
+router.get("/admin/sends", requireAdmin, async (_req, res): Promise<void> => {
+  const rows = await db
+    .select({ send: emailSendsTable, schoolName: schoolsTable.name })
+    .from(emailSendsTable)
+    .innerJoin(schoolsTable, eq(emailSendsTable.schoolId, schoolsTable.id))
+    .orderBy(desc(emailSendsTable.sentAt), desc(emailSendsTable.id));
+  res.json(rows.map((r) => sendOut(r.send, r.schoolName)));
+});
+
+router.post("/admin/send", requireAdmin, async (req: AdminRequest, res): Promise<void> => {
+  const parsed = SendEmailsBody.safeParse(req.body);
+  if (!parsed.success) {
+    res.status(400).json({ error: "Selected schools, a subject, and a message are required." });
+    return;
+  }
+  const sentBy = req.admin?.email ?? PAM_EMAIL;
+  const sends = [];
+  const errors: string[] = [];
+  for (const item of parsed.data.items) {
+    const [school] = await db
+      .select()
+      .from(schoolsTable)
+      .where(eq(schoolsTable.id, item.schoolId));
+    if (!school) {
+      errors.push(`School ${item.schoolId} not found.`);
+      continue;
+    }
+    if (school.locked) {
+      errors.push(`${school.name} is locked, so no email was sent to it.`);
+      continue;
+    }
+    const recipients = item.emails.map((e) => e.trim()).filter((e) => e.length > 0);
+    if (recipients.length === 0) {
+      errors.push(`${school.name} has no recipients selected.`);
+      continue;
+    }
+    const merge = {
+      name: school.name,
+      workshopDate: school.workshopDate,
+      link: schoolLink(school.code),
+    };
+    // Subjects are single-line: strip any line breaks merge fields could carry.
+    const subject = fillMergeFields(parsed.data.subject, merge).replace(/[\r\n]+/g, " ").trim();
+    const body = fillMergeFields(parsed.data.message, merge);
+    const result = await sendEmail({ to: recipients, subject, text: body });
+    if (emailConfigured() && !result.delivered) {
+      // A real delivery attempt failed: report it and don't log it as a send.
+      errors.push(`${school.name}: ${result.error ?? "The email service rejected the send."}`);
+      continue;
+    }
+    const priorSends = await db
+      .select({ id: emailSendsTable.id })
+      .from(emailSendsTable)
+      .where(eq(emailSendsTable.schoolId, school.id))
+      .limit(1);
+    const [row] = await db
+      .insert(emailSendsTable)
+      .values({
+        schoolId: school.id,
+        recipients,
+        subject,
+        body,
+        isFollowUp: priorSends.length > 0,
+        delivered: result.delivered,
+        sentBy,
+      })
+      .returning();
+    sends.push(sendOut(row!, school.name));
+  }
+  res.json({ configured: emailConfigured(), sends, errors });
 });
 
 // --- admin accounts ---

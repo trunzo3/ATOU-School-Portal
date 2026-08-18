@@ -29,7 +29,8 @@ import type {
   AirtableSettingsInput,
   AnswerInput,
   AnswerVersion,
-  DueSchool,
+  EmailSendRecord,
+  EmailStatus,
   EmailTemplate,
   EmailTemplateInput,
   ErrorMessage,
@@ -45,6 +46,8 @@ import type {
   SchoolDetail,
   SchoolLockUpdate,
   SchoolRow,
+  SendEmailsInput,
+  SendEmailsResult,
   TeachersInput,
   TeachersSnapshot
 } from './api.schemas';
@@ -1113,20 +1116,20 @@ export const useSetSchoolLock = <TError = ErrorType<unknown>,
       return useMutation(getSetSchoolLockMutationOptions(options));
     }
 
-export const getGetDueSchoolsUrl = () => {
+export const getGetEmailStatusUrl = () => {
 
 
 
 
-  return `/api/admin/due`
+  return `/api/admin/email-status`
 }
 
 /**
- * @summary Schools with workshops about two months out, ready for the logistics email
+ * @summary Whether an email service is connected for real delivery
  */
-export const getDueSchools = async ( options?: Parameters<typeof customFetch>[1]): Promise<DueSchool[]> => {
+export const getEmailStatus = async ( options?: Parameters<typeof customFetch>[1]): Promise<EmailStatus> => {
 
-  return customFetch<DueSchool[]>(getGetDueSchoolsUrl(),
+  return customFetch<EmailStatus>(getGetEmailStatusUrl(),
   {
     ...options,
     method: 'GET'
@@ -1139,45 +1142,45 @@ export const getDueSchools = async ( options?: Parameters<typeof customFetch>[1]
 
 
 
-export const getGetDueSchoolsQueryKey = () => {
+export const getGetEmailStatusQueryKey = () => {
     return [
-    `/api/admin/due`
+    `/api/admin/email-status`
     ] as const;
     }
 
 
-export const getGetDueSchoolsQueryOptions = <TData = Awaited<ReturnType<typeof getDueSchools>>, TError = ErrorType<unknown>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getDueSchools>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+export const getGetEmailStatusQueryOptions = <TData = Awaited<ReturnType<typeof getEmailStatus>>, TError = ErrorType<unknown>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getEmailStatus>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
 
-  const queryKey =  queryOptions?.queryKey ?? getGetDueSchoolsQueryKey();
+  const queryKey =  queryOptions?.queryKey ?? getGetEmailStatusQueryKey();
 
 
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof getDueSchools>>> = ({ signal }) => getDueSchools({ signal, ...requestOptions });
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getEmailStatus>>> = ({ signal }) => getEmailStatus({ signal, ...requestOptions });
 
 
 
 
 
-   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getDueSchools>>, TError, TData> & { queryKey: QueryKey }
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getEmailStatus>>, TError, TData> & { queryKey: QueryKey }
 }
 
-export type GetDueSchoolsQueryResult = NonNullable<Awaited<ReturnType<typeof getDueSchools>>>
-export type GetDueSchoolsQueryError = ErrorType<unknown>
+export type GetEmailStatusQueryResult = NonNullable<Awaited<ReturnType<typeof getEmailStatus>>>
+export type GetEmailStatusQueryError = ErrorType<unknown>
 
 
 /**
- * @summary Schools with workshops about two months out, ready for the logistics email
+ * @summary Whether an email service is connected for real delivery
  */
 
-export function useGetDueSchools<TData = Awaited<ReturnType<typeof getDueSchools>>, TError = ErrorType<unknown>>(
-  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getDueSchools>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+export function useGetEmailStatus<TData = Awaited<ReturnType<typeof getEmailStatus>>, TError = ErrorType<unknown>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getEmailStatus>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
 
  ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
 
-  const queryOptions = getGetDueSchoolsQueryOptions(options)
+  const queryOptions = getGetEmailStatusQueryOptions(options)
 
   const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
 
@@ -1189,6 +1192,154 @@ export function useGetDueSchools<TData = Awaited<ReturnType<typeof getDueSchools
 
 
 
+
+export const getGetEmailSendsUrl = () => {
+
+
+
+
+  return `/api/admin/sends`
+}
+
+/**
+ * @summary Sent log, newest first
+ */
+export const getEmailSends = async ( options?: Parameters<typeof customFetch>[1]): Promise<EmailSendRecord[]> => {
+
+  return customFetch<EmailSendRecord[]>(getGetEmailSendsUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetEmailSendsQueryKey = () => {
+    return [
+    `/api/admin/sends`
+    ] as const;
+    }
+
+
+export const getGetEmailSendsQueryOptions = <TData = Awaited<ReturnType<typeof getEmailSends>>, TError = ErrorType<unknown>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getEmailSends>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetEmailSendsQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getEmailSends>>> = ({ signal }) => getEmailSends({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getEmailSends>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetEmailSendsQueryResult = NonNullable<Awaited<ReturnType<typeof getEmailSends>>>
+export type GetEmailSendsQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary Sent log, newest first
+ */
+
+export function useGetEmailSends<TData = Awaited<ReturnType<typeof getEmailSends>>, TError = ErrorType<unknown>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getEmailSends>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetEmailSendsQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getSendEmailsUrl = () => {
+
+
+
+
+  return `/api/admin/send`
+}
+
+/**
+ * @summary Send the logistics email to the selected schools and log it
+ */
+export const sendEmails = async (sendEmailsInput: SendEmailsInput, options?: Parameters<typeof customFetch>[1]): Promise<SendEmailsResult> => {
+
+  return customFetch<SendEmailsResult>(getSendEmailsUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(sendEmailsInput)
+  }
+);}
+
+
+
+
+
+export const getSendEmailsMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof sendEmails>>, TError,{data: BodyType<SendEmailsInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof sendEmails>>, TError,{data: BodyType<SendEmailsInput>}, TContext> => {
+
+const mutationKey = ['sendEmails'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof sendEmails>>, {data: BodyType<SendEmailsInput>}> = (props) => {
+          const {data} = props ?? {};
+
+          return  sendEmails(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type SendEmailsMutationResult = NonNullable<Awaited<ReturnType<typeof sendEmails>>>
+    export type SendEmailsMutationBody = BodyType<SendEmailsInput>
+    export type SendEmailsMutationError = ErrorType<unknown>
+
+    /**
+ * @summary Send the logistics email to the selected schools and log it
+ */
+export const useSendEmails = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof sendEmails>>, TError,{data: BodyType<SendEmailsInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof sendEmails>>,
+        TError,
+        {data: BodyType<SendEmailsInput>},
+        TContext
+      > => {
+      return useMutation(getSendEmailsMutationOptions(options));
+    }
 
 export const getGetEmailTemplateUrl = () => {
 

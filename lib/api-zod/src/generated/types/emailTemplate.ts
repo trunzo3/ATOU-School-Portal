@@ -7,6 +7,7 @@
  */
 
 export interface EmailTemplate {
+  subject: string;
   body: string;
   /** @nullable */
   updatedAt: string | null;

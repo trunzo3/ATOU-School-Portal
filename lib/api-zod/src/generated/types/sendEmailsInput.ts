@@ -5,10 +5,13 @@
  * ATOU workshop logistics API
  * OpenAPI spec version: 0.1.0
  */
+import type { SendEmailsItem } from './sendEmailsItem';
 
-export interface EmailTemplateInput {
+export interface SendEmailsInput {
+  /** @minItems 1 */
+  items: SendEmailsItem[];
   /** @minLength 1 */
   subject: string;
   /** @minLength 1 */
-  body: string;
+  message: string;
 }

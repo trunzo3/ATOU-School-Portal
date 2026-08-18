@@ -22,7 +22,12 @@ export function SchoolForm({ code, email, initialAnswers, onSaveAnswer, onSaveTe
   // Extract state per question
   const getQ = (key: string) => initialAnswers.questions.find(q => q.questionKey === key)
   
-  const [timeValue, setTimeValue] = useState(getQ("workshop_time")?.current?.value || "")
+  // The Start Time picker only accepts "HH:MM"; answers imported from the
+  // Airtable sheet are free text (e.g. "8:15am - 9:45am") and are shown
+  // separately as the current saved answer.
+  const rawTimeValue = getQ("workshop_time")?.current?.value || ""
+  const isClockTime = /^\d{1,2}:\d{2}$/.test(rawTimeValue.trim())
+  const [timeValue, setTimeValue] = useState(isClockTime ? rawTimeValue.trim() : "")
   const [timingNote, setTimingNote] = useState(getQ("timing_note")?.current?.value || "")
   const [activityArea, setActivityArea] = useState(getQ("activity_area")?.current?.value || "")
   const [speakerArea, setSpeakerArea] = useState(getQ("speaker_area")?.current?.value || "")
@@ -37,6 +42,7 @@ export function SchoolForm({ code, email, initialAnswers, onSaveAnswer, onSaveTe
   // Local helper to handle confirmation for existing answers
   const handleSave = async (key: string, value: string, currentValue: string | undefined) => {
     if (value === currentValue) return; // No change
+    if (!value.trim()) return; // Server rejects empty values; nothing to save
     if (currentValue && !confirm("This will overwrite a previously saved answer. Are you sure?")) {
       // Revert state if cancelled - this is simplistic; in a real app we'd keep local draft state separate
       // For now, if they cancel, we'll let it stay in input but not save to server.
@@ -282,6 +288,14 @@ export function SchoolForm({ code, email, initialAnswers, onSaveAnswer, onSaveTe
         </CardHeader>
         <CardContent className="print:px-0">
           <div className="space-y-4 max-w-sm">
+            {qTime?.current && !isClockTime && (
+              <div className="space-y-1">
+                <Label className="text-muted-foreground">Currently saved</Label>
+                <div className="bg-primary/5 p-3 rounded-md text-sm border border-primary/20 whitespace-pre-line">
+                  {qTime.current.value}
+                </div>
+              </div>
+            )}
             <div className="space-y-2">
               <Label>Start Time</Label>
               <Input 

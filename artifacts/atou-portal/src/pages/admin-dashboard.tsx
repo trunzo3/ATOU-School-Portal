@@ -108,6 +108,7 @@ export function AdminDashboard() {
               <TableRow>
                 <TableHead className="w-[250px] font-semibold text-foreground">School</TableHead>
                 <TableHead className="w-[120px]">Date</TableHead>
+                <TableHead className="w-[90px]">Approx # Students</TableHead>
                 {questions.map(q => (
                   <TableHead key={q.key} className="min-w-[120px]">{q.label}</TableHead>
                 ))}
@@ -117,7 +118,7 @@ export function AdminDashboard() {
             <TableBody>
               {filteredSchools?.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">
+                  <TableCell colSpan={9} className="text-center py-8 text-muted-foreground">
                     No schools match your search.
                   </TableCell>
                 </TableRow>
@@ -138,6 +139,9 @@ export function AdminDashboard() {
                   </TableCell>
                   <TableCell>
                     {school.workshopDate ? formatPacificTime(school.workshopDate).split(',')[0] : "TBD"}
+                  </TableCell>
+                  <TableCell className="text-muted-foreground">
+                    {school.approxStudents || <span className="text-muted-foreground/50">—</span>}
                   </TableCell>
                   
                   {questions.map(q => {

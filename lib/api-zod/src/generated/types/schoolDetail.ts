@@ -15,5 +15,7 @@ export interface SchoolDetail {
   /** @nullable */
   workshopDate: string | null;
   locked: boolean;
+  /** @nullable */
+  approxStudents: string | null;
   contacts: Contact[];
 }

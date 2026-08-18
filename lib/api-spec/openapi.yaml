@@ -697,12 +697,13 @@ components:
         link: { type: string }
         workshopDate: { type: ["string", "null"] }
         locked: { type: boolean }
+        approxStudents: { type: ["string", "null"] }
         questionStates:
           type: array
           items:
             $ref: "#/components/schemas/QuestionState"
         missingCount: { type: number }
-      required: [id, name, code, link, workshopDate, locked, questionStates, missingCount]
+      required: [id, name, code, link, workshopDate, locked, approxStudents, questionStates, missingCount]
     Contact:
       type: object
       properties:
@@ -719,11 +720,12 @@ components:
         link: { type: string }
         workshopDate: { type: ["string", "null"] }
         locked: { type: boolean }
+        approxStudents: { type: ["string", "null"] }
         contacts:
           type: array
           items:
             $ref: "#/components/schemas/Contact"
-      required: [id, name, code, link, workshopDate, locked, contacts]
+      required: [id, name, code, link, workshopDate, locked, approxStudents, contacts]
     SchoolLockUpdate:
       type: object
       properties:

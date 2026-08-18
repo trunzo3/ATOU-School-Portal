@@ -143,6 +143,7 @@ router.get("/admin/schools", requireAdmin, async (_req, res): Promise<void> => {
       link: schoolLink(school.code),
       workshopDate: school.workshopDate,
       locked: school.locked,
+      approxStudents: school.approxStudents,
       questionStates: states,
       missingCount: missingCount(states),
     });
@@ -168,6 +169,7 @@ async function schoolDetail(schoolId: number, res: Response): Promise<void> {
     link: schoolLink(school.code),
     workshopDate: school.workshopDate,
     locked: school.locked,
+    approxStudents: school.approxStudents,
     contacts: contacts.map((c) => ({ id: c.id, email: c.email, name: c.name })),
   });
 }

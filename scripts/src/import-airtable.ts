@@ -25,6 +25,7 @@ type ImportSchool = {
   airtableRecordId: string;
   name: string;
   workshopDate: string | null;
+  approxStudents?: string | null;
   contacts: { email: string; name: string | null }[];
 };
 
@@ -55,6 +56,7 @@ async function main() {
         code,
         workshopDate: s.workshopDate,
         airtableRecordId: s.airtableRecordId,
+        approxStudents: s.approxStudents ?? null,
       })
       .returning();
     if (s.contacts.length > 0) {

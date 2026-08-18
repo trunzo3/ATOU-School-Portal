@@ -16,6 +16,8 @@ export const schoolsTable = pgTable("schools", {
   workshopDate: date("workshop_date", { mode: "string" }),
   locked: boolean("locked").notNull().default(false),
   airtableRecordId: text("airtable_record_id"),
+  // Read-only, pulled from the Airtable Workshops "Approx # Students" column.
+  approxStudents: text("approx_students"),
   createdAt: timestamp("created_at", { withTimezone: true })
     .notNull()
     .defaultNow(),

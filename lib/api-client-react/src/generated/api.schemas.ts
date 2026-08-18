@@ -141,6 +141,8 @@ export interface SchoolRow {
   /** @nullable */
   workshopDate: string | null;
   locked: boolean;
+  /** @nullable */
+  approxStudents: string | null;
   questionStates: QuestionState[];
   missingCount: number;
 }
@@ -160,6 +162,8 @@ export interface SchoolDetail {
   /** @nullable */
   workshopDate: string | null;
   locked: boolean;
+  /** @nullable */
+  approxStudents: string | null;
   contacts: Contact[];
 }
 

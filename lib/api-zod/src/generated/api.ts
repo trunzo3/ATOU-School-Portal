@@ -288,6 +288,7 @@ export const GetAdminSchoolsResponseItem = zod.object({
   "link": zod.string(),
   "workshopDate": zod.string().nullable(),
   "locked": zod.boolean(),
+  "approxStudents": zod.string().nullable(),
   "questionStates": zod.array(zod.object({
   "questionKey": zod.string(),
   "answered": zod.boolean(),
@@ -312,6 +313,7 @@ export const GetAdminSchoolResponse = zod.object({
   "link": zod.string(),
   "workshopDate": zod.string().nullable(),
   "locked": zod.boolean(),
+  "approxStudents": zod.string().nullable(),
   "contacts": zod.array(zod.object({
   "id": zod.number(),
   "email": zod.string(),
@@ -338,6 +340,7 @@ export const SetSchoolLockResponse = zod.object({
   "link": zod.string(),
   "workshopDate": zod.string().nullable(),
   "locked": zod.boolean(),
+  "approxStudents": zod.string().nullable(),
   "contacts": zod.array(zod.object({
   "id": zod.number(),
   "email": zod.string(),

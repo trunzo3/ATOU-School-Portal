@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label"
 import { Button } from "@/components/ui/button"
 import { StatusBadge } from "@/components/ui/status-badge"
 import { formatPacificTime } from "@/lib/utils"
-import { Clock, Plus, Trash2, Info, Users, Save, CheckCircle2 } from "lucide-react"
+import { Clock, Plus, Trash2, Info, Users, Save, CheckCircle2, ChevronRight } from "lucide-react"
 
 interface SchoolFormProps {
   code: string;
@@ -181,19 +181,39 @@ export function SchoolForm({ code, email, initialAnswers, onSaveAnswer, onSaveTe
 
   const totalStudents = teacherRows.reduce((sum, r) => sum + (Number(r.studentCount) || 0), 0);
 
-  const renderHistory = (history: any[]) => {
+  // Collapsed/expanded state per question's history. Expanding sticks until
+  // the user collapses it or leaves the page — saves/refetches don't reset it.
+  const [expandedHistory, setExpandedHistory] = useState<Record<string, boolean>>({});
+  const toggleHistory = (key: string) =>
+    setExpandedHistory(prev => ({ ...prev, [key]: !prev[key] }));
+
+  const historyToggleRow = (key: string, count: number) => (
+    <button
+      type="button"
+      onClick={() => toggleHistory(key)}
+      className="flex items-center gap-1 text-xs font-medium uppercase tracking-wider text-muted-foreground hover:text-foreground transition-colors"
+      aria-expanded={!!expandedHistory[key]}
+    >
+      <ChevronRight className={`h-3.5 w-3.5 transition-transform ${expandedHistory[key] ? "rotate-90" : ""}`} />
+      History ({count} {count === 1 ? "change" : "changes"})
+    </button>
+  )
+
+  const renderHistory = (key: string, history: any[]) => {
     if (!history || history.length === 0) return null;
     return (
-      <div className="mt-3 text-sm text-muted-foreground bg-muted/20 p-3 rounded-md border border-dashed no-print">
-        <p className="font-medium text-xs uppercase tracking-wider mb-2">Previous Answers</p>
-        <div className="space-y-2">
-          {history.map((h, i) => (
-            <div key={i} className="flex justify-between items-start gap-4">
-              <span className="min-w-0 italic whitespace-pre-wrap break-words">"{h.value}"</span>
-              <span className="text-xs whitespace-nowrap shrink-0">{h.enteredBy} • {formatPacificTime(h.enteredAt)}</span>
-            </div>
-          ))}
-        </div>
+      <div className="mt-3 text-sm text-muted-foreground no-print">
+        {historyToggleRow(key, history.length)}
+        {expandedHistory[key] && (
+          <div className="mt-2 bg-muted/20 p-3 rounded-md border border-dashed space-y-2">
+            {history.map((h, i) => (
+              <div key={i} className="flex justify-between items-start gap-4">
+                <span className="min-w-0 italic whitespace-pre-wrap break-words">"{h.value}"</span>
+                <span className="text-xs whitespace-nowrap shrink-0">{h.enteredBy} • {formatPacificTime(h.enteredAt)}</span>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     )
   }
@@ -233,22 +253,24 @@ export function SchoolForm({ code, email, initialAnswers, onSaveAnswer, onSaveTe
       return { ...h, schedule, note: note?.value || null };
     });
     return (
-      <div className="mt-3 text-sm text-muted-foreground bg-muted/20 p-3 rounded-md border border-dashed no-print">
-        <p className="font-medium text-xs uppercase tracking-wider mb-2">Previous Answers</p>
-        <div className="space-y-3">
-          {entries.map((h: any, i: number) => (
-            <div key={i} className="space-y-0.5">
-              <div className="text-xs">{h.enteredBy} • {formatPacificTime(h.enteredAt)}</div>
-              <div className="italic whitespace-pre-wrap break-words">"{formatStartTime(h.value)}"</div>
-              {h.schedule && <div className="text-xs">Calculated schedule: {h.schedule}</div>}
-              {h.note && (
-                <div className="text-xs">
-                  Timing note: <span className="italic whitespace-pre-wrap break-words">"{h.note}"</span>
-                </div>
-              )}
-            </div>
-          ))}
-        </div>
+      <div className="mt-3 text-sm text-muted-foreground no-print">
+        {historyToggleRow("workshop_time", entries.length)}
+        {expandedHistory["workshop_time"] && (
+          <div className="mt-2 bg-muted/20 p-3 rounded-md border border-dashed space-y-3">
+            {entries.map((h: any, i: number) => (
+              <div key={i} className="space-y-0.5">
+                <div className="text-xs">{h.enteredBy} • {formatPacificTime(h.enteredAt)}</div>
+                <div className="italic whitespace-pre-wrap break-words">"{formatStartTime(h.value)}"</div>
+                {h.schedule && <div className="text-xs">Calculated schedule: {h.schedule}</div>}
+                {h.note && (
+                  <div className="text-xs">
+                    Timing note: <span className="italic whitespace-pre-wrap break-words">"{h.note}"</span>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     )
   }
@@ -260,8 +282,9 @@ export function SchoolForm({ code, email, initialAnswers, onSaveAnswer, onSaveTe
     );
     return (
       <div className="mt-4 text-sm text-muted-foreground no-print">
-        <p className="font-medium text-xs uppercase tracking-wider mb-2">Previous Teacher Lists</p>
-        <div className="space-y-3">
+        {historyToggleRow("teachers", sorted.length)}
+        {expandedHistory["teachers"] && (
+        <div className="mt-2 space-y-3">
           {sorted.map((h, i) => (
             <div key={i} className="bg-muted/20 p-3 rounded-md border border-dashed">
               <div className="text-xs mb-2 font-medium text-foreground/80">
@@ -290,6 +313,7 @@ export function SchoolForm({ code, email, initialAnswers, onSaveAnswer, onSaveTe
             </div>
           ))}
         </div>
+        )}
       </div>
     )
   }
@@ -513,7 +537,7 @@ export function SchoolForm({ code, email, initialAnswers, onSaveAnswer, onSaveTe
                 Last updated by {qAct.current.enteredBy} at {formatPacificTime(qAct.current.enteredAt)}
               </div>
             )}
-            {renderHistory(qAct?.history || [])}
+            {renderHistory("activity_area", qAct?.history || [])}
           </div>
         </CardContent>
       </Card>
@@ -547,7 +571,7 @@ export function SchoolForm({ code, email, initialAnswers, onSaveAnswer, onSaveTe
                 Last updated by {qSpk.current.enteredBy} at {formatPacificTime(qSpk.current.enteredAt)}
               </div>
             )}
-            {renderHistory(qSpk?.history || [])}
+            {renderHistory("speaker_area", qSpk?.history || [])}
           </div>
         </CardContent>
       </Card>
@@ -578,7 +602,7 @@ export function SchoolForm({ code, email, initialAnswers, onSaveAnswer, onSaveTe
                 Last updated by {qNotes.current.enteredBy} at {formatPacificTime(qNotes.current.enteredAt)}
               </div>
             )}
-            {renderHistory(qNotes?.history || [])}
+            {renderHistory("notes", qNotes?.history || [])}
           </div>
         </CardContent>
       </Card>

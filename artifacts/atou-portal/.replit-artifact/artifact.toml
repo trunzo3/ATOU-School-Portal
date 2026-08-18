@@ -1,0 +1,28 @@
+kind = "web"
+previewPath = "/"
+title = "ATOU Logistics Portal"
+description = "A workshop-logistics web app for A Touch of Understanding, a disability-awareness nonprofit. Schools open a private link to answer logistics questions (teachers and student counts, workshop time, activity areas), with full change history. An admin dashboard lets the program manager see every school's answers at a glance, copy school links, manage info pages, and prepare email sends."
+version = "1.0.0"
+id = "artifacts/atou-portal"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 23678
+
+[services.development]
+run = "pnpm --filter @workspace/atou-portal run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/atou-portal", "run", "build" ]
+serve = "static"
+publicDir = "artifacts/atou-portal/dist/public"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "23678"
+BASE_PATH = "/"

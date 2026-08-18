@@ -1,45 +1,56 @@
-# [Project name]
+# ATOU Workshop Logistics Portal
 
-_Replace the heading above with the project's name, and this line with one sentence describing what this app does for users._
+## Overview
+Workshop-logistics app for A Touch of Understanding (ATOU), a nonprofit running
+disability-awareness workshops at ~140 schools/year. Two surfaces:
 
-## Run & Operate
+- **School portal** (`/s/<code>`): email-verified access (checked against the
+  school's contact list, typed every visit, never remembered), five logistics
+  questions with full change history on every answer, autosave, confirmation
+  page, printable paper form.
+- **Admin dashboard** (`/` → login, `/admin`): grid of schools × questions with
+  missing flags, copy-link buttons, per-school form reusing the same shared
+  form component, edit locks, email-send prep, rich-text info pages with
+  export, admin account management, Airtable settings.
 
-- `pnpm --filter @workspace/api-server run dev` — run the API server (port 5000)
-- `pnpm run typecheck` — full typecheck across all packages
-- `pnpm run build` — typecheck + build all packages
-- `pnpm --filter @workspace/api-spec run codegen` — regenerate API hooks and Zod schemas from the OpenAPI spec
-- `pnpm --filter @workspace/db run push` — push DB schema changes (dev only)
-- Required env: `DATABASE_URL` — Postgres connection string
+## Key business rules
+- Pam's email `programcoordinator@touchofunderstanding.org` is authorized for
+  every school and can edit locked schools.
+- Question keys: `workshop_time`, `timing_note`, `activity_area`,
+  `speaker_area`, `notes` (notes never goes to Airtable). Teachers are saved as
+  full snapshots with a computed student-count total.
+- Workshop time is the start time only; display computes
+  "8:00 – 9:30 AM, break, 9:45 – 11:15 AM". All times Pacific.
+- Answer history is append-only — every save is a new row; this history is the
+  point of the app.
+- **Airtable connection is switched OFF** in this build. Settings are stored
+  and write/read functions exist in `artifacts/api-server/src/lib/airtable.ts`
+  (with field IDs documented) but do nothing until config is filled in.
+- Resend email is NOT connected; the "send" page only prepares subject/body
+  for copy-paste.
+- School links are built from the `APP_BASE_URL` env var (falls back to the
+  current Replit domain).
+- The root login page has a dev-only "log in as Pam" button
+  (`POST /api/admin/dev-login`) — remove before go-live.
 
-## Stack
+## Architecture
+pnpm monorepo:
+- `artifacts/atou-portal` — React + Vite frontend (wouter, React Query hooks
+  from `lib/api-client-react`, shadcn UI). Shared form component:
+  `src/components/shared/school-form.tsx`, used by both portal and admin.
+- `artifacts/api-server` — Express 5 API. Routes: `src/routes/portal.ts`,
+  `src/routes/admin.ts`. Auth: signed cookie sessions (SESSION_SECRET),
+  scrypt password hashes (`src/lib/auth.ts`).
+- `lib/db` — Drizzle/Postgres. Schema: `src/schema/schools.ts` (schools,
+  contacts, answers history, teacher snapshots), `src/schema/admin.ts`
+  (admin_users, info_pages, app_settings key/value).
+- `lib/api-spec/openapi.yaml` — API contract; codegen produces
+  `lib/api-zod` (server validation) and `lib/api-client-react` (hooks).
 
-- pnpm workspaces, Node.js 24, TypeScript 5.9
-- API: Express 5
-- DB: PostgreSQL + Drizzle ORM
-- Validation: Zod (`zod/v4`), `drizzle-zod`
-- API codegen: Orval (from OpenAPI spec)
-- Build: esbuild (CJS bundle)
-
-## Where things live
-
-_Populate as you build — short repo map plus pointers to the source-of-truth file for DB schema, API contracts, theme files, etc._
-
-## Architecture decisions
-
-_Populate as you build — non-obvious choices a reader couldn't infer from the code (3-5 bullets)._
-
-## Product
-
-_Describe the high-level user-facing capabilities of this app once they exist._
+## Seed data
+`pnpm --filter @workspace/scripts run seed` — 5 sample schools (Sierra Vista
+complete with multi-person history, Oakmont/Del Rio partial, two untouched),
+Pam + backup admin (dev passwords in the seed script), 3 info pages.
 
 ## User preferences
-
-_Populate as you build — explicit user instructions worth remembering across sessions._
-
-## Gotchas
-
-_Populate as you build — sharp edges, "always run X before Y" rules._
-
-## Pointers
-
-- See the `pnpm-workspace` skill for workspace structure, TypeScript setup, and package details
+(none recorded yet)

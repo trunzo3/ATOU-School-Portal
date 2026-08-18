@@ -3,20 +3,20 @@ info:
   # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
-  description: API specification
+  description: ATOU workshop logistics API
 servers:
   - url: /api
     description: Base API path
 tags:
   - name: health
-    description: Health operations
+  - name: portal
+  - name: admin
 paths:
   /healthz:
     get:
       operationId: healthCheck
       tags: [health]
       summary: Health check
-      description: Returns server health status
       responses:
         "200":
           description: Healthy
@@ -24,13 +24,783 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+  /portal/{code}/identify:
+    post:
+      operationId: identifyPortalUser
+      tags: [portal]
+      summary: Verify an email against a school's authorized contacts
+      parameters:
+        - $ref: "#/components/parameters/PortalCode"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PortalIdentity"
+      responses:
+        "200":
+          description: Authorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PortalSession"
+        "403":
+          description: Email not authorized for this school
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorMessage"
+        "404":
+          description: Unknown school link
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorMessage"
+  /portal/{code}/answers/fetch:
+    post:
+      operationId: fetchPortalAnswers
+      tags: [portal]
+      summary: All answers with full history for a school
+      parameters:
+        - $ref: "#/components/parameters/PortalCode"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PortalIdentity"
+      responses:
+        "200":
+          description: Answers
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SchoolAnswers"
+        "403":
+          description: Not authorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorMessage"
+  /portal/{code}/answers/{questionKey}:
+    put:
+      operationId: saveAnswer
+      tags: [portal]
+      summary: Save a new value for a question (every save is kept in history)
+      parameters:
+        - $ref: "#/components/parameters/PortalCode"
+        - name: questionKey
+          in: path
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AnswerInput"
+      responses:
+        "200":
+          description: Saved
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AnswerVersion"
+        "403":
+          description: Not authorized or school locked
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorMessage"
+  /portal/{code}/teachers:
+    put:
+      operationId: saveTeachers
+      tags: [portal]
+      summary: Save the full teacher list as a new snapshot
+      parameters:
+        - $ref: "#/components/parameters/PortalCode"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TeachersInput"
+      responses:
+        "200":
+          description: Saved
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TeachersSnapshot"
+        "403":
+          description: Not authorized or school locked
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorMessage"
+  /portal/{code}/pages:
+    get:
+      operationId: getPortalPages
+      tags: [portal]
+      summary: Published info pages for schools
+      parameters:
+        - $ref: "#/components/parameters/PortalCode"
+      responses:
+        "200":
+          description: Pages
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/InfoPage"
+  /admin/login:
+    post:
+      operationId: adminLogin
+      tags: [admin]
+      summary: Admin sign in (sets session cookie)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AdminCredentials"
+      responses:
+        "200":
+          description: Signed in
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminUser"
+        "401":
+          description: Invalid credentials
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorMessage"
+  /admin/dev-login:
+    post:
+      operationId: adminDevLogin
+      tags: [admin]
+      summary: Temporary development-only login as Pam
+      responses:
+        "200":
+          description: Signed in
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminUser"
+  /admin/logout:
+    post:
+      operationId: adminLogout
+      tags: [admin]
+      summary: Sign out
+      responses:
+        "200":
+          description: Signed out
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OkStatus"
+  /admin/me:
+    get:
+      operationId: getAdminMe
+      tags: [admin]
+      summary: Current signed-in admin
+      responses:
+        "200":
+          description: Current admin
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminUser"
+        "401":
+          description: Not signed in
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorMessage"
+  /admin/summary:
+    get:
+      operationId: getAdminSummary
+      tags: [admin]
+      summary: Dashboard totals
+      responses:
+        "200":
+          description: Summary
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminSummary"
+  /admin/schools:
+    get:
+      operationId: getAdminSchools
+      tags: [admin]
+      summary: All schools with per-question answer state for the grid
+      responses:
+        "200":
+          description: Schools
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/SchoolRow"
+  /admin/schools/{id}:
+    get:
+      operationId: getAdminSchool
+      tags: [admin]
+      summary: One school with contacts and link
+      parameters:
+        - $ref: "#/components/parameters/SchoolId"
+      responses:
+        "200":
+          description: School
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SchoolDetail"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorMessage"
+  /admin/schools/{id}/lock:
+    patch:
+      operationId: setSchoolLock
+      tags: [admin]
+      summary: Lock or unlock editing for a school
+      parameters:
+        - $ref: "#/components/parameters/SchoolId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SchoolLockUpdate"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SchoolDetail"
+  /admin/due:
+    get:
+      operationId: getDueSchools
+      tags: [admin]
+      summary: Schools with workshops about two months out, ready for the logistics email
+      responses:
+        "200":
+          description: Due schools
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/DueSchool"
+  /admin/template:
+    get:
+      operationId: getEmailTemplate
+      tags: [admin]
+      summary: Editable logistics email template
+      responses:
+        "200":
+          description: Template
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EmailTemplate"
+    put:
+      operationId: updateEmailTemplate
+      tags: [admin]
+      summary: Save the email template
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/EmailTemplateInput"
+      responses:
+        "200":
+          description: Saved
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EmailTemplate"
+  /admin/admins:
+    get:
+      operationId: getAdminUsers
+      tags: [admin]
+      summary: List admin accounts
+      responses:
+        "200":
+          description: Admins
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/AdminUser"
+    post:
+      operationId: createAdminUser
+      tags: [admin]
+      summary: Add an admin account
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AdminUserInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminUser"
+        "400":
+          description: Invalid
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorMessage"
+  /admin/admins/{id}:
+    patch:
+      operationId: updateAdminUser
+      tags: [admin]
+      summary: Set an admin's password
+      parameters:
+        - $ref: "#/components/parameters/AdminId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AdminUserUpdate"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminUser"
+    delete:
+      operationId: deleteAdminUser
+      tags: [admin]
+      summary: Remove an admin account
+      parameters:
+        - $ref: "#/components/parameters/AdminId"
+      responses:
+        "200":
+          description: Deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OkStatus"
+        "400":
+          description: Cannot remove the last admin
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorMessage"
+  /admin/pages:
+    get:
+      operationId: getAdminPages
+      tags: [admin]
+      summary: All info pages (published and not)
+      responses:
+        "200":
+          description: Pages
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/InfoPage"
+    post:
+      operationId: createPage
+      tags: [admin]
+      summary: Create an info page
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/InfoPageInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InfoPage"
+  /admin/pages/{id}:
+    patch:
+      operationId: updatePage
+      tags: [admin]
+      summary: Update an info page
+      parameters:
+        - $ref: "#/components/parameters/PageId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/InfoPageUpdate"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InfoPage"
+    delete:
+      operationId: deletePage
+      tags: [admin]
+      summary: Delete an info page
+      parameters:
+        - $ref: "#/components/parameters/PageId"
+      responses:
+        "200":
+          description: Deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OkStatus"
+  /admin/pages/export:
+    get:
+      operationId: exportPages
+      tags: [admin]
+      summary: Export all info pages
+      responses:
+        "200":
+          description: Export
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PagesExport"
+  /admin/settings:
+    get:
+      operationId: getSettings
+      tags: [admin]
+      summary: Airtable connection settings (stored, connection stays off)
+      responses:
+        "200":
+          description: Settings
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AirtableSettings"
+    put:
+      operationId: updateSettings
+      tags: [admin]
+      summary: Save Airtable connection settings
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AirtableSettingsInput"
+      responses:
+        "200":
+          description: Saved
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AirtableSettings"
 components:
+  parameters:
+    PortalCode:
+      name: code
+      in: path
+      required: true
+      schema: { type: string }
+    SchoolId:
+      name: id
+      in: path
+      required: true
+      schema: { type: number }
+    AdminId:
+      name: id
+      in: path
+      required: true
+      schema: { type: number }
+    PageId:
+      name: id
+      in: path
+      required: true
+      schema: { type: number }
   schemas:
     HealthStatus:
       type: object
       properties:
-        status:
-          type: string
-      required:
-        - status
-
+        status: { type: string }
+      required: [status]
+    OkStatus:
+      type: object
+      properties:
+        ok: { type: boolean }
+      required: [ok]
+    ErrorMessage:
+      type: object
+      properties:
+        error: { type: string }
+      required: [error]
+    PortalIdentity:
+      type: object
+      properties:
+        email: { type: string, minLength: 3 }
+      required: [email]
+    PortalSession:
+      type: object
+      properties:
+        email: { type: string }
+        isAdminContact: { type: boolean }
+        school:
+          $ref: "#/components/schemas/PortalSchool"
+      required: [email, isAdminContact, school]
+    PortalSchool:
+      type: object
+      properties:
+        id: { type: number }
+        name: { type: string }
+        workshopDate: { type: ["string", "null"] }
+        locked: { type: boolean }
+      required: [id, name, workshopDate, locked]
+    AnswerVersion:
+      type: object
+      properties:
+        id: { type: number }
+        value: { type: string }
+        enteredBy: { type: string }
+        enteredAt: { type: string }
+      required: [id, value, enteredBy, enteredAt]
+    QuestionAnswers:
+      type: object
+      properties:
+        questionKey: { type: string }
+        current:
+          oneOf:
+            - $ref: "#/components/schemas/AnswerVersion"
+            - type: "null"
+        history:
+          type: array
+          items:
+            $ref: "#/components/schemas/AnswerVersion"
+      required: [questionKey, current, history]
+    TeacherRow:
+      type: object
+      properties:
+        firstName: { type: string, minLength: 1 }
+        lastName: { type: string, minLength: 1 }
+        email: { type: string, minLength: 3 }
+        studentCount: { type: number, minimum: 0 }
+      required: [firstName, lastName, email, studentCount]
+    TeachersSnapshot:
+      type: object
+      properties:
+        id: { type: number }
+        rows:
+          type: array
+          items:
+            $ref: "#/components/schemas/TeacherRow"
+        totalStudents: { type: number }
+        enteredBy: { type: string }
+        enteredAt: { type: string }
+      required: [id, rows, totalStudents, enteredBy, enteredAt]
+    SchoolAnswers:
+      type: object
+      properties:
+        school:
+          $ref: "#/components/schemas/PortalSchool"
+        questions:
+          type: array
+          items:
+            $ref: "#/components/schemas/QuestionAnswers"
+        teachers:
+          type: object
+          properties:
+            current:
+              oneOf:
+                - $ref: "#/components/schemas/TeachersSnapshot"
+                - type: "null"
+            history:
+              type: array
+              items:
+                $ref: "#/components/schemas/TeachersSnapshot"
+          required: [current, history]
+      required: [school, questions, teachers]
+    AnswerInput:
+      type: object
+      properties:
+        email: { type: string, minLength: 3 }
+        value: { type: string, minLength: 1 }
+      required: [email, value]
+    TeachersInput:
+      type: object
+      properties:
+        email: { type: string, minLength: 3 }
+        rows:
+          type: array
+          minItems: 1
+          items:
+            $ref: "#/components/schemas/TeacherRow"
+      required: [email, rows]
+    AdminCredentials:
+      type: object
+      properties:
+        email: { type: string, minLength: 3 }
+        password: { type: string, minLength: 1 }
+      required: [email, password]
+    AdminUser:
+      type: object
+      properties:
+        id: { type: number }
+        email: { type: string }
+        createdAt: { type: string }
+      required: [id, email, createdAt]
+    AdminUserInput:
+      type: object
+      properties:
+        email: { type: string, minLength: 3 }
+        password: { type: string, minLength: 8 }
+      required: [email, password]
+    AdminUserUpdate:
+      type: object
+      properties:
+        password: { type: string, minLength: 8 }
+      required: [password]
+    AdminSummary:
+      type: object
+      properties:
+        totalSchools: { type: number }
+        complete: { type: number }
+        partial: { type: number }
+        untouched: { type: number }
+        locked: { type: number }
+      required: [totalSchools, complete, partial, untouched, locked]
+    QuestionState:
+      type: object
+      properties:
+        questionKey: { type: string }
+        answered: { type: boolean }
+        summary: { type: ["string", "null"] }
+      required: [questionKey, answered, summary]
+    SchoolRow:
+      type: object
+      properties:
+        id: { type: number }
+        name: { type: string }
+        code: { type: string }
+        link: { type: string }
+        workshopDate: { type: ["string", "null"] }
+        locked: { type: boolean }
+        questionStates:
+          type: array
+          items:
+            $ref: "#/components/schemas/QuestionState"
+        missingCount: { type: number }
+      required: [id, name, code, link, workshopDate, locked, questionStates, missingCount]
+    Contact:
+      type: object
+      properties:
+        id: { type: number }
+        email: { type: string }
+        name: { type: ["string", "null"] }
+      required: [id, email, name]
+    SchoolDetail:
+      type: object
+      properties:
+        id: { type: number }
+        name: { type: string }
+        code: { type: string }
+        link: { type: string }
+        workshopDate: { type: ["string", "null"] }
+        locked: { type: boolean }
+        contacts:
+          type: array
+          items:
+            $ref: "#/components/schemas/Contact"
+      required: [id, name, code, link, workshopDate, locked, contacts]
+    SchoolLockUpdate:
+      type: object
+      properties:
+        locked: { type: boolean }
+      required: [locked]
+    DueSchool:
+      type: object
+      properties:
+        schoolId: { type: number }
+        name: { type: string }
+        workshopDate: { type: string }
+        contactEmails:
+          type: array
+          items: { type: string }
+        link: { type: string }
+        subject: { type: string }
+      required: [schoolId, name, workshopDate, contactEmails, link, subject]
+    EmailTemplate:
+      type: object
+      properties:
+        body: { type: string }
+        updatedAt: { type: ["string", "null"] }
+      required: [body, updatedAt]
+    EmailTemplateInput:
+      type: object
+      properties:
+        body: { type: string }
+      required: [body]
+    InfoPage:
+      type: object
+      properties:
+        id: { type: number }
+        title: { type: string }
+        slug: { type: string }
+        body: { type: string }
+        sortOrder: { type: number }
+        published: { type: boolean }
+        updatedAt: { type: string }
+      required: [id, title, slug, body, sortOrder, published, updatedAt]
+    InfoPageInput:
+      type: object
+      properties:
+        title: { type: string, minLength: 1 }
+        slug: { type: string, minLength: 1 }
+        body: { type: string }
+        sortOrder: { type: number }
+        published: { type: boolean }
+      required: [title, slug, body]
+    InfoPageUpdate:
+      type: object
+      properties:
+        title: { type: string, minLength: 1 }
+        slug: { type: string, minLength: 1 }
+        body: { type: string }
+        sortOrder: { type: number }
+        published: { type: boolean }
+    PagesExport:
+      type: object
+      properties:
+        exportedAt: { type: string }
+        pages:
+          type: array
+          items:
+            $ref: "#/components/schemas/InfoPage"
+      required: [exportedAt, pages]
+    AirtableSettings:
+      type: object
+      properties:
+        apiKeySet: { type: boolean }
+        baseId: { type: string }
+        tableId: { type: string }
+        enabled: { type: boolean }
+      required: [apiKeySet, baseId, tableId, enabled]
+    AirtableSettingsInput:
+      type: object
+      properties:
+        apiKey: { type: string }
+        baseId: { type: string }
+        tableId: { type: string }
+      required: [apiKey, baseId, tableId]

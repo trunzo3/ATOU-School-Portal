@@ -1,0 +1,1 @@
+- [Orval codegen quirks](orval-codegen-quirks.md) — no `type: integer`, no path+query param mixes in openapi.yaml or codegen breaks.

@@ -181,8 +181,6 @@ export function SchoolForm({ code, email, initialAnswers, onSaveAnswer, onSaveTe
 
   const totalStudents = teacherRows.reduce((sum, r) => sum + (Number(r.studentCount) || 0), 0);
 
-  // Entries may carry an optional label (e.g. "Timing note") and an extra line
-  // (e.g. the calculated schedule a start time produced).
   const renderHistory = (history: any[]) => {
     if (!history || history.length === 0) return null;
     return (
@@ -191,12 +189,63 @@ export function SchoolForm({ code, email, initialAnswers, onSaveAnswer, onSaveTe
         <div className="space-y-2">
           {history.map((h, i) => (
             <div key={i} className="flex justify-between items-start gap-4">
-              <span className="min-w-0">
-                {h.label && <span className="text-xs">{h.label}: </span>}
-                <span className="italic whitespace-pre-wrap break-words">"{h.value}"</span>
-                {h.extra && <span className="block text-xs mt-0.5">{h.extra}</span>}
-              </span>
-              <span className="text-xs whitespace-nowrap">{h.enteredBy} • {formatPacificTime(h.enteredAt)}</span>
+              <span className="min-w-0 italic whitespace-pre-wrap break-words">"{h.value}"</span>
+              <span className="text-xs whitespace-nowrap shrink-0">{h.enteredBy} • {formatPacificTime(h.enteredAt)}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    )
+  }
+
+  // Format a stored workshop start time for display: "14:00" -> "2:00 PM".
+  // Imported free-text values are shown as-is.
+  const formatStartTime = (value: string) => {
+    const trimmed = (value || "").trim();
+    if (!/^\d{1,2}:\d{2}$/.test(trimmed)) return trimmed;
+    const [h, m] = trimmed.split(':').map(Number);
+    const d = new Date();
+    d.setHours(h, m, 0);
+    return d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+  }
+
+  // Workshop time history: one entry per previous start time, with the
+  // attribution above and the schedule + timing note that went with it.
+  const renderWorkshopTimeHistory = (
+    timeQ: { current: any; history: any[] } | undefined,
+    noteQ: { current: any; history: any[] } | undefined
+  ) => {
+    const timeHistory = timeQ?.history || [];
+    if (timeHistory.length === 0) return null;
+    // All note versions, newest first, so we can find the note that was in
+    // effect while a given start time was current.
+    const noteVersions = [
+      ...(noteQ?.current ? [noteQ.current] : []),
+      ...(noteQ?.history || []),
+    ].sort((a, b) => new Date(b.enteredAt).getTime() - new Date(a.enteredAt).getTime());
+    const entries = timeHistory.map((h: any, i: number) => {
+      // The moment this start time was replaced by a newer one:
+      const supersededAt = i === 0 ? timeQ?.current?.enteredAt : timeHistory[i - 1].enteredAt;
+      const boundary = supersededAt ? new Date(supersededAt).getTime() : Infinity;
+      const note = noteVersions.find(n => new Date(n.enteredAt).getTime() <= boundary);
+      const trimmed = (h.value || "").trim();
+      const schedule = /^\d{1,2}:\d{2}$/.test(trimmed) ? computeBreakTimes(trimmed) : null;
+      return { ...h, schedule, note: note?.value || null };
+    });
+    return (
+      <div className="mt-3 text-sm text-muted-foreground bg-muted/20 p-3 rounded-md border border-dashed no-print">
+        <p className="font-medium text-xs uppercase tracking-wider mb-2">Previous Answers</p>
+        <div className="space-y-3">
+          {entries.map((h: any, i: number) => (
+            <div key={i} className="space-y-0.5">
+              <div className="text-xs">{h.enteredBy} • {formatPacificTime(h.enteredAt)}</div>
+              <div className="italic whitespace-pre-wrap break-words">"{formatStartTime(h.value)}"</div>
+              {h.schedule && <div className="text-xs">Calculated schedule: {h.schedule}</div>}
+              {h.note && (
+                <div className="text-xs">
+                  Timing note: <span className="italic whitespace-pre-wrap break-words">"{h.note}"</span>
+                </div>
+              )}
             </div>
           ))}
         </div>
@@ -247,19 +296,6 @@ export function SchoolForm({ code, email, initialAnswers, onSaveAnswer, onSaveTe
 
   const qTime = getQ("workshop_time");
   const qNote = getQ("timing_note");
-
-  // Workshop time history: show the previous start times (with the schedule
-  // each one produced) and previous timing notes, newest first.
-  const workshopTimeHistory = [
-    ...(qTime?.history || []).map((h: any) => ({
-      ...h,
-      label: "Start time",
-      extra: /^\d{1,2}:\d{2}$/.test(h.value.trim())
-        ? `Calculated schedule: ${computeBreakTimes(h.value.trim())}`
-        : null,
-    })),
-    ...(qNote?.history || []).map((h: any) => ({ ...h, label: "Timing note" })),
-  ].sort((a, b) => new Date(b.enteredAt).getTime() - new Date(a.enteredAt).getTime())
   const qAct = getQ("activity_area");
   const qSpk = getQ("speaker_area");
   const qNotes = getQ("notes");
@@ -443,8 +479,8 @@ export function SchoolForm({ code, email, initialAnswers, onSaveAnswer, onSaveTe
                 Last updated by {qTime.current.enteredBy} at {formatPacificTime(qTime.current.enteredAt)}
               </div>
             )}
-            {renderHistory(workshopTimeHistory)}
           </div>
+          {renderWorkshopTimeHistory(qTime, qNote)}
         </CardContent>
       </Card>
 

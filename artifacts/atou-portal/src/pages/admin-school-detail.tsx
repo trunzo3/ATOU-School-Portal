@@ -82,11 +82,25 @@ function AdminSchoolFormWrapper({ schoolId, detail, adminEmail, handleSaveAnswer
   const fetchAnswers = useFetchPortalAnswers()
   const [answers, setAnswers] = useState<any>(null)
 
-  useEffect(() => {
+  const refreshAnswers = () => {
     fetchAnswers.mutate({ code: detail.code, data: { email: adminEmail } }, {
       onSuccess: (data) => setAnswers(data)
     })
+  }
+
+  useEffect(() => {
+    refreshAnswers()
   }, [detail.code])
+
+  // After every save, re-fetch so the history trail updates immediately
+  const onSaveAnswer = async (key: string, value: string) => {
+    await handleSaveAnswer(key, value)
+    refreshAnswers()
+  }
+  const onSaveTeachers = async (rows: any[]) => {
+    await handleSaveTeachers(rows)
+    refreshAnswers()
+  }
 
   if (!answers) return <AdminLayout><div className="p-8">Loading form data...</div></AdminLayout>
 
@@ -126,8 +140,8 @@ function AdminSchoolFormWrapper({ schoolId, detail, adminEmail, handleSaveAnswer
         code={detail.code}
         email={adminEmail}
         initialAnswers={answers}
-        onSaveAnswer={handleSaveAnswer}
-        onSaveTeachers={handleSaveTeachers}
+        onSaveAnswer={onSaveAnswer}
+        onSaveTeachers={onSaveTeachers}
         isReadOnly={detail.locked}
       />
     </AdminLayout>

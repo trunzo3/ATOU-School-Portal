@@ -72,12 +72,7 @@ export function SchoolForm({ code, email, initialAnswers, onSaveAnswer, onSaveTe
     if (value === baseline) return; // No change
     if (!value.trim()) return; // Server rejects empty values; nothing to save
     if (inFlightRef.current[key] === value) return; // Same save already running (blur + click)
-    if (baseline && !confirm("This will overwrite a previously saved answer. Are you sure?")) {
-      // Revert state if cancelled - this is simplistic; in a real app we'd keep local draft state separate
-      // For now, if they cancel, we'll let it stay in input but not save to server.
-      return;
-    }
-    if (inFlightRef.current[key] === value) return; // Re-check after the blocking confirm
+    // No overwrite confirmation: autosave made it constant, and every change is kept in history.
     const seq = (saveSeqRef.current[key] = (saveSeqRef.current[key] ?? 0) + 1)
     inFlightRef.current[key] = value
     setSaveStates(s => ({ ...s, [key]: "saving" }))
@@ -186,6 +181,8 @@ export function SchoolForm({ code, email, initialAnswers, onSaveAnswer, onSaveTe
 
   const totalStudents = teacherRows.reduce((sum, r) => sum + (Number(r.studentCount) || 0), 0);
 
+  // Entries may carry an optional label (e.g. "Timing note") and an extra line
+  // (e.g. the calculated schedule a start time produced).
   const renderHistory = (history: any[]) => {
     if (!history || history.length === 0) return null;
     return (
@@ -194,7 +191,11 @@ export function SchoolForm({ code, email, initialAnswers, onSaveAnswer, onSaveTe
         <div className="space-y-2">
           {history.map((h, i) => (
             <div key={i} className="flex justify-between items-start gap-4">
-              <span className="truncate italic">"{h.value}"</span>
+              <span className="min-w-0">
+                {h.label && <span className="text-xs">{h.label}: </span>}
+                <span className="italic whitespace-pre-wrap break-words">"{h.value}"</span>
+                {h.extra && <span className="block text-xs mt-0.5">{h.extra}</span>}
+              </span>
               <span className="text-xs whitespace-nowrap">{h.enteredBy} • {formatPacificTime(h.enteredAt)}</span>
             </div>
           ))}
@@ -246,6 +247,19 @@ export function SchoolForm({ code, email, initialAnswers, onSaveAnswer, onSaveTe
 
   const qTime = getQ("workshop_time");
   const qNote = getQ("timing_note");
+
+  // Workshop time history: show the previous start times (with the schedule
+  // each one produced) and previous timing notes, newest first.
+  const workshopTimeHistory = [
+    ...(qTime?.history || []).map((h: any) => ({
+      ...h,
+      label: "Start time",
+      extra: /^\d{1,2}:\d{2}$/.test(h.value.trim())
+        ? `Calculated schedule: ${computeBreakTimes(h.value.trim())}`
+        : null,
+    })),
+    ...(qNote?.history || []).map((h: any) => ({ ...h, label: "Timing note" })),
+  ].sort((a, b) => new Date(b.enteredAt).getTime() - new Date(a.enteredAt).getTime())
   const qAct = getQ("activity_area");
   const qSpk = getQ("speaker_area");
   const qNotes = getQ("notes");
@@ -429,7 +443,7 @@ export function SchoolForm({ code, email, initialAnswers, onSaveAnswer, onSaveTe
                 Last updated by {qTime.current.enteredBy} at {formatPacificTime(qTime.current.enteredAt)}
               </div>
             )}
-            {renderHistory(qTime?.history || [])}
+            {renderHistory(workshopTimeHistory)}
           </div>
         </CardContent>
       </Card>

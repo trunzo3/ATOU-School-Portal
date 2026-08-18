@@ -54,8 +54,11 @@ contact names resolved via School Contacts `tbldPXXbTCSn9aaSH`). One school
 row per future-dated workshop; `schools.airtable_record_id` stores the
 workshop record id for write-back. `schools.approx_students` is a read-only
 copy of the Workshops "Approx # Students" column, shown in the admin
-dashboard (per user decision: answers already typed into the Workshops sheet
-are NOT imported; schools start blank in the app). Re-run:
+dashboard. Answers already typed into the Workshops sheet (Workshop Times,
+Areas, Teacher Name/Student Count + emails) ARE imported as starting answers
+with enteredBy "Airtable import"; free-form teacher text is parsed
+best-effort by `scripts/src/parse-workshop-answers.ts`. Write-back to
+Airtable stays OFF. Re-run:
 `pnpm --filter @workspace/scripts run import-airtable` (DESTRUCTIVE — wipes
 schools, contacts, answers, teacher snapshots; the payload JSON
 `scripts/src/airtable-import.json` is refreshed from Airtable by the agent).

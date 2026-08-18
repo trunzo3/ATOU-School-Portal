@@ -13,7 +13,14 @@
     "name": "Laurien Spiller (Principal)"
    }
   ],
-  "approxStudents": "75"
+  "approxStudents": "75",
+  "answers": {
+   "activityArea": null,
+   "speakerArea": null,
+   "teacherEmails": null,
+   "teacherNames": null,
+   "workshopTime": null
+  }
  },
  {
   "airtableRecordId": "rec18nMWPaKor3FTv",
@@ -29,7 +36,14 @@
     "name": "Michelle Salli-Brown (Secretary)"
    }
   ],
-  "approxStudents": "125"
+  "approxStudents": "125",
+  "answers": {
+   "activityArea": null,
+   "speakerArea": null,
+   "teacherEmails": null,
+   "teacherNames": null,
+   "workshopTime": null
+  }
  },
  {
   "airtableRecordId": "rec1FaIbObKvfE2hm",
@@ -49,7 +63,14 @@
     "name": "Alyssa Chun (Special Education Department Secretary)"
    }
   ],
-  "approxStudents": "100"
+  "approxStudents": "100",
+  "answers": {
+   "activityArea": null,
+   "speakerArea": null,
+   "teacherEmails": null,
+   "teacherNames": null,
+   "workshopTime": null
+  }
  },
  {
   "airtableRecordId": "rec2WacpMCdSKCGRV",
@@ -65,7 +86,14 @@
     "name": "Meghan Schooler (Principal)"
    }
   ],
-  "approxStudents": "85"
+  "approxStudents": "85",
+  "answers": {
+   "activityArea": null,
+   "speakerArea": null,
+   "teacherEmails": null,
+   "teacherNames": null,
+   "workshopTime": null
+  }
  },
  {
   "airtableRecordId": "rec3OtyFziWsr1Yjg",
@@ -81,7 +109,14 @@
     "name": "Jackie Wygal (Admin)"
    }
   ],
-  "approxStudents": "96"
+  "approxStudents": "96",
+  "answers": {
+   "activityArea": "Rooms 28 & 29",
+   "speakerArea": "Library",
+   "teacherEmails": "nbeardsley@rcsdk8.org;\ndertola@rcsdk8.org;\njroderick@rcsdk8.org",
+   "teacherNames": "Beardsley 4th 32 students  \nErtola 4th 33 students          \nRoderick 4th 31 students    ",
+   "workshopTime": "8:15am - 9:45am\n10:00am - 11:30am"
+  }
  },
  {
   "airtableRecordId": "rec45xBBdzfpDeAfw",
@@ -101,7 +136,14 @@
     "name": "Mele Blackstone (Principal)"
    }
   ],
-  "approxStudents": "70"
+  "approxStudents": "70",
+  "answers": {
+   "activityArea": null,
+   "speakerArea": null,
+   "teacherEmails": null,
+   "teacherNames": null,
+   "workshopTime": null
+  }
  },
  {
   "airtableRecordId": "rec4EOQ6hc1yqCBKD",
@@ -117,7 +159,14 @@
     "name": "Alena Cary (Teacher)"
    }
   ],
-  "approxStudents": "99"
+  "approxStudents": "99",
+  "answers": {
+   "activityArea": null,
+   "speakerArea": null,
+   "teacherEmails": null,
+   "teacherNames": null,
+   "workshopTime": null
+  }
  },
  {
   "airtableRecordId": "rec4GHiKP04uIlgmk",
@@ -141,7 +190,14 @@
     "name": "Stephanie Moore-Tealdi (Teacher)"
    }
   ],
-  "approxStudents": "60"
+  "approxStudents": "60",
+  "answers": {
+   "activityArea": null,
+   "speakerArea": null,
+   "teacherEmails": null,
+   "teacherNames": null,
+   "workshopTime": null
+  }
  },
  {
   "airtableRecordId": "rec4NyoiWTH4VDXMk",
@@ -157,7 +213,14 @@
     "name": "Carrie Manriquez (Principal)"
    }
   ],
-  "approxStudents": "80"
+  "approxStudents": "80",
+  "answers": {
+   "activityArea": null,
+   "speakerArea": null,
+   "teacherEmails": null,
+   "teacherNames": null,
+   "workshopTime": null
+  }
  },
  {
   "airtableRecordId": "rec4US1rjI4GIk729",
@@ -169,7 +232,14 @@
     "name": "Brandei Smith (Principal)"
    }
   ],
-  "approxStudents": "124"
+  "approxStudents": "124",
+  "answers": {
+   "activityArea": null,
+   "speakerArea": null,
+   "teacherEmails": null,
+   "teacherNames": null,
+   "workshopTime": null
+  }
  },
  {
   "airtableRecordId": "rec4c47HbpKZQjZXb",
@@ -189,7 +259,14 @@
     "name": "Susan Riedell (Clerk)"
    }
   ],
-  "approxStudents": "55"
+  "approxStudents": "55",
+  "answers": {
+   "activityArea": null,
+   "speakerArea": null,
+   "teacherEmails": null,
+   "teacherNames": null,
+   "workshopTime": null
+  }
  },
  {
   "airtableRecordId": "rec4eXLnc1O57CZLp",
@@ -205,7 +282,14 @@
     "name": "Jeanine Holton (Principal)"
    }
   ],
-  "approxStudents": "75"
+  "approxStudents": "75",
+  "answers": {
+   "activityArea": null,
+   "speakerArea": null,
+   "teacherEmails": null,
+   "teacherNames": null,
+   "workshopTime": null
+  }
  },
  {
   "airtableRecordId": "rec5II2jhqXWDMm0F",
@@ -221,7 +305,14 @@
     "name": "Jennifer Washburn (Admin)"
    }
   ],
-  "approxStudents": "77"
+  "approxStudents": "77",
+  "answers": {
+   "activityArea": null,
+   "speakerArea": null,
+   "teacherEmails": null,
+   "teacherNames": null,
+   "workshopTime": null
+  }
  },
  {
   "airtableRecordId": "rec66pf9ZQl51dfme",
@@ -237,7 +328,14 @@
     "name": "Cathi Carnes (Secretary)"
    }
   ],
-  "approxStudents": "80"
+  "approxStudents": "80",
+  "answers": {
+   "activityArea": null,
+   "speakerArea": null,
+   "teacherEmails": null,
+   "teacherNames": null,
+   "workshopTime": null
+  }
  },
  {
   "airtableRecordId": "rec6a9jLrmbS7iZQs",
@@ -253,7 +351,14 @@
     "name": "Maria Guillen (Office Coordinator)"
    }
   ],
-  "approxStudents": "40"
+  "approxStudents": "40",
+  "answers": {
+   "activityArea": null,
+   "speakerArea": null,
+   "teacherEmails": null,
+   "teacherNames": null,
+   "workshopTime": null
+  }
  },
  {
   "airtableRecordId": "rec6cOAqAVrVXt5fU",
@@ -277,7 +382,14 @@
     "name": "Yazmin Hurtado - Primary Contact (District Secretary - Primary Contact)"
    }
   ],
-  "approxStudents": "75"
+  "approxStudents": "75",
+  "answers": {
+   "activityArea": null,
+   "speakerArea": null,
+   "teacherEmails": null,
+   "teacherNames": null,
+   "workshopTime": null
+  }
  },
  {
   "airtableRecordId": "rec7z9VJDv767ZNw4",
@@ -293,7 +405,14 @@
     "name": "Anne Malvaux Ouellette (Administrative Assistant)"
    }
   ],
-  "approxStudents": "44"
+  "approxStudents": "44",
+  "answers": {
+   "activityArea": null,
+   "speakerArea": null,
+   "teacherEmails": null,
+   "teacherNames": null,
+   "workshopTime": null
+  }
  },
  {
   "airtableRecordId": "rec8rcLOLQ7CUyPxJ",
@@ -309,7 +428,14 @@
     "name": "Diana Marshall (Principal)"
    }
   ],
-  "approxStudents": "95"
+  "approxStudents": "95",
+  "answers": {
+   "activityArea": "Rooms B103 & B104",
+   "speakerArea": "Room 27",
+   "teacherEmails": "rory.mcclure@sanjuan.edu;\nGabi.Perez@sanjuan.edu;\nkellie.jonutz@sanjuan.edu",
+   "teacherNames": "Randazzo (room 27)- 29\nMcClure (b103)- 28\nPerez (b104)- 27\n",
+   "workshopTime": "9:05am - 10:35am \n11:00am - 12:20pm"
+  }
  },
  {
   "airtableRecordId": "rec8rnHEUXSjPjtxl",
@@ -325,7 +451,14 @@
     "name": "Keith Martin (Principal)"
    }
   ],
-  "approxStudents": "75"
+  "approxStudents": "75",
+  "answers": {
+   "activityArea": null,
+   "speakerArea": null,
+   "teacherEmails": null,
+   "teacherNames": null,
+   "workshopTime": null
+  }
  },
  {
   "airtableRecordId": "rec9HbxLyRdBk0bEs",
@@ -349,7 +482,14 @@
     "name": "Robla District - Invoice Submittal (Email for Invoice Submittal)"
    }
   ],
-  "approxStudents": "68"
+  "approxStudents": "68",
+  "answers": {
+   "activityArea": null,
+   "speakerArea": null,
+   "teacherEmails": null,
+   "teacherNames": null,
+   "workshopTime": null
+  }
  },
  {
   "airtableRecordId": "rec9KH8bWfinWOtdp",
@@ -365,7 +505,14 @@
     "name": "Christina Sherrod - Primary Contact (Teacher)"
    }
   ],
-  "approxStudents": "90"
+  "approxStudents": "90",
+  "answers": {
+   "activityArea": null,
+   "speakerArea": null,
+   "teacherEmails": null,
+   "teacherNames": null,
+   "workshopTime": null
+  }
  },
  {
   "airtableRecordId": "rec9ogodElnCLca1D",
@@ -381,7 +528,14 @@
     "name": "Kate Foucek (Teacher)"
    }
   ],
-  "approxStudents": "80"
+  "approxStudents": "80",
+  "answers": {
+   "activityArea": null,
+   "speakerArea": null,
+   "teacherEmails": null,
+   "teacherNames": null,
+   "workshopTime": null
+  }
  },
  {
   "airtableRecordId": "rec9wZujkDJItRuKp",
@@ -421,7 +575,14 @@
     "name": "James Torinus (Builder)"
    }
   ],
-  "approxStudents": null
+  "approxStudents": null,
+  "answers": {
+   "activityArea": null,
+   "speakerArea": null,
+   "teacherEmails": null,
+   "teacherNames": null,
+   "workshopTime": null
+  }
  },
  {
   "airtableRecordId": "rec9xfihx0KpNzB1M",
@@ -437,7 +598,14 @@
     "name": "Farah Friend (Principal)"
    }
   ],
-  "approxStudents": "62"
+  "approxStudents": "62",
+  "answers": {
+   "activityArea": null,
+   "speakerArea": null,
+   "teacherEmails": null,
+   "teacherNames": null,
+   "workshopTime": null
+  }
  },
  {
   "airtableRecordId": "recA8JUwQC1TxdzEK",
@@ -453,7 +621,14 @@
     "name": "Rocio Hara (Office Manager)"
    }
   ],
-  "approxStudents": "68"
+  "approxStudents": "68",
+  "answers": {
+   "activityArea": null,
+   "speakerArea": null,
+   "teacherEmails": null,
+   "teacherNames": null,
+   "workshopTime": null
+  }
  },
  {
   "airtableRecordId": "recASlH3b1uaZ3K4N",
@@ -469,7 +644,14 @@
     "name": "Leslie Calabrese (PTA Treasurer)"
    }
   ],
-  "approxStudents": "60"
+  "approxStudents": "60",
+  "answers": {
+   "activityArea": null,
+   "speakerArea": null,
+   "teacherEmails": null,
+   "teacherNames": null,
+   "workshopTime": null
+  }
  },
  {
   "airtableRecordId": "recAqmnuDjRFZncmq",
@@ -489,7 +671,14 @@
     "name": "Callie Cyr (Teacher - Scheduled Workshop)"
    }
   ],
-  "approxStudents": "55"
+  "approxStudents": "55",
+  "answers": {
+   "activityArea": "Rooms 26 & 27",
+   "speakerArea": "Cougar Mart Rom",
+   "teacherEmails": "callie.cyr@sanjuan.edu;\nElla.isaacs@sanjuan.edu",
+   "teacherNames": "Callie Cyr - 27  \nElla Isaacs - 27",
+   "workshopTime": "8:00am - 9:25am\n9:50am - 11:20am"
+  }
  },
  {
   "airtableRecordId": "recBd4DbgRIsro9BJ",
@@ -505,7 +694,14 @@
     "name": "Kiana Davis (Office Manager)"
    }
   ],
-  "approxStudents": "60"
+  "approxStudents": "60",
+  "answers": {
+   "activityArea": null,
+   "speakerArea": null,
+   "teacherEmails": null,
+   "teacherNames": null,
+   "workshopTime": null
+  }
  },
  {
   "airtableRecordId": "recBjh2QtWpmF34aV",
@@ -525,7 +721,14 @@
     "name": "Alyssa Chun (Special Education Department Secretary)"
    }
   ],
-  "approxStudents": "100"
+  "approxStudents": "100",
+  "answers": {
+   "activityArea": null,
+   "speakerArea": null,
+   "teacherEmails": null,
+   "teacherNames": null,
+   "workshopTime": null
+  }
  },
  {
   "airtableRecordId": "recC5S9nVbdyu2Bqh",
@@ -537,7 +740,14 @@
     "name": "Kim Little  (Principal / Superintendent )"
    }
   ],
-  "approxStudents": "80"
+  "approxStudents": "80",
+  "answers": {
+   "activityArea": null,
+   "speakerArea": null,
+   "teacherEmails": null,
+   "teacherNames": null,
+   "workshopTime": null
+  }
  },
  {
   "airtableRecordId": "recCDez0BaNI46sCF",
@@ -553,7 +763,14 @@
     "name": "Melissa Willes (Principal)"
    }
   ],
-  "approxStudents": null
+  "approxStudents": null,
+  "answers": {
+   "activityArea": null,
+   "speakerArea": null,
+   "teacherEmails": null,
+   "teacherNames": null,
+   "workshopTime": null
+  }
  },
  {
   "airtableRecordId": "recCDwDKAlex0rlz1",
@@ -569,7 +786,14 @@
     "name": "Michelle Calvert (Secretary)"
    }
   ],
-  "approxStudents": "60"
+  "approxStudents": "60",
+  "answers": {
+   "activityArea": null,
+   "speakerArea": null,
+   "teacherEmails": null,
+   "teacherNames": null,
+   "workshopTime": null
+  }
  },
  {
   "airtableRecordId": "recDAYoOSCZ8GT0P6",
@@ -589,7 +813,14 @@
     "name": "Hilda Marinko (Admin Asst)"
    }
   ],
-  "approxStudents": "56"
+  "approxStudents": "56",
+  "answers": {
+   "activityArea": null,
+   "speakerArea": null,
+   "teacherEmails": null,
+   "teacherNames": null,
+   "workshopTime": null
+  }
  },
  {
   "airtableRecordId": "recEHNJDPM7aqflcx",
@@ -609,7 +840,14 @@
     "name": "Beth Wahl (Principal)"
    }
   ],
-  "approxStudents": "87"
+  "approxStudents": "87",
+  "answers": {
+   "activityArea": null,
+   "speakerArea": null,
+   "teacherEmails": null,
+   "teacherNames": null,
+   "workshopTime": null
+  }
  },
  {
   "airtableRecordId": "recESFOcXN7oq6jo5",
@@ -625,7 +863,14 @@
     "name": "Kristyn Andrews (Principal)"
    }
   ],
-  "approxStudents": "110"
+  "approxStudents": "110",
+  "answers": {
+   "activityArea": "Rooms D26 nd D27",
+   "speakerArea": "Room D29",
+   "teacherEmails": "kalbright@travisusd.org\nmcarpenter@travisusd.org\nsgullett@travisusd.org\nswhitbeck@travisusd.org\namourlot@travisusd.org (This is our SDC teacher whose students will be participating in the other classrooms during the workshop)",
+   "teacherNames": "Albright - 26\nCarpenter - 26\nGullett - 29\nWhitbeck - 29\n",
+   "workshopTime": "9:15am - 10:40am\n11:00am - 12:30pm"
+  }
  },
  {
   "airtableRecordId": "recEaVcfumEqY29WC",
@@ -641,7 +886,14 @@
     "name": "Christy Aday (Principal)"
    }
   ],
-  "approxStudents": null
+  "approxStudents": null,
+  "answers": {
+   "activityArea": null,
+   "speakerArea": null,
+   "teacherEmails": null,
+   "teacherNames": null,
+   "workshopTime": null
+  }
  },
  {
   "airtableRecordId": "recGBB1seNH6rA3zG",
@@ -661,7 +913,14 @@
     "name": "Karen Takahashi (Admin)"
    }
   ],
-  "approxStudents": "119"
+  "approxStudents": "119",
+  "answers": {
+   "activityArea": null,
+   "speakerArea": null,
+   "teacherEmails": null,
+   "teacherNames": null,
+   "workshopTime": null
+  }
  },
  {
   "airtableRecordId": "recHOBMTdVPyC7EFA",
@@ -677,7 +936,14 @@
     "name": "Kate Prien (Admin Asst)"
    }
   ],
-  "approxStudents": "89"
+  "approxStudents": "89",
+  "answers": {
+   "activityArea": "Rooms G31 & G32",
+   "speakerArea": "D18",
+   "teacherEmails": "smccool@djusd.net, nfogliasso@djusd.net, yfreshour@djusd.net\n\n",
+   "teacherNames": "Selig McCool-31\nNoelle Fogliasso-29\nYolanda Freshour-29",
+   "workshopTime": "8:30am - 9:55am \n10:15am - 11:45am"
+  }
  },
  {
   "airtableRecordId": "recIfjQcyy0m9RmgJ",
@@ -689,7 +955,14 @@
     "name": "Mindy Sakoi (Registrar/Admin)"
    }
   ],
-  "approxStudents": "19"
+  "approxStudents": "19",
+  "answers": {
+   "activityArea": null,
+   "speakerArea": null,
+   "teacherEmails": null,
+   "teacherNames": null,
+   "workshopTime": null
+  }
  },
  {
   "airtableRecordId": "recJQwJlPeoAkM7Ss",
@@ -705,7 +978,14 @@
     "name": "Genevieve Williams (Secretary)"
    }
   ],
-  "approxStudents": "105"
+  "approxStudents": "105",
+  "answers": {
+   "activityArea": null,
+   "speakerArea": null,
+   "teacherEmails": null,
+   "teacherNames": null,
+   "workshopTime": null
+  }
  },
  {
   "airtableRecordId": "recKKwK1pJ3ZTEHa4",
@@ -725,7 +1005,14 @@
     "name": "Noel Stedeford (Principal)"
    }
   ],
-  "approxStudents": "75"
+  "approxStudents": "75",
+  "answers": {
+   "activityArea": null,
+   "speakerArea": null,
+   "teacherEmails": null,
+   "teacherNames": null,
+   "workshopTime": null
+  }
  },
  {
   "airtableRecordId": "recKl9ZVZ7bU9BkqO",
@@ -741,7 +1028,14 @@
     "name": "Ricardo Perez (Principal)"
    }
   ],
-  "approxStudents": "93"
+  "approxStudents": "93",
+  "answers": {
+   "activityArea": null,
+   "speakerArea": null,
+   "teacherEmails": null,
+   "teacherNames": null,
+   "workshopTime": null
+  }
  },
  {
   "airtableRecordId": "recKrxkHybZ5MA3mS",
@@ -753,7 +1047,14 @@
     "name": "Jason Matlon (Principal)"
    }
   ],
-  "approxStudents": "40"
+  "approxStudents": "40",
+  "answers": {
+   "activityArea": null,
+   "speakerArea": null,
+   "teacherEmails": null,
+   "teacherNames": null,
+   "workshopTime": null
+  }
  },
  {
   "airtableRecordId": "recKzN3uAqEXpb6me",
@@ -769,7 +1070,14 @@
     "name": "Alex Hess (Assistant Principal)"
    }
   ],
-  "approxStudents": "143"
+  "approxStudents": "143",
+  "answers": {
+   "activityArea": null,
+   "speakerArea": null,
+   "teacherEmails": null,
+   "teacherNames": null,
+   "workshopTime": null
+  }
  },
  {
   "airtableRecordId": "recLJ5xwgy2UtWPOB",
@@ -789,7 +1097,14 @@
     "name": "Alyssa Chun (Special Education Department Secretary)"
    }
   ],
-  "approxStudents": "100"
+  "approxStudents": "100",
+  "answers": {
+   "activityArea": null,
+   "speakerArea": null,
+   "teacherEmails": null,
+   "teacherNames": null,
+   "workshopTime": null
+  }
  },
  {
   "airtableRecordId": "recLKt0NpLiX9iuHf",
@@ -809,7 +1124,14 @@
     "name": "Ember Shurtz (Secretary)"
    }
   ],
-  "approxStudents": "100"
+  "approxStudents": "100",
+  "answers": {
+   "activityArea": null,
+   "speakerArea": null,
+   "teacherEmails": null,
+   "teacherNames": null,
+   "workshopTime": null
+  }
  },
  {
   "airtableRecordId": "recLU4nsWEG97kKDa",
@@ -825,7 +1147,14 @@
     "name": "Stacey Clark (Principal)"
    }
   ],
-  "approxStudents": "92"
+  "approxStudents": "92",
+  "answers": {
+   "activityArea": null,
+   "speakerArea": null,
+   "teacherEmails": null,
+   "teacherNames": null,
+   "workshopTime": null
+  }
  },
  {
   "airtableRecordId": "recMUCZ40quTkXcah",
@@ -845,7 +1174,14 @@
     "name": "Isabel Bennett (Secretary)"
    }
   ],
-  "approxStudents": "90"
+  "approxStudents": "90",
+  "answers": {
+   "activityArea": null,
+   "speakerArea": null,
+   "teacherEmails": null,
+   "teacherNames": null,
+   "workshopTime": null
+  }
  },
  {
   "airtableRecordId": "recMZ7wQ6qo1FHUfa",
@@ -861,7 +1197,14 @@
     "name": "Stephanie Solomon (Teacher)"
    }
   ],
-  "approxStudents": "56"
+  "approxStudents": "56",
+  "answers": {
+   "activityArea": null,
+   "speakerArea": null,
+   "teacherEmails": null,
+   "teacherNames": null,
+   "workshopTime": null
+  }
  },
  {
   "airtableRecordId": "recN9wg8i1a09rxry",
@@ -881,7 +1224,14 @@
     "name": "Alyssa Chun (Special Education Department Secretary)"
    }
   ],
-  "approxStudents": "100"
+  "approxStudents": "100",
+  "answers": {
+   "activityArea": null,
+   "speakerArea": null,
+   "teacherEmails": null,
+   "teacherNames": null,
+   "workshopTime": null
+  }
  },
  {
   "airtableRecordId": "recNCp29DLZUE504w",
@@ -897,7 +1247,14 @@
     "name": "Kaitlyn Hawkins (Teacher)"
    }
   ],
-  "approxStudents": "52"
+  "approxStudents": "52",
+  "answers": {
+   "activityArea": null,
+   "speakerArea": null,
+   "teacherEmails": null,
+   "teacherNames": null,
+   "workshopTime": null
+  }
  },
  {
   "airtableRecordId": "recNOoy4IfG7VnaHU",
@@ -925,7 +1282,14 @@
     "name": "Melissa Gruenholz - 7th grade workshop contact (Director of Operations)"
    }
   ],
-  "approxStudents": "112"
+  "approxStudents": "112",
+  "answers": {
+   "activityArea": "Rooms B115 and B118",
+   "speakerArea": "4th grade flex space",
+   "teacherEmails": "lpanhorst@westlakecharter.com;\narobinson@westlakecharter.com;\nmvanelderen@westlakecharter.com;\nawanser@westlakecharter.com",
+   "teacherNames": "Levon Panhorst - 29\nAshley Robinson -29\nMorgan Van Elderen - 29\nAna Wanser -29",
+   "workshopTime": "9:00am - 10:30am \n10:45am - 12:15pm"
+  }
  },
  {
   "airtableRecordId": "recO2j6qrjfrBtPig",
@@ -941,7 +1305,14 @@
     "name": "Amy Pirkl (Principal)"
    }
   ],
-  "approxStudents": "100"
+  "approxStudents": "100",
+  "answers": {
+   "activityArea": null,
+   "speakerArea": null,
+   "teacherEmails": null,
+   "teacherNames": null,
+   "workshopTime": null
+  }
  },
  {
   "airtableRecordId": "recO9ULNQN07vPvqQ",
@@ -961,7 +1332,14 @@
     "name": "Laura Cataldo (Teacher)"
    }
   ],
-  "approxStudents": "40"
+  "approxStudents": "40",
+  "answers": {
+   "activityArea": null,
+   "speakerArea": null,
+   "teacherEmails": null,
+   "teacherNames": null,
+   "workshopTime": null
+  }
  },
  {
   "airtableRecordId": "recOhRu2bSAXfiPQh",
@@ -977,7 +1355,14 @@
     "name": "Megan Grijalva (Principal)"
    }
   ],
-  "approxStudents": "85"
+  "approxStudents": "85",
+  "answers": {
+   "activityArea": "Gym",
+   "speakerArea": "D3 - Lab",
+   "teacherEmails": "sfernandez@uhsd.k12.ca.us;\nmgray@uhsd.k12.ca.us;\nsmass@uhsd.k12.ca.us",
+   "teacherNames": "Shirley Fernandez - (29)\nMelanie Gray - (28)\nKatie Ray (on Maternity Leave) / Sherri Mass - (28)",
+   "workshopTime": "8:40am - 10:00am\n10:15am - 11:45am"
+  }
  },
  {
   "airtableRecordId": "recOqXkLzl730etNb",
@@ -997,7 +1382,14 @@
     "name": "Medea Croy - Primary Contact (Administrative Assistant)"
    }
   ],
-  "approxStudents": "70"
+  "approxStudents": "70",
+  "answers": {
+   "activityArea": null,
+   "speakerArea": null,
+   "teacherEmails": null,
+   "teacherNames": null,
+   "workshopTime": null
+  }
  },
  {
   "airtableRecordId": "recOqkMu1hLrMZ53E",
@@ -1017,7 +1409,14 @@
     "name": "Michelle Walker (Principal)"
    }
   ],
-  "approxStudents": "44"
+  "approxStudents": "44",
+  "answers": {
+   "activityArea": null,
+   "speakerArea": null,
+   "teacherEmails": null,
+   "teacherNames": null,
+   "workshopTime": null
+  }
  },
  {
   "airtableRecordId": "recP0C8G66UgB32Fr",
@@ -1037,7 +1436,14 @@
     "name": "Wendy Sol (Principal)"
    }
   ],
-  "approxStudents": "68"
+  "approxStudents": "68",
+  "answers": {
+   "activityArea": null,
+   "speakerArea": null,
+   "teacherEmails": null,
+   "teacherNames": null,
+   "workshopTime": null
+  }
  },
  {
   "airtableRecordId": "recPtntZhYsTjiwZf",
@@ -1077,7 +1483,14 @@
     "name": "James Torinus (Builder)"
    }
   ],
-  "approxStudents": null
+  "approxStudents": null,
+  "answers": {
+   "activityArea": null,
+   "speakerArea": null,
+   "teacherEmails": null,
+   "teacherNames": null,
+   "workshopTime": null
+  }
  },
  {
   "airtableRecordId": "recQ0TWx9GrC3ep3q",
@@ -1093,7 +1506,14 @@
     "name": "Maia Ginnelly (CEO - Upcountry Advocate, LLC (Scheduled workshops))"
    }
   ],
-  "approxStudents": "99"
+  "approxStudents": "99",
+  "answers": {
+   "activityArea": null,
+   "speakerArea": null,
+   "teacherEmails": null,
+   "teacherNames": null,
+   "workshopTime": null
+  }
  },
  {
   "airtableRecordId": "recR6uC73QfmaGmTt",
@@ -1109,7 +1529,14 @@
     "name": "Helena Johnson (Principal)"
    }
   ],
-  "approxStudents": "120"
+  "approxStudents": "120",
+  "answers": {
+   "activityArea": null,
+   "speakerArea": null,
+   "teacherEmails": null,
+   "teacherNames": null,
+   "workshopTime": null
+  }
  },
  {
   "airtableRecordId": "recRSk1O1vvaqun5e",
@@ -1125,7 +1552,14 @@
     "name": "Mette Nagel (Lead 2nd Grade Teacher)"
    }
   ],
-  "approxStudents": "115"
+  "approxStudents": "115",
+  "answers": {
+   "activityArea": null,
+   "speakerArea": null,
+   "teacherEmails": null,
+   "teacherNames": null,
+   "workshopTime": null
+  }
  },
  {
   "airtableRecordId": "recS7AWqXmsCcTvCQ",
@@ -1141,7 +1575,14 @@
     "name": "Michael Maita (Principal)"
    }
   ],
-  "approxStudents": "75"
+  "approxStudents": "75",
+  "answers": {
+   "activityArea": null,
+   "speakerArea": null,
+   "teacherEmails": null,
+   "teacherNames": null,
+   "workshopTime": null
+  }
  },
  {
   "airtableRecordId": "recSMTp4GdS8wgnFO",
@@ -1157,7 +1598,14 @@
     "name": "Amberly Branson (Principal)"
    }
   ],
-  "approxStudents": "86"
+  "approxStudents": "86",
+  "answers": {
+   "activityArea": "Rooms O2 & O4",
+   "speakerArea": "Room F4",
+   "teacherEmails": "hroy@dcjesd.us,\nmnorton@dcjesd.us;    mmccarrick@dcjesd.us;\nbpacab@dcjesd.us",
+   "teacherNames": "Mulford-Roy 12\nNorton 24\nMcCarrick 23\nPacab 24",
+   "workshopTime": "8:15am - 9:45am \n10:00am - 11:30am"
+  }
  },
  {
   "airtableRecordId": "recSb1DElo9Fe8jBy",
@@ -1173,7 +1621,14 @@
     "name": "Kimberly Ervin (Secretary)"
    }
   ],
-  "approxStudents": "46"
+  "approxStudents": "46",
+  "answers": {
+   "activityArea": null,
+   "speakerArea": null,
+   "teacherEmails": null,
+   "teacherNames": null,
+   "workshopTime": null
+  }
  },
  {
   "airtableRecordId": "recSvQUdwhqu9xYAK",
@@ -1197,7 +1652,14 @@
     "name": "Robla District - Invoice Submittal (Email for Invoice Submittal)"
    }
   ],
-  "approxStudents": "48"
+  "approxStudents": "48",
+  "answers": {
+   "activityArea": null,
+   "speakerArea": null,
+   "teacherEmails": null,
+   "teacherNames": null,
+   "workshopTime": null
+  }
  },
  {
   "airtableRecordId": "recT0LFKo2vV6XJ58",
@@ -1217,7 +1679,14 @@
     "name": "Shayne Fackler (Admin Asst)"
    }
   ],
-  "approxStudents": "55"
+  "approxStudents": "55",
+  "answers": {
+   "activityArea": null,
+   "speakerArea": null,
+   "teacherEmails": null,
+   "teacherNames": null,
+   "workshopTime": null
+  }
  },
  {
   "airtableRecordId": "recTrKccLgcWug7sD",
@@ -1233,7 +1702,14 @@
     "name": "Genevieve Williams (Secretary)"
    }
   ],
-  "approxStudents": "105"
+  "approxStudents": "105",
+  "answers": {
+   "activityArea": null,
+   "speakerArea": null,
+   "teacherEmails": null,
+   "teacherNames": null,
+   "workshopTime": null
+  }
  },
  {
   "airtableRecordId": "recU64FcapxdM0xI1",
@@ -1249,7 +1725,14 @@
     "name": "Maia Ginnelly (CEO - Upcountry Advocate, LLC (Scheduled workshops))"
    }
   ],
-  "approxStudents": "51"
+  "approxStudents": "51",
+  "answers": {
+   "activityArea": null,
+   "speakerArea": null,
+   "teacherEmails": null,
+   "teacherNames": null,
+   "workshopTime": null
+  }
  },
  {
   "airtableRecordId": "recUTYUk1TOUyTIse",
@@ -1265,7 +1748,14 @@
     "name": "Rocio Hara (Office Manager)"
    }
   ],
-  "approxStudents": "68"
+  "approxStudents": "68",
+  "answers": {
+   "activityArea": null,
+   "speakerArea": null,
+   "teacherEmails": null,
+   "teacherNames": null,
+   "workshopTime": null
+  }
  },
  {
   "airtableRecordId": "recUtlRnL1JTuHRUj",
@@ -1281,7 +1771,14 @@
     "name": "Vickie Boudouris (Principal)"
    }
   ],
-  "approxStudents": "93"
+  "approxStudents": "93",
+  "answers": {
+   "activityArea": null,
+   "speakerArea": null,
+   "teacherEmails": null,
+   "teacherNames": null,
+   "workshopTime": null
+  }
  },
  {
   "airtableRecordId": "recV2aPIRihGPcnQh",
@@ -1301,7 +1798,14 @@
     "name": "Lisa Benoist (Principal's Secretary)"
    }
   ],
-  "approxStudents": "70"
+  "approxStudents": "70",
+  "answers": {
+   "activityArea": null,
+   "speakerArea": null,
+   "teacherEmails": null,
+   "teacherNames": null,
+   "workshopTime": null
+  }
  },
  {
   "airtableRecordId": "recVWdsYXa20bi5qi",
@@ -1317,7 +1821,14 @@
     "name": "Maia Ginnelly (CEO - Upcountry Advocate, LLC (Scheduled workshops))"
    }
   ],
-  "approxStudents": "138"
+  "approxStudents": "138",
+  "answers": {
+   "activityArea": null,
+   "speakerArea": null,
+   "teacherEmails": null,
+   "teacherNames": null,
+   "workshopTime": null
+  }
  },
  {
   "airtableRecordId": "recVuoaxoIykOlgoA",
@@ -1333,7 +1844,14 @@
     "name": "Gwendolyn Rogers (Admin)"
    }
   ],
-  "approxStudents": "68"
+  "approxStudents": "68",
+  "answers": {
+   "activityArea": null,
+   "speakerArea": null,
+   "teacherEmails": null,
+   "teacherNames": null,
+   "workshopTime": null
+  }
  },
  {
   "airtableRecordId": "recW0kjAfeUoqpDHu",
@@ -1345,7 +1863,14 @@
     "name": "Jodie Phan (Principal)"
    }
   ],
-  "approxStudents": "80"
+  "approxStudents": "80",
+  "answers": {
+   "activityArea": null,
+   "speakerArea": null,
+   "teacherEmails": null,
+   "teacherNames": null,
+   "workshopTime": null
+  }
  },
  {
   "airtableRecordId": "recW3yU7B1W1HC3qO",
@@ -1365,7 +1890,14 @@
     "name": "Alissa Yvarra (Secretary to Principal)"
    }
   ],
-  "approxStudents": "118"
+  "approxStudents": "118",
+  "answers": {
+   "activityArea": null,
+   "speakerArea": null,
+   "teacherEmails": null,
+   "teacherNames": null,
+   "workshopTime": null
+  }
  },
  {
   "airtableRecordId": "recWCGf9ZGe9ssoI8",
@@ -1385,7 +1917,14 @@
     "name": "Jennifer DuPont (Asst Principal)"
    }
   ],
-  "approxStudents": "70"
+  "approxStudents": "70",
+  "answers": {
+   "activityArea": null,
+   "speakerArea": null,
+   "teacherEmails": null,
+   "teacherNames": null,
+   "workshopTime": null
+  }
  },
  {
   "airtableRecordId": "recWEof9jCCDpghdJ",
@@ -1401,7 +1940,14 @@
     "name": "Genevieve Williams (Secretary)"
    }
   ],
-  "approxStudents": null
+  "approxStudents": null,
+  "answers": {
+   "activityArea": null,
+   "speakerArea": null,
+   "teacherEmails": null,
+   "teacherNames": null,
+   "workshopTime": "Campus Preview"
+  }
  },
  {
   "airtableRecordId": "recXB16YbHQhQaPDF",
@@ -1417,7 +1963,14 @@
     "name": "Kim Zeltvay (Principal)"
    }
   ],
-  "approxStudents": "72"
+  "approxStudents": "72",
+  "answers": {
+   "activityArea": null,
+   "speakerArea": null,
+   "teacherEmails": null,
+   "teacherNames": null,
+   "workshopTime": null
+  }
  },
  {
   "airtableRecordId": "recXD5z03YRUJXOaD",
@@ -1437,7 +1990,14 @@
     "name": "Lolly Cerqueira (Teacher)"
    }
   ],
-  "approxStudents": "59"
+  "approxStudents": "59",
+  "answers": {
+   "activityArea": null,
+   "speakerArea": null,
+   "teacherEmails": null,
+   "teacherNames": null,
+   "workshopTime": null
+  }
  },
  {
   "airtableRecordId": "recXjAqpL3FRRk0wo",
@@ -1453,7 +2013,14 @@
     "name": "Julia Blair - District Office Eureka SD - Invoice for Eureka Schools (District Payment)"
    }
   ],
-  "approxStudents": "105"
+  "approxStudents": "105",
+  "answers": {
+   "activityArea": null,
+   "speakerArea": null,
+   "teacherEmails": null,
+   "teacherNames": null,
+   "workshopTime": null
+  }
  },
  {
   "airtableRecordId": "recYqxMKoi2jOcdCD",
@@ -1473,7 +2040,14 @@
     "name": "Christina Cuevas (Principal's Secretary)"
    }
   ],
-  "approxStudents": "65"
+  "approxStudents": "65",
+  "answers": {
+   "activityArea": null,
+   "speakerArea": null,
+   "teacherEmails": null,
+   "teacherNames": null,
+   "workshopTime": null
+  }
  },
  {
   "airtableRecordId": "recZURRW99V22Q5Dt",
@@ -1489,7 +2063,14 @@
     "name": "Anna Cools (Secretary)"
    }
   ],
-  "approxStudents": "58"
+  "approxStudents": "58",
+  "answers": {
+   "activityArea": "Rooms 192 and PE Room",
+   "speakerArea": "Room 228",
+   "teacherEmails": "Cpetteng@egusd.net;\ndpedward@egusd.net",
+   "teacherNames": "Courtney Pettenger - 29\nDavid Edwards - 29",
+   "workshopTime": "9:45am - 11:15am\n11:30am - 12:50pm"
+  }
  },
  {
   "airtableRecordId": "recZmQpC2MudkNwU2",
@@ -1501,7 +2082,14 @@
     "name": "Jessica Conant, MS (Disability Resource Coordinator)"
    }
   ],
-  "approxStudents": null
+  "approxStudents": null,
+  "answers": {
+   "activityArea": "Venture Lab - modular tables for up to 50.  Lobby entrance to be used for canes and chairs",
+   "speakerArea": "Venture Lab - modular tables for up to 50.    Lobby entrance to be used for canes and chairs",
+   "teacherEmails": null,
+   "teacherNames": null,
+   "workshopTime": "8:30am - 12:30pm"
+  }
  },
  {
   "airtableRecordId": "recaErYwXOdaFxbip",
@@ -1517,7 +2105,14 @@
     "name": "Molly Griffin (Principal)"
    }
   ],
-  "approxStudents": "85"
+  "approxStudents": "85",
+  "answers": {
+   "activityArea": "Rooms F2 and F3",
+   "speakerArea": "Room F4",
+   "teacherEmails": "rlangtry@my.rescueusd.org,\njrossi@my.rescueusd.org,\nkmagallanes@my.rescueusd.org ",
+   "teacherNames": "Ryann Langtry \nJennifer Rossi\nKaren Magallanes",
+   "workshopTime": "9:15am - 10:45am\n11:00am - 12:25pm"
+  }
  },
  {
   "airtableRecordId": "recafh9VrRvPErQym",
@@ -1533,7 +2128,14 @@
     "name": "Genevieve Williams (Secretary)"
    }
   ],
-  "approxStudents": "105"
+  "approxStudents": "105",
+  "answers": {
+   "activityArea": null,
+   "speakerArea": null,
+   "teacherEmails": null,
+   "teacherNames": null,
+   "workshopTime": null
+  }
  },
  {
   "airtableRecordId": "recagMNPxUWRd3LMK",
@@ -1549,7 +2151,14 @@
     "name": "Maia Ginnelly (CEO - Upcountry Advocate, LLC (Scheduled workshops))"
    }
   ],
-  "approxStudents": "123"
+  "approxStudents": "123",
+  "answers": {
+   "activityArea": null,
+   "speakerArea": null,
+   "teacherEmails": null,
+   "teacherNames": null,
+   "workshopTime": null
+  }
  },
  {
   "airtableRecordId": "recakFn0iNa5CB18j",
@@ -1569,7 +2178,14 @@
     "name": "Jacquie Medeiros (Teacher)"
    }
   ],
-  "approxStudents": "90"
+  "approxStudents": "90",
+  "answers": {
+   "activityArea": null,
+   "speakerArea": null,
+   "teacherEmails": null,
+   "teacherNames": null,
+   "workshopTime": null
+  }
  },
  {
   "airtableRecordId": "recbGVna0ZTIfZkug",
@@ -1609,7 +2225,14 @@
     "name": "James Torinus (Builder)"
    }
   ],
-  "approxStudents": null
+  "approxStudents": null,
+  "answers": {
+   "activityArea": null,
+   "speakerArea": null,
+   "teacherEmails": null,
+   "teacherNames": null,
+   "workshopTime": null
+  }
  },
  {
   "airtableRecordId": "recbX1l0h16H3lko4",
@@ -1621,7 +2244,14 @@
     "name": "Brandi Crockett (Teacher)"
    }
   ],
-  "approxStudents": "58"
+  "approxStudents": "58",
+  "answers": {
+   "activityArea": null,
+   "speakerArea": null,
+   "teacherEmails": null,
+   "teacherNames": null,
+   "workshopTime": null
+  }
  },
  {
   "airtableRecordId": "recc5x0jTNmsXBdxn",
@@ -1637,7 +2267,14 @@
     "name": "Julia Blair - District Office Eureka SD - Invoice for Eureka Schools (District Payment)"
    }
   ],
-  "approxStudents": "105"
+  "approxStudents": "105",
+  "answers": {
+   "activityArea": null,
+   "speakerArea": null,
+   "teacherEmails": null,
+   "teacherNames": null,
+   "workshopTime": null
+  }
  },
  {
   "airtableRecordId": "reccA7mZpBaaRQe6K",
@@ -1653,7 +2290,14 @@
     "name": "Kristyn Andrews (Principal)"
    }
   ],
-  "approxStudents": "96"
+  "approxStudents": "96",
+  "answers": {
+   "activityArea": "Rooms D31 and D33",
+   "speakerArea": "Room D30",
+   "teacherEmails": "jbarnett@travisusd.org\nmrindels@travisusd.org\nashelton@travisusd.org\namourlot@travisusd.org (This is our SDC teacher whose students will be participating in the other classrooms during the workshop)",
+   "teacherNames": "Barnett - 34\nRindels - 33\nShelton - 31",
+   "workshopTime": "9:15am - 10:40am\n11:00am - 12:30pm"
+  }
  },
  {
   "airtableRecordId": "reccPpMzjGPOMMFxd",
@@ -1669,7 +2313,14 @@
     "name": "Tarynn Rojas (4th grade teacher - Lead)"
    }
   ],
-  "approxStudents": "96"
+  "approxStudents": "96",
+  "answers": {
+   "activityArea": null,
+   "speakerArea": null,
+   "teacherEmails": null,
+   "teacherNames": null,
+   "workshopTime": null
+  }
  },
  {
   "airtableRecordId": "reccRWmcbInhmfLza",
@@ -1689,7 +2340,14 @@
     "name": "Shannon Simpson (Events Coordinator, Special Education Paraeducator)"
    }
   ],
-  "approxStudents": "83"
+  "approxStudents": "83",
+  "answers": {
+   "activityArea": "Gym and Stage",
+   "speakerArea": "Room 5",
+   "teacherEmails": " loliver@vsd.k12.ca.us;  slewis@vsd.k12.ca.us;  kwalker@vsd.k12.ca.us",
+   "teacherNames": "Oliver - 35 \nLewis -  24 \nWalker - 24",
+   "workshopTime": "9:00am - 10:30am\n10:50am - 12:15pm"
+  }
  },
  {
   "airtableRecordId": "reccVk4JDiKmdaMtJ",
@@ -1705,7 +2363,14 @@
     "name": "Maia Ginnelly (CEO - Upcountry Advocate, LLC (Scheduled workshops))"
    }
   ],
-  "approxStudents": "71"
+  "approxStudents": "71",
+  "answers": {
+   "activityArea": null,
+   "speakerArea": null,
+   "teacherEmails": null,
+   "teacherNames": null,
+   "workshopTime": null
+  }
  },
  {
   "airtableRecordId": "recchOq9WZjvj7XOk",
@@ -1725,7 +2390,14 @@
     "name": "Amy Johns (Teacher)"
    }
   ],
-  "approxStudents": "75"
+  "approxStudents": "75",
+  "answers": {
+   "activityArea": null,
+   "speakerArea": null,
+   "teacherEmails": null,
+   "teacherNames": null,
+   "workshopTime": null
+  }
  },
  {
   "airtableRecordId": "recdKPAm4ZH1GuDWf",
@@ -1741,7 +2413,14 @@
     "name": "Daryl Lee (Assistant Principal)"
    }
   ],
-  "approxStudents": "142"
+  "approxStudents": "142",
+  "answers": {
+   "activityArea": null,
+   "speakerArea": null,
+   "teacherEmails": null,
+   "teacherNames": null,
+   "workshopTime": null
+  }
  },
  {
   "airtableRecordId": "recdzbCYgtla7CzVp",
@@ -1757,7 +2436,14 @@
     "name": "Daniel McCord (Principal)"
    }
   ],
-  "approxStudents": "60"
+  "approxStudents": "60",
+  "answers": {
+   "activityArea": null,
+   "speakerArea": null,
+   "teacherEmails": null,
+   "teacherNames": null,
+   "workshopTime": null
+  }
  },
  {
   "airtableRecordId": "recfD59EFGSfDcloj",
@@ -1773,7 +2459,14 @@
     "name": "Genevieve Williams (Secretary)"
    }
   ],
-  "approxStudents": "105"
+  "approxStudents": "105",
+  "answers": {
+   "activityArea": null,
+   "speakerArea": null,
+   "teacherEmails": null,
+   "teacherNames": null,
+   "workshopTime": null
+  }
  },
  {
   "airtableRecordId": "recg87iPuHepQKzW2",
@@ -1789,7 +2482,14 @@
     "name": "Amy Trapp (Admin)"
    }
   ],
-  "approxStudents": "62"
+  "approxStudents": "62",
+  "answers": {
+   "activityArea": null,
+   "speakerArea": null,
+   "teacherEmails": null,
+   "teacherNames": null,
+   "workshopTime": null
+  }
  },
  {
   "airtableRecordId": "recgHen8GD0Harjcj",
@@ -1809,7 +2509,14 @@
     "name": "Julia Blair - District Office Eureka SD - Invoice for Eureka Schools (District Payment)"
    }
   ],
-  "approxStudents": "70"
+  "approxStudents": "70",
+  "answers": {
+   "activityArea": null,
+   "speakerArea": null,
+   "teacherEmails": null,
+   "teacherNames": null,
+   "workshopTime": null
+  }
  },
  {
   "airtableRecordId": "rechKXQu1vH9rkhqh",
@@ -1825,7 +2532,14 @@
     "name": "Jessica Brooks (Principal)"
    }
   ],
-  "approxStudents": "70"
+  "approxStudents": "70",
+  "answers": {
+   "activityArea": null,
+   "speakerArea": null,
+   "teacherEmails": null,
+   "teacherNames": null,
+   "workshopTime": null
+  }
  },
  {
   "airtableRecordId": "rechmIjCoouQjrYNF",
@@ -1841,7 +2555,14 @@
     "name": "Nancy Aguirre Garcia  (Office Manager)"
    }
   ],
-  "approxStudents": "78"
+  "approxStudents": "78",
+  "answers": {
+   "activityArea": null,
+   "speakerArea": null,
+   "teacherEmails": null,
+   "teacherNames": null,
+   "workshopTime": null
+  }
  },
  {
   "airtableRecordId": "reciMmXe6GvFXjzVt",
@@ -1861,7 +2582,14 @@
     "name": "Carolyn Provencal (Admin)"
    }
   ],
-  "approxStudents": "56"
+  "approxStudents": "56",
+  "answers": {
+   "activityArea": null,
+   "speakerArea": null,
+   "teacherEmails": null,
+   "teacherNames": null,
+   "workshopTime": null
+  }
  },
  {
   "airtableRecordId": "recjFl3V8bJx1TCOY",
@@ -1877,7 +2605,14 @@
     "name": "Kate Nettnay (Principal)"
    }
   ],
-  "approxStudents": "60"
+  "approxStudents": "60",
+  "answers": {
+   "activityArea": "Gym",
+   "speakerArea": "Science/Art Room",
+   "teacherEmails": null,
+   "teacherNames": null,
+   "workshopTime": null
+  }
  },
  {
   "airtableRecordId": "recjfD5rSzujelkt1",
@@ -1909,7 +2644,14 @@
     "name": "Karyn Roth (Teacher)"
    }
   ],
-  "approxStudents": "69"
+  "approxStudents": "69",
+  "answers": {
+   "activityArea": "Rooms 22 & 23",
+   "speakerArea": "Room 15",
+   "teacherEmails": "kankley@rcsdk8.org, njordan@rcsdk8.org,\nkroth@rcsdk8.org",
+   "teacherNames": "Ankley: 23 \nJordan: 23 \nRoth: 23",
+   "workshopTime": "8:00am - 9:30am\n9:50am - 11:20am"
+  }
  },
  {
   "airtableRecordId": "reckTueZeptaAmmZw",
@@ -1929,7 +2671,14 @@
     "name": "Jennifer DuPont (Asst Principal)"
    }
   ],
-  "approxStudents": "70"
+  "approxStudents": "70",
+  "answers": {
+   "activityArea": null,
+   "speakerArea": null,
+   "teacherEmails": null,
+   "teacherNames": null,
+   "workshopTime": null
+  }
  },
  {
   "airtableRecordId": "reckkmN8pfTqiBAsx",
@@ -1949,7 +2698,14 @@
     "name": "Julia Blair - District Office Eureka SD - Invoice for Eureka Schools (District Payment)"
    }
   ],
-  "approxStudents": "70"
+  "approxStudents": "70",
+  "answers": {
+   "activityArea": null,
+   "speakerArea": null,
+   "teacherEmails": null,
+   "teacherNames": null,
+   "workshopTime": null
+  }
  },
  {
   "airtableRecordId": "recl54nKHFpynfKSk",
@@ -1965,7 +2721,14 @@
     "name": "Tiffany Ehrlich (Admin Asst)"
    }
   ],
-  "approxStudents": "60"
+  "approxStudents": "60",
+  "answers": {
+   "activityArea": null,
+   "speakerArea": null,
+   "teacherEmails": null,
+   "teacherNames": null,
+   "workshopTime": null
+  }
  },
  {
   "airtableRecordId": "recl8ijwTsT9tflhE",
@@ -1981,14 +2744,28 @@
     "name": "Nicole Andrews (Secretary)"
    }
   ],
-  "approxStudents": "91"
+  "approxStudents": "91",
+  "answers": {
+   "activityArea": null,
+   "speakerArea": null,
+   "teacherEmails": null,
+   "teacherNames": null,
+   "workshopTime": null
+  }
  },
  {
   "airtableRecordId": "reclJ26rh7uuTVcty",
   "name": "Hackathon #4 School",
   "workshopDate": "2026-09-05",
   "contacts": [],
-  "approxStudents": null
+  "approxStudents": null,
+  "answers": {
+   "activityArea": null,
+   "speakerArea": null,
+   "teacherEmails": null,
+   "teacherNames": null,
+   "workshopTime": null
+  }
  },
  {
   "airtableRecordId": "recleHzxL7YNJocjX",
@@ -2004,7 +2781,14 @@
     "name": "Christine Mabery (Principal)"
    }
   ],
-  "approxStudents": null
+  "approxStudents": null,
+  "answers": {
+   "activityArea": null,
+   "speakerArea": null,
+   "teacherEmails": null,
+   "teacherNames": null,
+   "workshopTime": null
+  }
  },
  {
   "airtableRecordId": "reclkgqEbU341GfqJ",
@@ -2028,7 +2812,14 @@
     "name": "Robla District - Invoice Submittal (Email for Invoice Submittal)"
    }
   ],
-  "approxStudents": "60"
+  "approxStudents": "60",
+  "answers": {
+   "activityArea": null,
+   "speakerArea": null,
+   "teacherEmails": null,
+   "teacherNames": null,
+   "workshopTime": null
+  }
  },
  {
   "airtableRecordId": "reclz0jWRXWvBoM4n",
@@ -2068,7 +2859,14 @@
     "name": "James Torinus (Builder)"
    }
   ],
-  "approxStudents": null
+  "approxStudents": null,
+  "answers": {
+   "activityArea": null,
+   "speakerArea": null,
+   "teacherEmails": null,
+   "teacherNames": null,
+   "workshopTime": null
+  }
  },
  {
   "airtableRecordId": "recmp7zkkvQXBfcvS",
@@ -2088,7 +2886,14 @@
     "name": "Robla District - Invoice Submittal (Email for Invoice Submittal)"
    }
   ],
-  "approxStudents": "50"
+  "approxStudents": "50",
+  "answers": {
+   "activityArea": null,
+   "speakerArea": null,
+   "teacherEmails": null,
+   "teacherNames": null,
+   "workshopTime": null
+  }
  },
  {
   "airtableRecordId": "recmzsTkieZxB2eAi",
@@ -2104,7 +2909,14 @@
     "name": "Christina Sherrod - Primary Contact (Teacher)"
    }
   ],
-  "approxStudents": "90"
+  "approxStudents": "90",
+  "answers": {
+   "activityArea": null,
+   "speakerArea": null,
+   "teacherEmails": null,
+   "teacherNames": null,
+   "workshopTime": null
+  }
  },
  {
   "airtableRecordId": "recn5S0yadOA4gWuO",
@@ -2128,7 +2940,14 @@
     "name": "Kaili Bray (Principal)"
    }
   ],
-  "approxStudents": "60"
+  "approxStudents": "60",
+  "answers": {
+   "activityArea": null,
+   "speakerArea": null,
+   "teacherEmails": null,
+   "teacherNames": null,
+   "workshopTime": null
+  }
  },
  {
   "airtableRecordId": "recnURjILnMvkCeao",
@@ -2144,7 +2963,14 @@
     "name": "Summer Ellis (Admin)"
    }
   ],
-  "approxStudents": "60"
+  "approxStudents": "60",
+  "answers": {
+   "activityArea": null,
+   "speakerArea": null,
+   "teacherEmails": null,
+   "teacherNames": null,
+   "workshopTime": null
+  }
  },
  {
   "airtableRecordId": "recna4xM9UnjJeCQ5",
@@ -2160,7 +2986,14 @@
     "name": "Sherri Guerrero (Secretary)"
    }
   ],
-  "approxStudents": "97"
+  "approxStudents": "97",
+  "answers": {
+   "activityArea": null,
+   "speakerArea": null,
+   "teacherEmails": null,
+   "teacherNames": null,
+   "workshopTime": null
+  }
  },
  {
   "airtableRecordId": "recoW8O5GpPU9f9Hy",
@@ -2176,7 +3009,14 @@
     "name": "Shannon McCarthy (Admin)"
    }
   ],
-  "approxStudents": "68"
+  "approxStudents": "68",
+  "answers": {
+   "activityArea": "Room 20 and Classroom 23",
+   "speakerArea": "Room 12",
+   "teacherEmails": "kmontgomery01@rcsdk8.org; kpowell@rcsdk8.org",
+   "teacherNames": "Kim Montgomery 35\nKelly Powell 35",
+   "workshopTime": "7:45am - 9:15am\n9:30am - 11:00am"
+  }
  },
  {
   "airtableRecordId": "recpiOf6RMy3oHlhU",
@@ -2196,7 +3036,14 @@
     "name": "Julie Reynolds- 2ndary contact (Secretary/Registration)"
    }
   ],
-  "approxStudents": "42"
+  "approxStudents": "42",
+  "answers": {
+   "activityArea": "Rooms 2 & 3, MPR is also available",
+   "speakerArea": "Rooms 2 & 3, MPR is also available",
+   "teacherEmails": "jwhitmore@gtusd.org;\ndhornsby@gtusd.org;\nscase@edcoe.org",
+   "teacherNames": "Jen Whitmore = 19\nDebbie Hornsby = 20\nSara Case = 3 (pending participation – these students are enrolled in an alternative program which is hosted on our campus)",
+   "workshopTime": "10:30am - 12:00pm\n1:00pm - 2:30pm"
+  }
  },
  {
   "airtableRecordId": "recpyoXevUsGGwJJy",
@@ -2212,7 +3059,14 @@
     "name": "Alexandra Taverna (Principal)"
    }
   ],
-  "approxStudents": "117"
+  "approxStudents": "117",
+  "answers": {
+   "activityArea": null,
+   "speakerArea": null,
+   "teacherEmails": null,
+   "teacherNames": null,
+   "workshopTime": null
+  }
  },
  {
   "airtableRecordId": "recqD1q0n5nhww8BB",
@@ -2232,7 +3086,14 @@
     "name": "Julia Blair - District Office Eureka SD - Invoice for Eureka Schools (District Payment)"
    }
   ],
-  "approxStudents": "70"
+  "approxStudents": "70",
+  "answers": {
+   "activityArea": null,
+   "speakerArea": null,
+   "teacherEmails": null,
+   "teacherNames": null,
+   "workshopTime": null
+  }
  },
  {
   "airtableRecordId": "recrF6YF4itIVtpar",
@@ -2244,7 +3105,14 @@
     "name": "Kevin Cadden (Principal)"
    }
   ],
-  "approxStudents": "60"
+  "approxStudents": "60",
+  "answers": {
+   "activityArea": null,
+   "speakerArea": null,
+   "teacherEmails": null,
+   "teacherNames": null,
+   "workshopTime": null
+  }
  },
  {
   "airtableRecordId": "recrGW3Vcn1AhgQm8",
@@ -2264,7 +3132,14 @@
     "name": "Evin Duncan - scheduling contact (PTC President)"
    }
   ],
-  "approxStudents": "60"
+  "approxStudents": "60",
+  "answers": {
+   "activityArea": null,
+   "speakerArea": null,
+   "teacherEmails": null,
+   "teacherNames": null,
+   "workshopTime": null
+  }
  },
  {
   "airtableRecordId": "recrbbi3KQmrdFAFP",
@@ -2280,7 +3155,14 @@
     "name": "Melissa Oliver (Principal)"
    }
   ],
-  "approxStudents": "75"
+  "approxStudents": "75",
+  "answers": {
+   "activityArea": null,
+   "speakerArea": null,
+   "teacherEmails": null,
+   "teacherNames": null,
+   "workshopTime": null
+  }
  },
  {
   "airtableRecordId": "recsrSZohabzGHtFg",
@@ -2296,7 +3178,14 @@
     "name": "Jeanine Holton (Principal)"
    }
   ],
-  "approxStudents": "75"
+  "approxStudents": "75",
+  "answers": {
+   "activityArea": null,
+   "speakerArea": null,
+   "teacherEmails": null,
+   "teacherNames": null,
+   "workshopTime": null
+  }
  },
  {
   "airtableRecordId": "rectZdvYAQbZo9yjq",
@@ -2312,7 +3201,14 @@
     "name": "Megan Spears (Principal)"
    }
   ],
-  "approxStudents": "60"
+  "approxStudents": "60",
+  "answers": {
+   "activityArea": "Rooms 35 & 36",
+   "speakerArea": "Room 8",
+   "teacherEmails": "ASimmons@rcsdk8.org;\ncsmith03@rcsdk8.org;\nkertola@rcsdk8.org;\nrmartin01@rcsdk8.org",
+   "teacherNames": "Simmons 13, \nSmith 24, \nEbner/Stubblefield 23",
+   "workshopTime": "7:45am - 9:15am \n9:30am - 11:00am"
+  }
  },
  {
   "airtableRecordId": "rectzrhkzTkpezdcM",
@@ -2328,7 +3224,14 @@
     "name": "Montey Snyder (Secretary)"
    }
   ],
-  "approxStudents": "52"
+  "approxStudents": "52",
+  "answers": {
+   "activityArea": null,
+   "speakerArea": null,
+   "teacherEmails": null,
+   "teacherNames": null,
+   "workshopTime": null
+  }
  },
  {
   "airtableRecordId": "recuREYQFrf6OleL3",
@@ -2344,7 +3247,14 @@
     "name": "Joel Francisco (Principal)"
    }
   ],
-  "approxStudents": "42"
+  "approxStudents": "42",
+  "answers": {
+   "activityArea": null,
+   "speakerArea": null,
+   "teacherEmails": null,
+   "teacherNames": null,
+   "workshopTime": null
+  }
  },
  {
   "airtableRecordId": "recuWaRQ0MdVQfxpn",
@@ -2360,7 +3270,14 @@
     "name": "Paul Stewart (Principal)"
    }
   ],
-  "approxStudents": "78"
+  "approxStudents": "78",
+  "answers": {
+   "activityArea": null,
+   "speakerArea": null,
+   "teacherEmails": null,
+   "teacherNames": null,
+   "workshopTime": null
+  }
  },
  {
   "airtableRecordId": "recvDahzjEJb5eO8v",
@@ -2376,7 +3293,14 @@
     "name": "Bobby Biggs (Teacher)"
    }
   ],
-  "approxStudents": null
+  "approxStudents": null,
+  "answers": {
+   "activityArea": null,
+   "speakerArea": null,
+   "teacherEmails": null,
+   "teacherNames": null,
+   "workshopTime": null
+  }
  },
  {
   "airtableRecordId": "recvIW0Xw1I1sRTf1",
@@ -2392,7 +3316,14 @@
     "name": "Joan Pulling (Secretary)"
    }
   ],
-  "approxStudents": "70"
+  "approxStudents": "70",
+  "answers": {
+   "activityArea": null,
+   "speakerArea": null,
+   "teacherEmails": null,
+   "teacherNames": null,
+   "workshopTime": null
+  }
  },
  {
   "airtableRecordId": "recvniOmA7lzmul06",
@@ -2408,7 +3339,14 @@
     "name": "Kaleb Cagle  (Principal)"
    }
   ],
-  "approxStudents": "138"
+  "approxStudents": "138",
+  "answers": {
+   "activityArea": null,
+   "speakerArea": null,
+   "teacherEmails": null,
+   "teacherNames": null,
+   "workshopTime": null
+  }
  },
  {
   "airtableRecordId": "recwk3EnBIoFd0mlW",
@@ -2424,7 +3362,14 @@
     "name": "Jessica Connors (Principal)"
    }
   ],
-  "approxStudents": "119"
+  "approxStudents": "119",
+  "answers": {
+   "activityArea": null,
+   "speakerArea": null,
+   "teacherEmails": null,
+   "teacherNames": null,
+   "workshopTime": null
+  }
  },
  {
   "airtableRecordId": "recy07ULOM5PXUNBA",
@@ -2440,7 +3385,14 @@
     "name": "Danisha Keeler (Principal)"
    }
   ],
-  "approxStudents": "84"
+  "approxStudents": "84",
+  "answers": {
+   "activityArea": null,
+   "speakerArea": null,
+   "teacherEmails": null,
+   "teacherNames": null,
+   "workshopTime": null
+  }
  },
  {
   "airtableRecordId": "recyLdgorXiZ1aOlC",
@@ -2460,7 +3412,14 @@
     "name": "Vyvianne Kiriakis (Admin)"
    }
   ],
-  "approxStudents": "40"
+  "approxStudents": "40",
+  "answers": {
+   "activityArea": null,
+   "speakerArea": null,
+   "teacherEmails": null,
+   "teacherNames": null,
+   "workshopTime": null
+  }
  },
  {
   "airtableRecordId": "recyYTDs3pummEwl4",
@@ -2484,7 +3443,14 @@
     "name": "Sara Choate (Teacher)"
    }
   ],
-  "approxStudents": "52"
+  "approxStudents": "52",
+  "answers": {
+   "activityArea": "Multi-Purpose Room",
+   "speakerArea": "Room 7 or 15",
+   "teacherEmails": "Schoate@loomisk8.org;\nJbartlett@loomisk8.org;\nFgrant@loomisk8.org",
+   "teacherNames": "Sara Choate:  26\nJenny Fitzpatrick/Fiona Grant:  26",
+   "workshopTime": "8:30am - 9:40am\n9:45am - 11:00am"
+  }
  },
  {
   "airtableRecordId": "recyggZ3r2QfkF9ui",
@@ -2500,7 +3466,14 @@
     "name": "Bevin Glover (Principal)"
    }
   ],
-  "approxStudents": "50"
+  "approxStudents": "50",
+  "answers": {
+   "activityArea": null,
+   "speakerArea": null,
+   "teacherEmails": null,
+   "teacherNames": null,
+   "workshopTime": null
+  }
  },
  {
   "airtableRecordId": "recyv1BW2TfEedlVz",
@@ -2520,7 +3493,14 @@
     "name": "Mike Kelley (Teacher)"
    }
   ],
-  "approxStudents": "110"
+  "approxStudents": "110",
+  "answers": {
+   "activityArea": null,
+   "speakerArea": null,
+   "teacherEmails": null,
+   "teacherNames": null,
+   "workshopTime": null
+  }
  },
  {
   "airtableRecordId": "recyvlCq4uaLFcB3p",
@@ -2556,7 +3536,14 @@
     "name": "James Torinus (Builder)"
    }
   ],
-  "approxStudents": null
+  "approxStudents": null,
+  "answers": {
+   "activityArea": null,
+   "speakerArea": null,
+   "teacherEmails": null,
+   "teacherNames": null,
+   "workshopTime": null
+  }
  },
  {
   "airtableRecordId": "reczccHWqjUGKkfj8",
@@ -2572,7 +3559,14 @@
     "name": "Melanie Thompson (Admin)"
    }
   ],
-  "approxStudents": "48"
+  "approxStudents": "48",
+  "answers": {
+   "activityArea": "MPR",
+   "speakerArea": "MPR",
+   "teacherEmails": "MGiambo@cacmp.org, MGillis@cacmp.org, cmfranklin@cacmp.org, aangove@cacmp.org",
+   "teacherNames": "Amy-12, \nMary-11, \nMakenna-11, \nChristina-13",
+   "workshopTime": "9:00am - 10:30am\n10:45am - 12:15pm"
+  }
  },
  {
   "airtableRecordId": "reczwplHAF2d5AEmM",
@@ -2588,6 +3582,13 @@
     "name": "William Middleton (Principal)"
    }
   ],
-  "approxStudents": "130"
+  "approxStudents": "130",
+  "answers": {
+   "activityArea": null,
+   "speakerArea": null,
+   "teacherEmails": null,
+   "teacherNames": null,
+   "workshopTime": null
+  }
  }
 ]

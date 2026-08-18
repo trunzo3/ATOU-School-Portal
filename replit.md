@@ -47,10 +47,17 @@ pnpm monorepo:
 - `lib/api-spec/openapi.yaml` — API contract; codegen produces
   `lib/api-zod` (server validation) and `lib/api-client-react` (hooks).
 
-## Seed data
-`pnpm --filter @workspace/scripts run seed` — 5 sample schools (Sierra Vista
-complete with multi-person history, Oakmont/Del Rio partial, two untouched),
-Pam + backup admin (dev passwords in the seed script), 3 info pages.
+## Data
+Real school/contact data is imported from Airtable (Replit Airtable connector,
+base "ATOU" `app9RGanaWFp0BpLh`, **Workshops** table `tblB8D1tEyxY30LO8` only,
+contact names resolved via School Contacts `tbldPXXbTCSn9aaSH`). One school
+row per future-dated workshop; `schools.airtable_record_id` stores the
+workshop record id for write-back. Re-run:
+`pnpm --filter @workspace/scripts run import-airtable` (DESTRUCTIVE — wipes
+schools, contacts, answers, teacher snapshots; the payload JSON
+`scripts/src/airtable-import.json` is refreshed from Airtable by the agent).
+The old sample-data seed (`run seed`) still exists but is superseded.
+Write-back to Airtable remains switched OFF.
 
 ## User preferences
 (none recorded yet)

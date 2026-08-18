@@ -1,0 +1,2450 @@
+[
+ {
+  "airtableRecordId": "rec0XjmjPa3GEjumu",
+  "name": "California Montessori Project - Carmichael",
+  "workshopDate": "2026-11-12",
+  "contacts": [
+   {
+    "email": "jemory@cacmp.org",
+    "name": "Jennifer Emory (Admin)"
+   },
+   {
+    "email": "lspiller@cacmp.org",
+    "name": "Laurien Spiller (Principal)"
+   }
+  ]
+ },
+ {
+  "airtableRecordId": "rec18nMWPaKor3FTv",
+  "name": "Foskett Ranch Elementary School",
+  "workshopDate": "2027-02-03",
+  "contacts": [
+   {
+    "email": "gpasquini@wpusd.org",
+    "name": "Gina Pasquini (Principal)"
+   },
+   {
+    "email": "msalli-brown@wpusd.org",
+    "name": "Michelle Salli-Brown (Secretary)"
+   }
+  ]
+ },
+ {
+  "airtableRecordId": "rec1FaIbObKvfE2hm",
+  "name": "Wheatland Union High School",
+  "workshopDate": "2026-09-10",
+  "contacts": [
+   {
+    "email": "llink@wheatlandhigh.org",
+    "name": "Lauren Link (Exec Director Student Services)"
+   },
+   {
+    "email": "nkailihiwa@wheatlandhigh.org",
+    "name": "Nancy Kailihiwa (Admin)"
+   },
+   {
+    "email": "achun@wheatlandhigh.org",
+    "name": "Alyssa Chun (Special Education Department Secretary)"
+   }
+  ]
+ },
+ {
+  "airtableRecordId": "rec2WacpMCdSKCGRV",
+  "name": "Russell Ranch Elementary",
+  "workshopDate": "2026-12-15",
+  "contacts": [
+   {
+    "email": "LTrenary@fcusd.org",
+    "name": "Lisa Trenary (Teacher)"
+   },
+   {
+    "email": "mschooler@fcusd.org",
+    "name": "Meghan Schooler (Principal)"
+   }
+  ]
+ },
+ {
+  "airtableRecordId": "rec3OtyFziWsr1Yjg",
+  "name": "Junction Elementary School",
+  "workshopDate": "2026-10-02",
+  "contacts": [
+   {
+    "email": "jmochrie@rcsdk8.org",
+    "name": "Julia Mochrie (Principal)"
+   },
+   {
+    "email": "jwygal@rcsdk8.org",
+    "name": "Jackie Wygal (Admin)"
+   }
+  ]
+ },
+ {
+  "airtableRecordId": "rec45xBBdzfpDeAfw",
+  "name": "Linford L. Anderson Elementary",
+  "workshopDate": "2027-03-26",
+  "contacts": [
+   {
+    "email": "vanessa.rodriguez@dixonusd.org",
+    "name": "Vanessa Rodriguez (office coordinator)"
+   },
+   {
+    "email": "lindsay.snyder@dixonusd.org",
+    "name": "Lindsay Snyder (Grade Level Leader/Teacher)"
+   },
+   {
+    "email": "Mele.Blackstone@dixonusd.org",
+    "name": "Mele Blackstone (Principal)"
+   }
+  ]
+ },
+ {
+  "airtableRecordId": "rec4EOQ6hc1yqCBKD",
+  "name": "Mariemont Elementary",
+  "workshopDate": "2026-11-04",
+  "contacts": [
+   {
+    "email": "Leah.Lewandowski@sanjuan.Edu",
+    "name": "Leah Lewandowski (Principal)"
+   },
+   {
+    "email": "Alena.Cary@sanjuan.edu",
+    "name": "Alena Cary (Teacher)"
+   }
+  ]
+ },
+ {
+  "airtableRecordId": "rec4GHiKP04uIlgmk",
+  "name": "Patwin Elementary School",
+  "workshopDate": "2027-02-18",
+  "contacts": [
+   {
+    "email": "hspangler@djusd.net",
+    "name": "Helen Spangler (Principal)"
+   },
+   {
+    "email": "cnikzad@djusd.net",
+    "name": "Cyndee Nikzad - Primary contact for logistics (Teacher)"
+   },
+   {
+    "email": "nbrook@djusd.net",
+    "name": "Natalie Brook (Site Admin)"
+   },
+   {
+    "email": "smooretealdi@djusd.net",
+    "name": "Stephanie Moore-Tealdi (Teacher)"
+   }
+  ]
+ },
+ {
+  "airtableRecordId": "rec4NyoiWTH4VDXMk",
+  "name": "Pershing Elementary School",
+  "workshopDate": "2027-01-22",
+  "contacts": [
+   {
+    "email": "Tamara.Hart@sanjuan.edu",
+    "name": "Tamara Hart (Secretary)"
+   },
+   {
+    "email": "carrie.manriquez@sanjuan.edu",
+    "name": "Carrie Manriquez (Principal)"
+   }
+  ]
+ },
+ {
+  "airtableRecordId": "rec4US1rjI4GIk729",
+  "name": "Vencil Brown Grammar School",
+  "workshopDate": "2026-10-08",
+  "contacts": [
+   {
+    "email": "bsmith@rcsdk8.org",
+    "name": "Brandei Smith (Principal)"
+   }
+  ]
+ },
+ {
+  "airtableRecordId": "rec4c47HbpKZQjZXb",
+  "name": "Sutterville Elementary School",
+  "workshopDate": "2027-04-27",
+  "contacts": [
+   {
+    "email": "Nancy-Stagg@scusd.edu",
+    "name": "Nancy Stagg (School Office Manager)"
+   },
+   {
+    "email": "frances-thompson@scusd.edu",
+    "name": "Frances Thompson (Principal)"
+   },
+   {
+    "email": "Susan-Riedell@scusd.edu",
+    "name": "Susan Riedell (Clerk)"
+   }
+  ]
+ },
+ {
+  "airtableRecordId": "rec4eXLnc1O57CZLp",
+  "name": "Carl Sundahl Elementary",
+  "workshopDate": "2027-04-29",
+  "contacts": [
+   {
+    "email": "ABWhite@fcusd.org",
+    "name": "Allyson White (Admin)"
+   },
+   {
+    "email": "Jholton@fcusd.org",
+    "name": "Jeanine Holton (Principal)"
+   }
+  ]
+ },
+ {
+  "airtableRecordId": "rec5II2jhqXWDMm0F",
+  "name": "Lakeview Elementary School",
+  "workshopDate": "2027-02-19",
+  "contacts": [
+   {
+    "email": "lstuart@my.rescueusd.org",
+    "name": "Laurisa Stuart (Principal)"
+   },
+   {
+    "email": "jwashburn@rescueusd.org",
+    "name": "Jennifer Washburn (Admin)"
+   }
+  ]
+ },
+ {
+  "airtableRecordId": "rec66pf9ZQl51dfme",
+  "name": "Rescue Elementary School",
+  "workshopDate": "2027-02-17",
+  "contacts": [
+   {
+    "email": "tmcginnis@my.rescueusd.org",
+    "name": "Todd McGinnis (Principal)"
+   },
+   {
+    "email": "ccarnes@my.rescueusd.org",
+    "name": "Cathi Carnes (Secretary)"
+   }
+  ]
+ },
+ {
+  "airtableRecordId": "rec6a9jLrmbS7iZQs",
+  "name": "Zamora Elementary",
+  "workshopDate": "2027-02-02",
+  "contacts": [
+   {
+    "email": "Amanda.walsh@wjusd.org",
+    "name": "Amanda Walsh (Principal)"
+   },
+   {
+    "email": "maria.guillen@wjusd.org",
+    "name": "Maria Guillen (Office Coordinator)"
+   }
+  ]
+ },
+ {
+  "airtableRecordId": "rec6cOAqAVrVXt5fU",
+  "name": "Elverta Elementary School",
+  "workshopDate": "2027-03-25",
+  "contacts": [
+   {
+    "email": "mwells@ejesd.net",
+    "name": "Mike Wells (Principal/Superintendent)"
+   },
+   {
+    "email": "aburgess@ejesd.net",
+    "name": "Astrid Burgess (Teacher)"
+   },
+   {
+    "email": "smelendez@ejesd.net",
+    "name": "Samantha Melendez (Teacher)"
+   },
+   {
+    "email": "yhurtado@ejesd.net",
+    "name": "Yazmin Hurtado - Primary Contact (District Secretary - Primary Contact)"
+   }
+  ]
+ },
+ {
+  "airtableRecordId": "rec7z9VJDv767ZNw4",
+  "name": "Park School",
+  "workshopDate": "2027-02-25",
+  "contacts": [
+   {
+    "email": "dfinnane@mvschools.org",
+    "name": "David Finnane (Interim Principal)"
+   },
+   {
+    "email": "amalvaux@mvschools.org",
+    "name": "Anne Malvaux Ouellette (Administrative Assistant)"
+   }
+  ]
+ },
+ {
+  "airtableRecordId": "rec8rcLOLQ7CUyPxJ",
+  "name": "Earl LeGette Elementary School",
+  "workshopDate": "2026-09-01",
+  "contacts": [
+   {
+    "email": "hillary.blair@sanjuan.edu",
+    "name": "Hillary Blair (Teacher)"
+   },
+   {
+    "email": "diana.marshall@sanjuan.edu",
+    "name": "Diana Marshall (Principal)"
+   }
+  ]
+ },
+ {
+  "airtableRecordId": "rec8rnHEUXSjPjtxl",
+  "name": "St. John's Notre Dame School",
+  "workshopDate": "2027-04-19",
+  "contacts": [
+   {
+    "email": "Kendall.horton@sjnds.org",
+    "name": "Kendall Horton (Teacher)"
+   },
+   {
+    "email": "keith.martin@sjnds.org",
+    "name": "Keith Martin (Principal)"
+   }
+  ]
+ },
+ {
+  "airtableRecordId": "rec9HbxLyRdBk0bEs",
+  "name": "Glenwood Elementary School",
+  "workshopDate": "2027-03-03",
+  "contacts": [
+   {
+    "email": "ltran@robla.k12.ca.us",
+    "name": "Lina Tran (Assistant Principal)"
+   },
+   {
+    "email": "avrodriguez@robla.k12.ca.us",
+    "name": "Andrea Rodriguez (Principal)"
+   },
+   {
+    "email": "clyon@robla.k12.ca.us",
+    "name": "Cindi Lyon (Director of State and Federal Programs)"
+   },
+   {
+    "email": "invoices@robla.k12.ca.us",
+    "name": "Robla District - Invoice Submittal (Email for Invoice Submittal)"
+   }
+  ]
+ },
+ {
+  "airtableRecordId": "rec9KH8bWfinWOtdp",
+  "name": "California Montessori Project - Shingle Springs",
+  "workshopDate": "2026-10-05",
+  "contacts": [
+   {
+    "email": "ksriram@ca.cmp.org",
+    "name": "Kanchana Sriram (Dean of Students)"
+   },
+   {
+    "email": "csherrod@cacmp.org",
+    "name": "Christina Sherrod - Primary Contact (Teacher)"
+   }
+  ]
+ },
+ {
+  "airtableRecordId": "rec9ogodElnCLca1D",
+  "name": "St. Rose School",
+  "workshopDate": "2027-01-07",
+  "contacts": [
+   {
+    "email": "ccanalas@strose.org",
+    "name": "Carrie Canalas (Admin)"
+   },
+   {
+    "email": "kfoucek@strose.org",
+    "name": "Kate Foucek (Teacher)"
+   }
+  ]
+ },
+ {
+  "airtableRecordId": "rec9wZujkDJItRuKp",
+  "name": "Hackathon #1 School",
+  "workshopDate": "2026-10-10",
+  "contacts": [
+   {
+    "email": "shailaja.gandam@gmail.com",
+    "name": "Shailaja Gandam (Builder)"
+   },
+   {
+    "email": "jeanne.olivas@smud.org",
+    "name": "Jeanne Olivas (Builder)"
+   },
+   {
+    "email": "nathant@TORwealth.com",
+    "name": "Nathan Torinus (Builder)"
+   },
+   {
+    "email": "anthony@iqmeeteq.com",
+    "name": "Anthony Trunzo (Team Leader)"
+   },
+   {
+    "email": "hellotwilson@gmail.com",
+    "name": "Trân (tron) Wilson"
+   },
+   {
+    "email": "meghan@touchofunderstanding.org",
+    "name": "Meghan Adamski (ED ATOU)"
+   },
+   {
+    "email": "pam@touchofunderstanding.org",
+    "name": "Pam Evers (Build)"
+   },
+   {
+    "email": "James.torinus@gmail.com",
+    "name": "James Torinus (Builder)"
+   }
+  ]
+ },
+ {
+  "airtableRecordId": "rec9xfihx0KpNzB1M",
+  "name": "George Cirby Elementary Schools",
+  "workshopDate": "2027-03-30",
+  "contacts": [
+   {
+    "email": "bscott01@rcsdk8.org",
+    "name": "Briana Scott (Admin)"
+   },
+   {
+    "email": "ffriend@rcsdk8.org",
+    "name": "Farah Friend (Principal)"
+   }
+  ]
+ },
+ {
+  "airtableRecordId": "recA8JUwQC1TxdzEK",
+  "name": "Westside Preparatory Charter - Regency Park Campus",
+  "workshopDate": "2026-10-14",
+  "contacts": [
+   {
+    "email": "melissa.rossavick@trusd.net",
+    "name": "Melissa Rossavick (Principal)"
+   },
+   {
+    "email": "Rocio.Haro@trusd.net",
+    "name": "Rocio Hara (Office Manager)"
+   }
+  ]
+ },
+ {
+  "airtableRecordId": "recASlH3b1uaZ3K4N",
+  "name": "I Learn Academy",
+  "workshopDate": "2027-04-20",
+  "contacts": [
+   {
+    "email": "KBerryman@placercoe.org",
+    "name": "Kimberly Berryman (Secretary)"
+   },
+   {
+    "email": "leslief24@yahoo.com",
+    "name": "Leslie Calabrese (PTA Treasurer)"
+   }
+  ]
+ },
+ {
+  "airtableRecordId": "recAqmnuDjRFZncmq",
+  "name": "Carriage Drive Elementary",
+  "workshopDate": "2026-08-20",
+  "contacts": [
+   {
+    "email": "Heather.Ingram@sanjuan.edu",
+    "name": "Heather Ingram (Secretary)"
+   },
+   {
+    "email": "rnicholson@sanjuan.edu",
+    "name": "Renee Nicholson (Principal)"
+   },
+   {
+    "email": "callie.cyr@sanjuan.edu",
+    "name": "Callie Cyr (Teacher - Scheduled Workshop)"
+   }
+  ]
+ },
+ {
+  "airtableRecordId": "recBd4DbgRIsro9BJ",
+  "name": "Fairbanks Elementary",
+  "workshopDate": "2027-02-04",
+  "contacts": [
+   {
+    "email": "Sara.Tolle@trusd.net",
+    "name": "Sara Tolle (Principal)"
+   },
+   {
+    "email": "Kiana.Davis@trusd.net",
+    "name": "Kiana Davis (Office Manager)"
+   }
+  ]
+ },
+ {
+  "airtableRecordId": "recBjh2QtWpmF34aV",
+  "name": "Wheatland Union High School",
+  "workshopDate": "2026-09-09",
+  "contacts": [
+   {
+    "email": "llink@wheatlandhigh.org",
+    "name": "Lauren Link (Exec Director Student Services)"
+   },
+   {
+    "email": "nkailihiwa@wheatlandhigh.org",
+    "name": "Nancy Kailihiwa (Admin)"
+   },
+   {
+    "email": "achun@wheatlandhigh.org",
+    "name": "Alyssa Chun (Special Education Department Secretary)"
+   }
+  ]
+ },
+ {
+  "airtableRecordId": "recC5S9nVbdyu2Bqh",
+  "name": "Pinewood Elementary",
+  "workshopDate": "2027-03-31",
+  "contacts": [
+   {
+    "email": "klittle@ppesd.org",
+    "name": "Kim Little  (Principal / Superintendent )"
+   }
+  ]
+ },
+ {
+  "airtableRecordId": "recCDez0BaNI46sCF",
+  "name": "Auburn Elementary",
+  "workshopDate": "2027-04-09",
+  "contacts": [
+   {
+    "email": "kyoung@auburn.k12.ca.us",
+    "name": "Kelly Young (Director of Student Support - AUSD District)"
+   },
+   {
+    "email": "mwilles@auburn.k12.ca.us",
+    "name": "Melissa Willes (Principal)"
+   }
+  ]
+ },
+ {
+  "airtableRecordId": "recCDwDKAlex0rlz1",
+  "name": "Northridge Elementary",
+  "workshopDate": "2026-10-29",
+  "contacts": [
+   {
+    "email": "jana.conli@sanjuan.edu",
+    "name": "Jana Conli (Principal)"
+   },
+   {
+    "email": "michelle.calvert@sanjuan.edu",
+    "name": "Michelle Calvert (Secretary)"
+   }
+  ]
+ },
+ {
+  "airtableRecordId": "recDAYoOSCZ8GT0P6",
+  "name": "Blue Oak Elementary School",
+  "workshopDate": "2026-10-15",
+  "contacts": [
+   {
+    "email": "jhughes@buckeyeusd.org",
+    "name": "Julie Hughes (Principal)"
+   },
+   {
+    "email": "hquintrall@buckeyeusd.org",
+    "name": "Heather Quintrall (3rd Grade Teacher)"
+   },
+   {
+    "email": "hmarinko@buckeyeusd.org",
+    "name": "Hilda Marinko (Admin Asst)"
+   }
+  ]
+ },
+ {
+  "airtableRecordId": "recEHNJDPM7aqflcx",
+  "name": "Del Dayo Elementary",
+  "workshopDate": "2026-12-01",
+  "contacts": [
+   {
+    "email": "jessica.york@sanjuan.edu",
+    "name": "Jessica York (Secretary)"
+   },
+   {
+    "email": "rbakke@sanjuan.edu",
+    "name": "Regina Bakke (Teacher - Primary Contact)"
+   },
+   {
+    "email": "ewahl@sanjuan.edu",
+    "name": "Beth Wahl (Principal)"
+   }
+  ]
+ },
+ {
+  "airtableRecordId": "recESFOcXN7oq6jo5",
+  "name": "Foxboro Elementary",
+  "workshopDate": "2026-08-26",
+  "contacts": [
+   {
+    "email": "bkunkel@travisusd.org",
+    "name": "Becky Kunkel (Teacher)"
+   },
+   {
+    "email": "kandrews@travisusd.org",
+    "name": "Kristyn Andrews (Principal)"
+   }
+  ]
+ },
+ {
+  "airtableRecordId": "recEaVcfumEqY29WC",
+  "name": "Skyridge Elementary School",
+  "workshopDate": "2027-03-19",
+  "contacts": [
+   {
+    "email": "kyoung@auburn.k12.ca.us",
+    "name": "Kelly Young (Director of Student Support - AUSD District)"
+   },
+   {
+    "email": "caday@auburn.k12.ca.us",
+    "name": "Christy Aday (Principal)"
+   }
+  ]
+ },
+ {
+  "airtableRecordId": "recGBB1seNH6rA3zG",
+  "name": "Orchard Ranch Elementary",
+  "workshopDate": "2026-12-17",
+  "contacts": [
+   {
+    "email": "crohla@rcsdk8.org",
+    "name": "Carrie Rohla (Teacher)"
+   },
+   {
+    "email": "rprestedge@rcsdk8.org",
+    "name": "Richard Prestedge (Principal)"
+   },
+   {
+    "email": "ktakahashi@rcsdk8.org",
+    "name": "Karen Takahashi (Admin)"
+   }
+  ]
+ },
+ {
+  "airtableRecordId": "recHOBMTdVPyC7EFA",
+  "name": "Willett Elementary",
+  "workshopDate": "2026-09-15",
+  "contacts": [
+   {
+    "email": "jcampbell@djusd.net",
+    "name": "John Campbell (Principal)"
+   },
+   {
+    "email": "kprien@djusd.net",
+    "name": "Kate Prien (Admin Asst)"
+   }
+  ]
+ },
+ {
+  "airtableRecordId": "recIfjQcyy0m9RmgJ",
+  "name": "St. Albans Country Day School",
+  "workshopDate": "2026-10-22",
+  "contacts": [
+   {
+    "email": "mindys@stalbans.org",
+    "name": "Mindy Sakoi (Registrar/Admin)"
+   }
+  ]
+ },
+ {
+  "airtableRecordId": "recJQwJlPeoAkM7Ss",
+  "name": "Edna Batey Elementary",
+  "workshopDate": "2027-05-03",
+  "contacts": [
+   {
+    "email": "whjones@egusd.net",
+    "name": "William Jones (Principal)"
+   },
+   {
+    "email": "gewillia@egusd.net",
+    "name": "Genevieve Williams (Secretary)"
+   }
+  ]
+ },
+ {
+  "airtableRecordId": "recKKwK1pJ3ZTEHa4",
+  "name": "Folsom Hills Elementary School",
+  "workshopDate": "2027-03-10",
+  "contacts": [
+   {
+    "email": "aysonhailey@gmail.com",
+    "name": "Hailey Ayson (PTC)"
+   },
+   {
+    "email": "rchaffee@fcusd.org",
+    "name": "Robin Chaffee (Admin)"
+   },
+   {
+    "email": "nstedeford@fcusd.org",
+    "name": "Noel Stedeford (Principal)"
+   }
+  ]
+ },
+ {
+  "airtableRecordId": "recKl9ZVZ7bU9BkqO",
+  "name": "Pioneer Elementary School",
+  "workshopDate": "2026-12-10",
+  "contacts": [
+   {
+    "email": "ajimenezpepper@djusd.net",
+    "name": "Ashley Jimenez-Pepper (Teacher)"
+   },
+   {
+    "email": "ricperez@djusd.net",
+    "name": "Ricardo Perez (Principal)"
+   }
+  ]
+ },
+ {
+  "airtableRecordId": "recKrxkHybZ5MA3mS",
+  "name": "Old Mill School",
+  "workshopDate": "2027-02-25",
+  "contacts": [
+   {
+    "email": "jmatlon@mvschools.org",
+    "name": "Jason Matlon (Principal)"
+   }
+  ]
+ },
+ {
+  "airtableRecordId": "recKzN3uAqEXpb6me",
+  "name": "Argonaut High School",
+  "workshopDate": "2026-11-10",
+  "contacts": [
+   {
+    "email": "russell.dewalt@acusd.org",
+    "name": "Russell DeWalt (Principal)"
+   },
+   {
+    "email": "alexander.hess@acusd.org",
+    "name": "Alex Hess (Assistant Principal)"
+   }
+  ]
+ },
+ {
+  "airtableRecordId": "recLJ5xwgy2UtWPOB",
+  "name": "Wheatland Union High School",
+  "workshopDate": "2026-09-08",
+  "contacts": [
+   {
+    "email": "llink@wheatlandhigh.org",
+    "name": "Lauren Link (Exec Director Student Services)"
+   },
+   {
+    "email": "nkailihiwa@wheatlandhigh.org",
+    "name": "Nancy Kailihiwa (Admin)"
+   },
+   {
+    "email": "achun@wheatlandhigh.org",
+    "name": "Alyssa Chun (Special Education Department Secretary)"
+   }
+  ]
+ },
+ {
+  "airtableRecordId": "recLKt0NpLiX9iuHf",
+  "name": "Heritage Oak Elementary School",
+  "workshopDate": "2027-04-06",
+  "contacts": [
+   {
+    "email": "jnielsen@dcjesd.us",
+    "name": "Josh Nielsen (Principal)"
+   },
+   {
+    "email": "svanvuren@dcjesd.us",
+    "name": "Shannon Van Vuren (Teacher)"
+   },
+   {
+    "email": "eshurtz@dcjesd.us",
+    "name": "Ember Shurtz (Secretary)"
+   }
+  ]
+ },
+ {
+  "airtableRecordId": "recLU4nsWEG97kKDa",
+  "name": "Antelope Meadows Elementary School (Sac county) - Use this file",
+  "workshopDate": "2026-10-21",
+  "contacts": [
+   {
+    "email": "khoey@dcjesd.us",
+    "name": "Katelyn Whitmore-Hoey (Secretary)"
+   },
+   {
+    "email": "sclark@dcjesd.us",
+    "name": "Stacey Clark (Principal)"
+   }
+  ]
+ },
+ {
+  "airtableRecordId": "recMUCZ40quTkXcah",
+  "name": "Quail Glen Elementary School",
+  "workshopDate": "2027-03-09",
+  "contacts": [
+   {
+    "email": "jwarren@dcjesd.us",
+    "name": "Jennifer Warren (Teacher)"
+   },
+   {
+    "email": "cdevine@dcjesd.us",
+    "name": "Colleen Devine (Principal)"
+   },
+   {
+    "email": "cbennett@dcjesd.us",
+    "name": "Isabel Bennett (Secretary)"
+   }
+  ]
+ },
+ {
+  "airtableRecordId": "recMZ7wQ6qo1FHUfa",
+  "name": "Mission Avenue Open School",
+  "workshopDate": "2026-09-18",
+  "contacts": [
+   {
+    "email": "margaret.terzich@sanjuan.edu",
+    "name": "Margaret Terzich (Principal)"
+   },
+   {
+    "email": "stephanie.solomon@sanjuan.edu",
+    "name": "Stephanie Solomon (Teacher)"
+   }
+  ]
+ },
+ {
+  "airtableRecordId": "recN9wg8i1a09rxry",
+  "name": "Wheatland Union High School",
+  "workshopDate": "2026-09-11",
+  "contacts": [
+   {
+    "email": "llink@wheatlandhigh.org",
+    "name": "Lauren Link (Exec Director Student Services)"
+   },
+   {
+    "email": "nkailihiwa@wheatlandhigh.org",
+    "name": "Nancy Kailihiwa (Admin)"
+   },
+   {
+    "email": "achun@wheatlandhigh.org",
+    "name": "Alyssa Chun (Special Education Department Secretary)"
+   }
+  ]
+ },
+ {
+  "airtableRecordId": "recNCp29DLZUE504w",
+  "name": "Sierra Oaks Elementary School",
+  "workshopDate": "2027-01-08",
+  "contacts": [
+   {
+    "email": "hady.jimenez@sanjuan.edu",
+    "name": "Hady Jiminez-Chrostowski (Principal)"
+   },
+   {
+    "email": "kaitlyn.hawkins@sanjuan.edu",
+    "name": "Kaitlyn Hawkins (Teacher)"
+   }
+  ]
+ },
+ {
+  "airtableRecordId": "recNOoy4IfG7VnaHU",
+  "name": "Westlake Charter School",
+  "workshopDate": "2026-09-23",
+  "contacts": [
+   {
+    "email": "ntzuc@westlakecharter.com",
+    "name": "Natalie Tzuc (Office Specialist\n)"
+   },
+   {
+    "email": "kdavis@westlakecharter.com",
+    "name": "Katie Davis (Director Student Support Services)"
+   },
+   {
+    "email": "apatel@westlakecharter.com",
+    "name": "Ashlee Patel - Primary 7th grade contact (Special Ed, Asst Principal)"
+   },
+   {
+    "email": "jblock@westlakecharter.com",
+    "name": "Jessica Block (Site Principal - 7th grade workshop contact)"
+   },
+   {
+    "email": "mgruenholz@westlakecharter.com",
+    "name": "Melissa Gruenholz - 7th grade workshop contact (Director of Operations)"
+   }
+  ]
+ },
+ {
+  "airtableRecordId": "recO2j6qrjfrBtPig",
+  "name": "Oak Meadow Elementary School",
+  "workshopDate": "2027-04-08",
+  "contacts": [
+   {
+    "email": "mnelson@buckeyeusd.org",
+    "name": "Mimi Nelson (Teacher)"
+   },
+   {
+    "email": "apirkl@buckeyeusd.org",
+    "name": "Amy Pirkl (Principal)"
+   }
+  ]
+ },
+ {
+  "airtableRecordId": "recO9ULNQN07vPvqQ",
+  "name": "Folsom Cordova Community Charter School",
+  "workshopDate": "2027-02-23",
+  "contacts": [
+   {
+    "email": "mkirk@fcusd.org",
+    "name": "Mercedes Kirk (Principal)"
+   },
+   {
+    "email": "mwhitney@fcusd.org",
+    "name": "Melanie Whitney (Secretary)"
+   },
+   {
+    "email": "lcataldo@fcusd.org",
+    "name": "Laura Cataldo (Teacher)"
+   }
+  ]
+ },
+ {
+  "airtableRecordId": "recOhRu2bSAXfiPQh",
+  "name": "Union Hill Elementary",
+  "workshopDate": "2026-09-17",
+  "contacts": [
+   {
+    "email": "nkiser@uhsd.k12.ca.us",
+    "name": "Nicole Kiser (Admin)"
+   },
+   {
+    "email": "mgrijalva@uhsd.k12.ca.us",
+    "name": "Megan Grijalva (Principal)"
+   }
+  ]
+ },
+ {
+  "airtableRecordId": "recOqXkLzl730etNb",
+  "name": "Cordova Villa Elementary",
+  "workshopDate": "2027-02-05",
+  "contacts": [
+   {
+    "email": "lynedelkovic@fcusd.org",
+    "name": "Lyndsey Nedeljkovic (Teacher)"
+   },
+   {
+    "email": "acarter@fcusd.org",
+    "name": "Amber Carter (Principal)"
+   },
+   {
+    "email": "mcroy@fcusd.org",
+    "name": "Medea Croy - Primary Contact (Administrative Assistant)"
+   }
+  ]
+ },
+ {
+  "airtableRecordId": "recOqkMu1hLrMZ53E",
+  "name": "The Cove School",
+  "workshopDate": "2027-04-02",
+  "contacts": [
+   {
+    "email": "dlong@lcmschools.org",
+    "name": "Dakota Long (Teacher)"
+   },
+   {
+    "email": "lhess@lcmschools.org",
+    "name": "Lindsay Hess (Teacher)"
+   },
+   {
+    "email": "mwalker@lcmschools.org",
+    "name": "Michelle Walker (Principal)"
+   }
+  ]
+ },
+ {
+  "airtableRecordId": "recP0C8G66UgB32Fr",
+  "name": "Gold Ridge Elementary",
+  "workshopDate": "2027-01-14",
+  "contacts": [
+   {
+    "email": "JLira@fcusd.org",
+    "name": "Julie Corwin-Lira (Lead 4th Grade Teacher)"
+   },
+   {
+    "email": "sborjas@fcusd.org",
+    "name": "Sarah Borjas (Admin Asst)"
+   },
+   {
+    "email": "wsol@fcusd.org",
+    "name": "Wendy Sol (Principal)"
+   }
+  ]
+ },
+ {
+  "airtableRecordId": "recPtntZhYsTjiwZf",
+  "name": "Hackathon #3 School",
+  "workshopDate": "2026-11-07",
+  "contacts": [
+   {
+    "email": "shailaja.gandam@gmail.com",
+    "name": "Shailaja Gandam (Builder)"
+   },
+   {
+    "email": "jeanne.olivas@smud.org",
+    "name": "Jeanne Olivas (Builder)"
+   },
+   {
+    "email": "nathant@TORwealth.com",
+    "name": "Nathan Torinus (Builder)"
+   },
+   {
+    "email": "anthony@iqmeeteq.com",
+    "name": "Anthony Trunzo (Team Leader)"
+   },
+   {
+    "email": "hellotwilson@gmail.com",
+    "name": "Trân (tron) Wilson"
+   },
+   {
+    "email": "meghan@touchofunderstanding.org",
+    "name": "Meghan Adamski (ED ATOU)"
+   },
+   {
+    "email": "pam@touchofunderstanding.org",
+    "name": "Pam Evers (Build)"
+   },
+   {
+    "email": "James.torinus@gmail.com",
+    "name": "James Torinus (Builder)"
+   }
+  ]
+ },
+ {
+  "airtableRecordId": "recQ0TWx9GrC3ep3q",
+  "name": "Sutter Creek Elementary",
+  "workshopDate": "2026-11-05",
+  "contacts": [
+   {
+    "email": "tpeters@acusd.org",
+    "name": "Tia Peters (Principal)"
+   },
+   {
+    "email": "maia@upcountryadvocate.com",
+    "name": "Maia Ginnelly (CEO - Upcountry Advocate, LLC (Scheduled workshops))"
+   }
+  ]
+ },
+ {
+  "airtableRecordId": "recR6uC73QfmaGmTt",
+  "name": "Greenhills School",
+  "workshopDate": "2027-05-18",
+  "contacts": [
+   {
+    "email": "kkuntz@eurekausd.org",
+    "name": "Karen Kuntz (Teacher)"
+   },
+   {
+    "email": "hjohnson@eurekausd.org",
+    "name": "Helena Johnson (Principal)"
+   }
+  ]
+ },
+ {
+  "airtableRecordId": "recRSk1O1vvaqun5e",
+  "name": "Oakhills Elementary School",
+  "workshopDate": "2027-05-27",
+  "contacts": [
+   {
+    "email": "sobrien@eurekausd.org",
+    "name": "Sarah O'Brien (Principal)"
+   },
+   {
+    "email": "mnagel@eurekausd.org",
+    "name": "Mette Nagel (Lead 2nd Grade Teacher)"
+   }
+  ]
+ },
+ {
+  "airtableRecordId": "recS7AWqXmsCcTvCQ",
+  "name": "Gateway International School",
+  "workshopDate": "2027-05-12",
+  "contacts": [
+   {
+    "email": "Rinda.Vale@gcccharters.org",
+    "name": "Rinda Vale (Teacher)"
+   },
+   {
+    "email": "Michael.Maita@gcccharters.org",
+    "name": "Michael Maita (Principal)"
+   }
+  ]
+ },
+ {
+  "airtableRecordId": "recSMTp4GdS8wgnFO",
+  "name": "Creekview Ranch School",
+  "workshopDate": "2026-09-24",
+  "contacts": [
+   {
+    "email": "hroy@dcjesd.us",
+    "name": "Heather Mulford-Roy (Teacher)"
+   },
+   {
+    "email": "abranson@dcjesd.us",
+    "name": "Amberly Branson (Principal)"
+   }
+  ]
+ },
+ {
+  "airtableRecordId": "recSb1DElo9Fe8jBy",
+  "name": "Sierra Elementary School (IB School)",
+  "workshopDate": "2027-02-09",
+  "contacts": [
+   {
+    "email": "awestberg@rocklinusd.org",
+    "name": "Amy Westberg (Principal)"
+   },
+   {
+    "email": "kervin@rocklinusd.org",
+    "name": "Kimberly Ervin (Secretary)"
+   }
+  ]
+ },
+ {
+  "airtableRecordId": "recSvQUdwhqu9xYAK",
+  "name": "Taylor Street Elementary School",
+  "workshopDate": "2027-03-02",
+  "contacts": [
+   {
+    "email": "mibenjamin@robla.k12.ca.us",
+    "name": "Michelle Benjamin (Principal)"
+   },
+   {
+    "email": "kjetton@robla.k12.ca.us",
+    "name": "Kayla Jetton (Secretary)"
+   },
+   {
+    "email": "clyon@robla.k12.ca.us",
+    "name": "Cindi Lyon (Director of State and Federal Programs)"
+   },
+   {
+    "email": "invoices@robla.k12.ca.us",
+    "name": "Robla District - Invoice Submittal (Email for Invoice Submittal)"
+   }
+  ]
+ },
+ {
+  "airtableRecordId": "recT0LFKo2vV6XJ58",
+  "name": "California Montessori Project - American River",
+  "workshopDate": "2027-02-16",
+  "contacts": [
+   {
+    "email": "mabrown@cacmp.org",
+    "name": "Marleena Brown (Office Manager)"
+   },
+   {
+    "email": "kandres@cacmp.org",
+    "name": "Katherine Andres (Principal)"
+   },
+   {
+    "email": "sfackler@cacmp.org",
+    "name": "Shayne Fackler (Admin Asst)"
+   }
+  ]
+ },
+ {
+  "airtableRecordId": "recTrKccLgcWug7sD",
+  "name": "Edna Batey Elementary",
+  "workshopDate": "2027-04-14",
+  "contacts": [
+   {
+    "email": "whjones@egusd.net",
+    "name": "William Jones (Principal)"
+   },
+   {
+    "email": "gewillia@egusd.net",
+    "name": "Genevieve Williams (Secretary)"
+   }
+  ]
+ },
+ {
+  "airtableRecordId": "recU64FcapxdM0xI1",
+  "name": "Pioneer Elementary - Amador",
+  "workshopDate": "2026-10-20",
+  "contacts": [
+   {
+    "email": "denae.merten@acusd.org",
+    "name": "Denae Merten (Principal)"
+   },
+   {
+    "email": "maia@upcountryadvocate.com",
+    "name": "Maia Ginnelly (CEO - Upcountry Advocate, LLC (Scheduled workshops))"
+   }
+  ]
+ },
+ {
+  "airtableRecordId": "recUTYUk1TOUyTIse",
+  "name": "Westside Preparatory Charter - Regency Park Campus",
+  "workshopDate": "2026-10-13",
+  "contacts": [
+   {
+    "email": "melissa.rossavick@trusd.net",
+    "name": "Melissa Rossavick (Principal)"
+   },
+   {
+    "email": "Rocio.Haro@trusd.net",
+    "name": "Rocio Hara (Office Manager)"
+   }
+  ]
+ },
+ {
+  "airtableRecordId": "recUtlRnL1JTuHRUj",
+  "name": "Natoma Station Elementary",
+  "workshopDate": "2027-05-25",
+  "contacts": [
+   {
+    "email": "sthomas@fcusd.org",
+    "name": "Susan Thomas (Admin)"
+   },
+   {
+    "email": "VBoudour@fcusd.org",
+    "name": "Vickie Boudouris (Principal)"
+   }
+  ]
+ },
+ {
+  "airtableRecordId": "recV2aPIRihGPcnQh",
+  "name": "Cobblestone Elementary School",
+  "workshopDate": "2026-12-11",
+  "contacts": [
+   {
+    "email": "kgoddard@rocklinusd.org",
+    "name": "Kathy Goddard (Principal)"
+   },
+   {
+    "email": "Dprekeges@rocklinusd.org",
+    "name": "Debbie Prekeges (4th Grade Teacher)"
+   },
+   {
+    "email": "lbenoist@rocklinusd.org",
+    "name": "Lisa Benoist (Principal's Secretary)"
+   }
+  ]
+ },
+ {
+  "airtableRecordId": "recVWdsYXa20bi5qi",
+  "name": "Ione Elementary School",
+  "workshopDate": "2027-01-06",
+  "contacts": [
+   {
+    "email": "mhuss@acusd.org",
+    "name": "Mike Huss (Principal)"
+   },
+   {
+    "email": "maia@upcountryadvocate.com",
+    "name": "Maia Ginnelly (CEO - Upcountry Advocate, LLC (Scheduled workshops))"
+   }
+  ]
+ },
+ {
+  "airtableRecordId": "recVuoaxoIykOlgoA",
+  "name": "Silva Valley Elementary School",
+  "workshopDate": "2027-03-11",
+  "contacts": [
+   {
+    "email": "bbeadle@buckeyeusd.org",
+    "name": "Brandon Beadle (Principal)"
+   },
+   {
+    "email": "grogers@buckeyeusd.org",
+    "name": "Gwendolyn Rogers (Admin)"
+   }
+  ]
+ },
+ {
+  "airtableRecordId": "recW0kjAfeUoqpDHu",
+  "name": "Crescent Elementary School",
+  "workshopDate": "2027-05-21",
+  "contacts": [
+   {
+    "email": "jodiep@fsusd.org",
+    "name": "Jodie Phan (Principal)"
+   }
+  ]
+ },
+ {
+  "airtableRecordId": "recW3yU7B1W1HC3qO",
+  "name": "K. I. Jones",
+  "workshopDate": "2026-11-03",
+  "contacts": [
+   {
+    "email": "victoriaro@fsusd.org",
+    "name": "Victoria Rodgers (Teacher)"
+   },
+   {
+    "email": "KristaN@fsusd.org",
+    "name": "Krista Nichols (Principal)"
+   },
+   {
+    "email": "alissay@fsusd.org",
+    "name": "Alissa Yvarra (Secretary to Principal)"
+   }
+  ]
+ },
+ {
+  "airtableRecordId": "recWCGf9ZGe9ssoI8",
+  "name": "Coyote Ridge Elementary School",
+  "workshopDate": "2026-11-18",
+  "contacts": [
+   {
+    "email": "dmartinez@dcesd.us",
+    "name": "Desina Martinez (Secretary)"
+   },
+   {
+    "email": "jherrmann@dcjesd.us",
+    "name": "Julie Hermann (Principal)"
+   },
+   {
+    "email": "jdupont@dcjesd.us",
+    "name": "Jennifer DuPont (Asst Principal)"
+   }
+  ]
+ },
+ {
+  "airtableRecordId": "recWEof9jCCDpghdJ",
+  "name": "Edna Batey Elementary",
+  "workshopDate": "2027-04-12",
+  "contacts": [
+   {
+    "email": "whjones@egusd.net",
+    "name": "William Jones (Principal)"
+   },
+   {
+    "email": "gewillia@egusd.net",
+    "name": "Genevieve Williams (Secretary)"
+   }
+  ]
+ },
+ {
+  "airtableRecordId": "recXB16YbHQhQaPDF",
+  "name": "Gold River Discovery Center",
+  "workshopDate": "2027-05-20",
+  "contacts": [
+   {
+    "email": "andrea.vidlund@sanjuan.edu",
+    "name": "Andrea Vidlund (Teacher)"
+   },
+   {
+    "email": "kzeltvay@sanjuan.edu",
+    "name": "Kim Zeltvay (Principal)"
+   }
+  ]
+ },
+ {
+  "airtableRecordId": "recXD5z03YRUJXOaD",
+  "name": "Plymouth Elementary",
+  "workshopDate": "2026-12-08",
+  "contacts": [
+   {
+    "email": "joseph.horacek@acusd.org",
+    "name": "Joseph Horacek (Principal)"
+   },
+   {
+    "email": "maia@upcountryadvocate.com",
+    "name": "Maia Ginnelly (CEO - Upcountry Advocate, LLC (Scheduled workshops))"
+   },
+   {
+    "email": "lolly.cerqueira@acusd.org",
+    "name": "Lolly Cerqueira (Teacher)"
+   }
+  ]
+ },
+ {
+  "airtableRecordId": "recXjAqpL3FRRk0wo",
+  "name": "Ridgeview Elementary School",
+  "workshopDate": "2027-02-10",
+  "contacts": [
+   {
+    "email": "mrzatzke@eurekausd.org",
+    "name": "Michael Zatzke (Principal)"
+   },
+   {
+    "email": "jblair@eurekausd.org",
+    "name": "Julia Blair - District Office Eureka SD - Invoice for Eureka Schools (District Payment)"
+   }
+  ]
+ },
+ {
+  "airtableRecordId": "recYqxMKoi2jOcdCD",
+  "name": "Parker Whitney Elementary School",
+  "workshopDate": "2027-01-20",
+  "contacts": [
+   {
+    "email": "clocke@rocklinusd.org",
+    "name": "Cortnie Locke (Teacher)"
+   },
+   {
+    "email": "oconn@rocklinusd.org",
+    "name": "Olivia Conn (Principal)"
+   },
+   {
+    "email": "ccuevas@rocklinusd.org",
+    "name": "Christina Cuevas (Principal's Secretary)"
+   }
+  ]
+ },
+ {
+  "airtableRecordId": "recZURRW99V22Q5Dt",
+  "name": "C.W. Dillard Elementary School",
+  "workshopDate": "2026-08-24",
+  "contacts": [
+   {
+    "email": "TKeating@egusd.net",
+    "name": "Trina Keating (Principal)"
+   },
+   {
+    "email": "acools@egusd.net",
+    "name": "Anna Cools (Secretary)"
+   }
+  ]
+ },
+ {
+  "airtableRecordId": "recZmQpC2MudkNwU2",
+  "name": "Golden Sierra Job Training Agency",
+  "workshopDate": "2026-09-25",
+  "contacts": [
+   {
+    "email": "Conant@goldensierra.com",
+    "name": "Jessica Conant, MS (Disability Resource Coordinator)"
+   }
+  ]
+ },
+ {
+  "airtableRecordId": "recaErYwXOdaFxbip",
+  "name": "Jackson Elementary School",
+  "workshopDate": "2026-09-29",
+  "contacts": [
+   {
+    "email": "cladd@my.rescueusd.org",
+    "name": "Coco Ladd (Secretary)"
+   },
+   {
+    "email": "mgriffin@my.rescueusd.org",
+    "name": "Molly Griffin (Principal)"
+   }
+  ]
+ },
+ {
+  "airtableRecordId": "recafh9VrRvPErQym",
+  "name": "Edna Batey Elementary",
+  "workshopDate": "2027-04-12",
+  "contacts": [
+   {
+    "email": "whjones@egusd.net",
+    "name": "William Jones (Principal)"
+   },
+   {
+    "email": "gewillia@egusd.net",
+    "name": "Genevieve Williams (Secretary)"
+   }
+  ]
+ },
+ {
+  "airtableRecordId": "recagMNPxUWRd3LMK",
+  "name": "Jackson Jr. High",
+  "workshopDate": "2026-12-16",
+  "contacts": [
+   {
+    "email": "sklement@acusd.org",
+    "name": "Sinead Klement (Principal)"
+   },
+   {
+    "email": "maia@upcountryadvocate.com",
+    "name": "Maia Ginnelly (CEO - Upcountry Advocate, LLC (Scheduled workshops))"
+   }
+  ]
+ },
+ {
+  "airtableRecordId": "recakFn0iNa5CB18j",
+  "name": "Fred T. Korematsu Elementary",
+  "workshopDate": "2027-05-14",
+  "contacts": [
+   {
+    "email": "lreaka@djusd.net",
+    "name": "Laura Reaka (Admin)"
+   },
+   {
+    "email": "landrews@djusd.net",
+    "name": "Laura Andrews (Principal)"
+   },
+   {
+    "email": "jmedeiros@djusd.net",
+    "name": "Jacquie Medeiros (Teacher)"
+   }
+  ]
+ },
+ {
+  "airtableRecordId": "recbGVna0ZTIfZkug",
+  "name": "Hackathon #5 School",
+  "workshopDate": "2026-10-31",
+  "contacts": [
+   {
+    "email": "shailaja.gandam@gmail.com",
+    "name": "Shailaja Gandam (Builder)"
+   },
+   {
+    "email": "jeanne.olivas@smud.org",
+    "name": "Jeanne Olivas (Builder)"
+   },
+   {
+    "email": "nathant@TORwealth.com",
+    "name": "Nathan Torinus (Builder)"
+   },
+   {
+    "email": "anthony@iqmeeteq.com",
+    "name": "Anthony Trunzo (Team Leader)"
+   },
+   {
+    "email": "hellotwilson@gmail.com",
+    "name": "Trân (tron) Wilson"
+   },
+   {
+    "email": "meghan@touchofunderstanding.org",
+    "name": "Meghan Adamski (ED ATOU)"
+   },
+   {
+    "email": "pam@touchofunderstanding.org",
+    "name": "Pam Evers (Build)"
+   },
+   {
+    "email": "James.torinus@gmail.com",
+    "name": "James Torinus (Builder)"
+   }
+  ]
+ },
+ {
+  "airtableRecordId": "recbX1l0h16H3lko4",
+  "name": "Orangevale Open K-8 School",
+  "workshopDate": "2026-12-04",
+  "contacts": [
+   {
+    "email": "brandi.crockett@sanjuan.edu",
+    "name": "Brandi Crockett (Teacher)"
+   }
+  ]
+ },
+ {
+  "airtableRecordId": "recc5x0jTNmsXBdxn",
+  "name": "Ridgeview Elementary School",
+  "workshopDate": "2027-02-11",
+  "contacts": [
+   {
+    "email": "mrzatzke@eurekausd.org",
+    "name": "Michael Zatzke (Principal)"
+   },
+   {
+    "email": "jblair@eurekausd.org",
+    "name": "Julia Blair - District Office Eureka SD - Invoice for Eureka Schools (District Payment)"
+   }
+  ]
+ },
+ {
+  "airtableRecordId": "reccA7mZpBaaRQe6K",
+  "name": "Foxboro Elementary",
+  "workshopDate": "2026-08-27",
+  "contacts": [
+   {
+    "email": "bkunkel@travisusd.org",
+    "name": "Becky Kunkel (Teacher)"
+   },
+   {
+    "email": "kandrews@travisusd.org",
+    "name": "Kristyn Andrews (Principal)"
+   }
+  ]
+ },
+ {
+  "airtableRecordId": "reccPpMzjGPOMMFxd",
+  "name": "Natomas Charter School - Star Academy",
+  "workshopDate": "2027-06-01",
+  "contacts": [
+   {
+    "email": "chines@natomascharter.org",
+    "name": "Caroline Hines (Principal)"
+   },
+   {
+    "email": "trojas@natomascharter.org",
+    "name": "Tarynn Rojas (4th grade teacher - Lead)"
+   }
+  ]
+ },
+ {
+  "airtableRecordId": "reccRWmcbInhmfLza",
+  "name": "Albert Michelson Elementary School",
+  "workshopDate": "2026-09-04",
+  "contacts": [
+   {
+    "email": "jogeen@vsd.k12.ca.us",
+    "name": "Josh O'Geen (Principal)"
+   },
+   {
+    "email": "drocco@vsd.k12.ca.us",
+    "name": "Debra Rocco (Admin)"
+   },
+   {
+    "email": "shannon.simpson@vsd.k12.ca.us",
+    "name": "Shannon Simpson (Events Coordinator, Special Education Paraeducator)"
+   }
+  ]
+ },
+ {
+  "airtableRecordId": "reccVk4JDiKmdaMtJ",
+  "name": "Pine Grove Elementary",
+  "workshopDate": "2026-12-02",
+  "contacts": [
+   {
+    "email": "jhawley@acusd.org",
+    "name": "John Hawley (Principal)"
+   },
+   {
+    "email": "maia@upcountryadvocate.com",
+    "name": "Maia Ginnelly (CEO - Upcountry Advocate, LLC (Scheduled workshops))"
+   }
+  ]
+ },
+ {
+  "airtableRecordId": "recchOq9WZjvj7XOk",
+  "name": "Caleb Greenwood IB World School",
+  "workshopDate": "2026-10-30",
+  "contacts": [
+   {
+    "email": "Samantha-Trent@scusd.edu",
+    "name": "Samantha Trent (Principal)"
+   },
+   {
+    "email": "Anna-Symkowick-Rose@scusd.edu",
+    "name": "Anna Symkowick-Rose - primary contact scheduling  (Teacher)"
+   },
+   {
+    "email": "Amy-Johns@scusd.edu",
+    "name": "Amy Johns (Teacher)"
+   }
+  ]
+ },
+ {
+  "airtableRecordId": "recdKPAm4ZH1GuDWf",
+  "name": "Ione Jr High",
+  "workshopDate": "2027-01-12",
+  "contacts": [
+   {
+    "email": "bwagner@acusd.org",
+    "name": "Butch Wagner (Principal)"
+   },
+   {
+    "email": "daryl.lee@acusd.org",
+    "name": "Daryl Lee (Assistant Principal)"
+   }
+  ]
+ },
+ {
+  "airtableRecordId": "recdzbCYgtla7CzVp",
+  "name": "Edna Maguire School",
+  "workshopDate": "2027-01-28",
+  "contacts": [
+   {
+    "email": "aeshoff@mvschools.org",
+    "name": "Ann Eshoff (Teacher)"
+   },
+   {
+    "email": "dmccord@mvschools.org",
+    "name": "Daniel McCord (Principal)"
+   }
+  ]
+ },
+ {
+  "airtableRecordId": "recfD59EFGSfDcloj",
+  "name": "Edna Batey Elementary",
+  "workshopDate": "2027-04-13",
+  "contacts": [
+   {
+    "email": "whjones@egusd.net",
+    "name": "William Jones (Principal)"
+   },
+   {
+    "email": "gewillia@egusd.net",
+    "name": "Genevieve Williams (Secretary)"
+   }
+  ]
+ },
+ {
+  "airtableRecordId": "recg87iPuHepQKzW2",
+  "name": "Tamalpais Valley School",
+  "workshopDate": "2027-01-29",
+  "contacts": [
+   {
+    "email": "Llamar@mvschools.org",
+    "name": "Lisa Lamar (Principal)"
+   },
+   {
+    "email": "Atrapp@mvschools.org",
+    "name": "Amy Trapp (Admin)"
+   }
+  ]
+ },
+ {
+  "airtableRecordId": "recgHen8GD0Harjcj",
+  "name": "Excelsior Elementary School",
+  "workshopDate": "2027-05-05",
+  "contacts": [
+   {
+    "email": "hwilliams@eurekausd.org",
+    "name": "Dr. Heidi Williams (Principal)"
+   },
+   {
+    "email": "klewis@eurekausd.org",
+    "name": "Kelly Lewis (5th grade level leader)"
+   },
+   {
+    "email": "jblair@eurekausd.org",
+    "name": "Julia Blair - District Office Eureka SD - Invoice for Eureka Schools (District Payment)"
+   }
+  ]
+ },
+ {
+  "airtableRecordId": "rechKXQu1vH9rkhqh",
+  "name": "Westbrook Elementary",
+  "workshopDate": "2027-01-21",
+  "contacts": [
+   {
+    "email": "lmakishima@rcsdk8.org",
+    "name": "Luisa Markishima (Admin Secretary)"
+   },
+   {
+    "email": "jbrooks@rcsdk8.org",
+    "name": "Jessica Brooks (Principal)"
+   }
+  ]
+ },
+ {
+  "airtableRecordId": "rechmIjCoouQjrYNF",
+  "name": "Dry Creek Elementary",
+  "workshopDate": "2026-10-16",
+  "contacts": [
+   {
+    "email": "Amanda.Forde@trusd.net",
+    "name": "Amanda Forde (Principal)"
+   },
+   {
+    "email": "Nancy.Aguirregarcia@trusd.net",
+    "name": "Nancy Aguirre Garcia  (Office Manager)"
+   }
+  ]
+ },
+ {
+  "airtableRecordId": "reciMmXe6GvFXjzVt",
+  "name": "Thomas Jefferson Elementary",
+  "workshopDate": "2027-01-26",
+  "contacts": [
+   {
+    "email": "kblagg@rcsdk8.org",
+    "name": "Kerry Blagg (Teacher)"
+   },
+   {
+    "email": "jdeslaurier@rcsdk8.org",
+    "name": "Jennifer DeSlaurier (Principal)"
+   },
+   {
+    "email": "cprovencal@rcsdk8.org",
+    "name": "Carolyn Provencal (Admin)"
+   }
+  ]
+ },
+ {
+  "airtableRecordId": "recjFl3V8bJx1TCOY",
+  "name": "Placer School",
+  "workshopDate": "2027-01-13",
+  "contacts": [
+   {
+    "email": "kwittenberg@loomis-usd.k12.ca.us",
+    "name": "Kristie Wittenberg (Secretary)"
+   },
+   {
+    "email": "knettnay@loomis-usd.k12.ca.us",
+    "name": "Kate Nettnay (Principal)"
+   }
+  ]
+ },
+ {
+  "airtableRecordId": "recjfD5rSzujelkt1",
+  "name": "Catheryn Gates Elementary School",
+  "workshopDate": "2026-09-16",
+  "contacts": [
+   {
+    "email": "kankley@rcsdk8.org",
+    "name": "Kristen Ankley - Primary Contact (Teacher)"
+   },
+   {
+    "email": "jseley@rcsdk8.org",
+    "name": "Jenny Seley (Principal)"
+   },
+   {
+    "email": "tbouldin@rcsdk8.org",
+    "name": "Teresa Bouldin (Admin)"
+   },
+   {
+    "email": "venriquez@rcsdk8.org",
+    "name": "Valerie Enriquez (Secretary)"
+   },
+   {
+    "email": "njordan@rcsdk8.org",
+    "name": "Nicole Jordan (Teacher)"
+   },
+   {
+    "email": "kroth@rcsdk8.org",
+    "name": "Karyn Roth (Teacher)"
+   }
+  ]
+ },
+ {
+  "airtableRecordId": "reckTueZeptaAmmZw",
+  "name": "Coyote Ridge Elementary School",
+  "workshopDate": "2026-11-17",
+  "contacts": [
+   {
+    "email": "dmartinez@dcesd.us",
+    "name": "Desina Martinez (Secretary)"
+   },
+   {
+    "email": "jherrmann@dcjesd.us",
+    "name": "Julie Hermann (Principal)"
+   },
+   {
+    "email": "jdupont@dcjesd.us",
+    "name": "Jennifer DuPont (Asst Principal)"
+   }
+  ]
+ },
+ {
+  "airtableRecordId": "reckkmN8pfTqiBAsx",
+  "name": "Excelsior Elementary School",
+  "workshopDate": "2027-04-07",
+  "contacts": [
+   {
+    "email": "hwilliams@eurekausd.org",
+    "name": "Dr. Heidi Williams (Principal)"
+   },
+   {
+    "email": "klewis@eurekausd.org",
+    "name": "Kelly Lewis (5th grade level leader)"
+   },
+   {
+    "email": "jblair@eurekausd.org",
+    "name": "Julia Blair - District Office Eureka SD - Invoice for Eureka Schools (District Payment)"
+   }
+  ]
+ },
+ {
+  "airtableRecordId": "recl54nKHFpynfKSk",
+  "name": "Indian Creek Elementary School",
+  "workshopDate": "2026-12-03",
+  "contacts": [
+   {
+    "email": "Sschmidt@mlusd.net",
+    "name": "Shannon Schmidt (Principal)"
+   },
+   {
+    "email": "tehrlich@mlusd.net",
+    "name": "Tiffany Ehrlich (Admin Asst)"
+   }
+  ]
+ },
+ {
+  "airtableRecordId": "recl8ijwTsT9tflhE",
+  "name": "Barrett Ranch Elementary School",
+  "workshopDate": "2027-03-18",
+  "contacts": [
+   {
+    "email": "ccoulter@dcjesd.us",
+    "name": "Cheri Coulter (Principal)"
+   },
+   {
+    "email": "nandrews@dcjesd.us",
+    "name": "Nicole Andrews (Secretary)"
+   }
+  ]
+ },
+ {
+  "airtableRecordId": "reclJ26rh7uuTVcty",
+  "name": "Hackathon #4 School",
+  "workshopDate": "2026-09-05",
+  "contacts": []
+ },
+ {
+  "airtableRecordId": "recleHzxL7YNJocjX",
+  "name": "E.V. Cain School",
+  "workshopDate": "2027-03-05",
+  "contacts": [
+   {
+    "email": "kyoung@auburn.k12.ca.us",
+    "name": "Kelly Young (Director of Student Support - AUSD District)"
+   },
+   {
+    "email": "cmabery@auburn.k12.ca.us",
+    "name": "Christine Mabery (Principal)"
+   }
+  ]
+ },
+ {
+  "airtableRecordId": "reclkgqEbU341GfqJ",
+  "name": "Main Avenue Elementary",
+  "workshopDate": "2026-12-09",
+  "contacts": [
+   {
+    "email": "Sneuhaus@robla.k12.ca.us",
+    "name": "Sarah Neuhaus (Principal)"
+   },
+   {
+    "email": "mjanowicz@robla.k12.ca.us",
+    "name": "Megan Janowica (Vice Principal)"
+   },
+   {
+    "email": "clyon@robla.k12.ca.us",
+    "name": "Cindi Lyon (Director of State and Federal Programs)"
+   },
+   {
+    "email": "invoices@robla.k12.ca.us",
+    "name": "Robla District - Invoice Submittal (Email for Invoice Submittal)"
+   }
+  ]
+ },
+ {
+  "airtableRecordId": "reclz0jWRXWvBoM4n",
+  "name": "Hackathon #6 School",
+  "workshopDate": "2026-11-21",
+  "contacts": [
+   {
+    "email": "shailaja.gandam@gmail.com",
+    "name": "Shailaja Gandam (Builder)"
+   },
+   {
+    "email": "jeanne.olivas@smud.org",
+    "name": "Jeanne Olivas (Builder)"
+   },
+   {
+    "email": "nathant@TORwealth.com",
+    "name": "Nathan Torinus (Builder)"
+   },
+   {
+    "email": "anthony@iqmeeteq.com",
+    "name": "Anthony Trunzo (Team Leader)"
+   },
+   {
+    "email": "hellotwilson@gmail.com",
+    "name": "Trân (tron) Wilson"
+   },
+   {
+    "email": "meghan@touchofunderstanding.org",
+    "name": "Meghan Adamski (ED ATOU)"
+   },
+   {
+    "email": "pam@touchofunderstanding.org",
+    "name": "Pam Evers (Build)"
+   },
+   {
+    "email": "James.torinus@gmail.com",
+    "name": "James Torinus (Builder)"
+   }
+  ]
+ },
+ {
+  "airtableRecordId": "recmp7zkkvQXBfcvS",
+  "name": "Robla Elementary School",
+  "workshopDate": "2027-03-04",
+  "contacts": [
+   {
+    "email": "dkaff@robla.k12.ca.us",
+    "name": "Darren Kaff (Principal)"
+   },
+   {
+    "email": "clyon@robla.k12.ca.us",
+    "name": "Cindi Lyon (Director of State and Federal Programs)"
+   },
+   {
+    "email": "invoices@robla.k12.ca.us",
+    "name": "Robla District - Invoice Submittal (Email for Invoice Submittal)"
+   }
+  ]
+ },
+ {
+  "airtableRecordId": "recmzsTkieZxB2eAi",
+  "name": "California Montessori Project - Shingle Springs",
+  "workshopDate": "2026-10-06",
+  "contacts": [
+   {
+    "email": "ksriram@ca.cmp.org",
+    "name": "Kanchana Sriram (Dean of Students)"
+   },
+   {
+    "email": "csherrod@cacmp.org",
+    "name": "Christina Sherrod - Primary Contact (Teacher)"
+   }
+  ]
+ },
+ {
+  "airtableRecordId": "recn5S0yadOA4gWuO",
+  "name": "Valley View Elementary School",
+  "workshopDate": "2027-05-26",
+  "contacts": [
+   {
+    "email": "hnethaway@rocklinusd.org",
+    "name": "Heather Nethaway (Teacher)"
+   },
+   {
+    "email": "myoung@rocklinusd.org",
+    "name": "Margaret (Meg) Young (Teacher)"
+   },
+   {
+    "email": "ygoyhenetche@rocklinusd.org",
+    "name": "Yvonne Goyhenetche (Principal's Secretary)"
+   },
+   {
+    "email": "kbray@rocklinusd.org",
+    "name": "Kaili Bray (Principal)"
+   }
+  ]
+ },
+ {
+  "airtableRecordId": "recnURjILnMvkCeao",
+  "name": "Navigator Elementary",
+  "workshopDate": "2027-03-24",
+  "contacts": [
+   {
+    "email": "nmorton@fcusd.org",
+    "name": "Niki Morton (Principal)"
+   },
+   {
+    "email": "stellis@fcusd.org",
+    "name": "Summer Ellis (Admin)"
+   }
+  ]
+ },
+ {
+  "airtableRecordId": "recna4xM9UnjJeCQ5",
+  "name": "Maidu Elementary School",
+  "workshopDate": "2027-05-13",
+  "contacts": [
+   {
+    "email": "nkeblis@eurekausd.org",
+    "name": "Ms. Nell Keblis - effective 25_26 SY (Principal)"
+   },
+   {
+    "email": "sguerrero@eurekausd.org",
+    "name": "Sherri Guerrero (Secretary)"
+   }
+  ]
+ },
+ {
+  "airtableRecordId": "recoW8O5GpPU9f9Hy",
+  "name": "Sargeant Elementary School",
+  "workshopDate": "2026-08-21",
+  "contacts": [
+   {
+    "email": "rconway@rcsdk8.org",
+    "name": "Rachael Conway (Principal)"
+   },
+   {
+    "email": "smccarthy@rcsdk8.org",
+    "name": "Shannon McCarthy (Admin)"
+   }
+  ]
+ },
+ {
+  "airtableRecordId": "recpiOf6RMy3oHlhU",
+  "name": "Gold Trail Elementary",
+  "workshopDate": "2026-09-22",
+  "contacts": [
+   {
+    "email": "kphillips@gtusd.org",
+    "name": "Keri Phillips (Superintendent)"
+   },
+   {
+    "email": "dmayers@gtusd.org",
+    "name": "Dan Mayers -Primary contact (Principal)"
+   },
+   {
+    "email": "jreynolds@gtusd.org",
+    "name": "Julie Reynolds- 2ndary contact (Secretary/Registration)"
+   }
+  ]
+ },
+ {
+  "airtableRecordId": "recpyoXevUsGGwJJy",
+  "name": "Jackson Elementary - Amador County",
+  "workshopDate": "2026-11-19",
+  "contacts": [
+   {
+    "email": "maia@upcountryadvocate.com",
+    "name": "Maia Ginnelly (CEO - Upcountry Advocate, LLC (Scheduled workshops))"
+   },
+   {
+    "email": "alexandra.taverna@acusd.org",
+    "name": "Alexandra Taverna (Principal)"
+   }
+  ]
+ },
+ {
+  "airtableRecordId": "recqD1q0n5nhww8BB",
+  "name": "Excelsior Elementary School",
+  "workshopDate": "2027-05-06",
+  "contacts": [
+   {
+    "email": "hwilliams@eurekausd.org",
+    "name": "Dr. Heidi Williams (Principal)"
+   },
+   {
+    "email": "klewis@eurekausd.org",
+    "name": "Kelly Lewis (5th grade level leader)"
+   },
+   {
+    "email": "jblair@eurekausd.org",
+    "name": "Julia Blair - District Office Eureka SD - Invoice for Eureka Schools (District Payment)"
+   }
+  ]
+ },
+ {
+  "airtableRecordId": "recrF6YF4itIVtpar",
+  "name": "Buckeye Elementary School",
+  "workshopDate": "2026-11-13",
+  "contacts": [
+   {
+    "email": "kcadden@buckeyeusd.org",
+    "name": "Kevin Cadden (Principal)"
+   }
+  ]
+ },
+ {
+  "airtableRecordId": "recrGW3Vcn1AhgQm8",
+  "name": "Loomis Grammar School",
+  "workshopDate": "2026-10-07",
+  "contacts": [
+   {
+    "email": "cmcclaughry@loomis-usd.k12.ca.us",
+    "name": "Cheri McClaughry (Teacher)"
+   },
+   {
+    "email": "cdiaz-granados@loomisk8.org",
+    "name": "Carlos Diaz-Granados (Principal)"
+   },
+   {
+    "email": "evin.duncan@gmail.com",
+    "name": "Evin Duncan - scheduling contact (PTC President)"
+   }
+  ]
+ },
+ {
+  "airtableRecordId": "recrbbi3KQmrdFAFP",
+  "name": "Dudley Elementary",
+  "workshopDate": "2027-04-30",
+  "contacts": [
+   {
+    "email": "tsilverman@centerusd.org",
+    "name": "Todd Silverman (Counselor)"
+   },
+   {
+    "email": "mltoliver@centerusd.org",
+    "name": "Melissa Oliver (Principal)"
+   }
+  ]
+ },
+ {
+  "airtableRecordId": "recsrSZohabzGHtFg",
+  "name": "Carl Sundahl Elementary",
+  "workshopDate": "2027-04-28",
+  "contacts": [
+   {
+    "email": "ABWhite@fcusd.org",
+    "name": "Allyson White (Admin)"
+   },
+   {
+    "email": "Jholton@fcusd.org",
+    "name": "Jeanine Holton (Principal)"
+   }
+  ]
+ },
+ {
+  "airtableRecordId": "rectZdvYAQbZo9yjq",
+  "name": "Stoneridge Elementary",
+  "workshopDate": "2026-09-02",
+  "contacts": [
+   {
+    "email": "csmith03@rcsdk8.org",
+    "name": "Candice Smith (Admin)"
+   },
+   {
+    "email": "mspears@rcsdk8.org",
+    "name": "Megan Spears (Principal)"
+   }
+  ]
+ },
+ {
+  "airtableRecordId": "rectzrhkzTkpezdcM",
+  "name": "Albert Schweitzer School",
+  "workshopDate": "2026-10-28",
+  "contacts": [
+   {
+    "email": "gharrison@sanjuan.edu",
+    "name": "Gelika Harrison (Principal)"
+   },
+   {
+    "email": "montey.snyder@sanjuan.edu",
+    "name": "Montey Snyder (Secretary)"
+   }
+  ]
+ },
+ {
+  "airtableRecordId": "recuREYQFrf6OleL3",
+  "name": "Mather Heights Elementary",
+  "workshopDate": "2027-01-05",
+  "contacts": [
+   {
+    "email": "jjarwin@fcusd.org",
+    "name": "Jennifer Jarwin (Admin)"
+   },
+   {
+    "email": "JFrancis@fcusd.org",
+    "name": "Joel Francisco (Principal)"
+   }
+  ]
+ },
+ {
+  "airtableRecordId": "recuWaRQ0MdVQfxpn",
+  "name": "Valley View Charter Montessori",
+  "workshopDate": "2027-03-16",
+  "contacts": [
+   {
+    "email": "vbustos@buckeyeusd.org",
+    "name": "Valerie Bustos (Secretary)"
+   },
+   {
+    "email": "pstewart@buckeyeusd.org",
+    "name": "Paul Stewart (Principal)"
+   }
+  ]
+ },
+ {
+  "airtableRecordId": "recvDahzjEJb5eO8v",
+  "name": "Casa Roble SCORE Health Academy",
+  "workshopDate": "2027-05-07",
+  "contacts": [
+   {
+    "email": "kathy.carlson@sanjuan.edu",
+    "name": "Kathy Carlson (English Teacher)"
+   },
+   {
+    "email": "robert.biggs@sanjuan.edu",
+    "name": "Bobby Biggs (Teacher)"
+   }
+  ]
+ },
+ {
+  "airtableRecordId": "recvIW0Xw1I1sRTf1",
+  "name": "Lake Forest Elementary School",
+  "workshopDate": "2027-05-11",
+  "contacts": [
+   {
+    "email": "rmallot@my.rescueusd.org",
+    "name": "Renee Mallot (Principal)"
+   },
+   {
+    "email": "jpulling@rescueusd.org",
+    "name": "Joan Pulling (Secretary)"
+   }
+  ]
+ },
+ {
+  "airtableRecordId": "recvniOmA7lzmul06",
+  "name": "Amador High School",
+  "workshopDate": "2027-03-23",
+  "contacts": [
+   {
+    "email": "sadie.hedegard@acusd.org",
+    "name": "Dr. Sadie Hedegard (Assistant Superintendent)"
+   },
+   {
+    "email": "kcagle@acusd.org",
+    "name": "Kaleb Cagle  (Principal)"
+   }
+  ]
+ },
+ {
+  "airtableRecordId": "recwk3EnBIoFd0mlW",
+  "name": "Fiddyment Farm Elementary School",
+  "workshopDate": "2027-01-19",
+  "contacts": [
+   {
+    "email": "ljackson@rcsdk8.org",
+    "name": "Lan Jackson (Teacher)"
+   },
+   {
+    "email": "jconnors@rcsdk8.org",
+    "name": "Jessica Connors (Principal)"
+   }
+  ]
+ },
+ {
+  "airtableRecordId": "recy07ULOM5PXUNBA",
+  "name": "Jefferson School",
+  "workshopDate": "2027-05-19",
+  "contacts": [
+   {
+    "email": "tkennedy@natomasunified.org",
+    "name": "Tamara Kennedy (Secretary)"
+   },
+   {
+    "email": "dkeeler@natomasunified.org",
+    "name": "Danisha Keeler (Principal)"
+   }
+  ]
+ },
+ {
+  "airtableRecordId": "recyLdgorXiZ1aOlC",
+  "name": "Strawberry Point School",
+  "workshopDate": "2027-02-26",
+  "contacts": [
+   {
+    "email": "krussell@mvschools.org",
+    "name": "Kimberly Russell (Principal)"
+   },
+   {
+    "email": "lmonti@mvschools.org",
+    "name": "Lulu Monti (Teacher)"
+   },
+   {
+    "email": "vkiriakis@mvschools.org",
+    "name": "Vyvianne Kiriakis (Admin)"
+   }
+  ]
+ },
+ {
+  "airtableRecordId": "recyYTDs3pummEwl4",
+  "name": "H. Clarke Powers School",
+  "workshopDate": "2026-08-19",
+  "contacts": [
+   {
+    "email": "lbaltzley@loomis-usd.k12.ca.us",
+    "name": "Leesa Baltzley (Admin)"
+   },
+   {
+    "email": "rmyers@loomisk8.org",
+    "name": "Robert Myers (Principal)"
+   },
+   {
+    "email": "JBartlett@loomisk8.org",
+    "name": "Jenny Bartlett (Teacher)"
+   },
+   {
+    "email": "SChoate@loomisk8.org",
+    "name": "Sara Choate (Teacher)"
+   }
+  ]
+ },
+ {
+  "airtableRecordId": "recyggZ3r2QfkF9ui",
+  "name": "Rock Creek Elementary School",
+  "workshopDate": "2026-10-27",
+  "contacts": [
+   {
+    "email": "vsmith@rocklinusd.org",
+    "name": "Valarie Smith (Principal's Secretary)"
+   },
+   {
+    "email": "bglover@rocklinusd.org",
+    "name": "Bevin Glover (Principal)"
+   }
+  ]
+ },
+ {
+  "airtableRecordId": "recyv1BW2TfEedlVz",
+  "name": "Diamond Creek Elementary School",
+  "workshopDate": "2026-10-01",
+  "contacts": [
+   {
+    "email": "lphillips01@rcsdk8.org",
+    "name": "Lisa Phillips (Principal)"
+   },
+   {
+    "email": "sdepue@rcsdk8.org",
+    "name": "Summer Depue (Teacher)"
+   },
+   {
+    "email": "mkelley@rcsdk8.org",
+    "name": "Mike Kelley (Teacher)"
+   }
+  ]
+ },
+ {
+  "airtableRecordId": "recyvlCq4uaLFcB3p",
+  "name": "Hackathon #2 School",
+  "workshopDate": "2026-09-19",
+  "contacts": [
+   {
+    "email": "shailaja.gandam@gmail.com",
+    "name": "Shailaja Gandam (Builder)"
+   },
+   {
+    "email": "jeanne.olivas@smud.org",
+    "name": "Jeanne Olivas (Builder)"
+   },
+   {
+    "email": "nathant@TORwealth.com",
+    "name": "Nathan Torinus (Builder)"
+   },
+   {
+    "email": "hellotwilson@gmail.com",
+    "name": "Trân (tron) Wilson"
+   },
+   {
+    "email": "meghan@touchofunderstanding.org",
+    "name": "Meghan Adamski (ED ATOU)"
+   },
+   {
+    "email": "pam@touchofunderstanding.org",
+    "name": "Pam Evers (Build)"
+   },
+   {
+    "email": "James.torinus@gmail.com",
+    "name": "James Torinus (Builder)"
+   }
+  ]
+ },
+ {
+  "airtableRecordId": "reczccHWqjUGKkfj8",
+  "name": "California Montessori Project - Orangevale",
+  "workshopDate": "2026-09-03",
+  "contacts": [
+   {
+    "email": "mostendorf@cacmp.org",
+    "name": "Maria Ostendorf (Principal)"
+   },
+   {
+    "email": "mthompson@cacmp.org",
+    "name": "Melanie Thompson (Admin)"
+   }
+  ]
+ },
+ {
+  "airtableRecordId": "reczwplHAF2d5AEmM",
+  "name": "Twelve Bridges Elementary School",
+  "workshopDate": "2026-10-23",
+  "contacts": [
+   {
+    "email": "rjohnson@wpusd.org",
+    "name": "Rosanne Johnson (Secretary)"
+   },
+   {
+    "email": "wmiddleton@wpusd.org",
+    "name": "William Middleton (Principal)"
+   }
+  ]
+ }
+]

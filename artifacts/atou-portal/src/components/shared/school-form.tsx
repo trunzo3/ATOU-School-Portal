@@ -8,7 +8,7 @@ import { StatusBadge } from "@/components/ui/status-badge"
 import { TimePicker } from "@/components/ui/time-picker"
 import { AtouLogo } from "@/components/shared/atou-logo"
 import { formatPacificTime } from "@/lib/utils"
-import { Clock, Plus, Trash2, Info, Users, Save, CheckCircle2, ChevronRight, Printer } from "lucide-react"
+import { CalendarDays, Plus, Trash2, Info, Users, Save, CheckCircle2, ChevronRight, Printer } from "lucide-react"
 
 interface SchoolFormProps {
   code: string;
@@ -416,12 +416,18 @@ export function SchoolForm({ code, email, initialAnswers, onSaveAnswer, onSaveTe
       
       {/* Header Info */}
       <div className="bg-primary/5 border border-primary/20 rounded-xl p-6 sm:p-8 print:border-none print:p-0 print:bg-transparent flex flex-col sm:flex-row justify-between items-start gap-4">
-        <div>
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
           <h2 className="text-2xl sm:text-3xl font-serif font-bold text-foreground tracking-tight">{initialAnswers.school.name}</h2>
-          <p className="text-primary font-medium mt-2 flex items-center gap-2 text-sm sm:text-base">
-            <Clock className="h-4 w-4" /> 
-            {initialAnswers.school.workshopDate ? formatPacificTime(initialAnswers.school.workshopDate).split(',')[0] : "Date TBD"}
-          </p>
+          <span
+            className={
+              initialAnswers.school.workshopDate
+                ? "inline-flex items-center gap-1.5 rounded-full bg-primary text-primary-foreground px-3 py-1.5 text-sm font-semibold whitespace-nowrap shadow-sm print:bg-transparent print:text-foreground print:border print:border-foreground/30 print:shadow-none"
+                : "inline-flex items-center gap-1.5 rounded-full bg-muted text-muted-foreground border border-border px-3 py-1.5 text-sm font-medium whitespace-nowrap print:bg-transparent print:shadow-none"
+            }
+          >
+            <CalendarDays className="h-4 w-4" />
+            {workshopDate}
+          </span>
         </div>
         <div className="flex items-center gap-3 flex-shrink-0 flex-wrap">
           {initialAnswers.school.locked && (

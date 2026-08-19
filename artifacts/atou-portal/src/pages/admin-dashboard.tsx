@@ -29,7 +29,7 @@ type DashState = {
   summaryFilter: SummaryFilter
 }
 
-type SummaryFilter = "all" | "complete" | "partial" | "untouched" | "locked"
+type SummaryFilter = "all" | "complete" | "partial" | "locked"
 
 const DEFAULT_STATE: DashState = {
   search: "",
@@ -44,7 +44,12 @@ const DEFAULT_STATE: DashState = {
 function loadDashState(): DashState {
   try {
     const raw = sessionStorage.getItem(DASH_STATE_KEY)
-    if (raw) return { ...DEFAULT_STATE, ...JSON.parse(raw) }
+    if (raw) {
+      const saved = { ...DEFAULT_STATE, ...JSON.parse(raw) }
+      // The "untouched" summary card was removed; clear any saved filter for it.
+      if ((saved.summaryFilter as string) === "untouched") saved.summaryFilter = "all"
+      return saved
+    }
   } catch { /* fall through */ }
   return DEFAULT_STATE
 }
@@ -116,7 +121,6 @@ export function AdminDashboard() {
       const answeredAny = s.questionStates.some(question => question.answered)
       if (state.summaryFilter === "complete" && s.missingCount > 0) return false
       if (state.summaryFilter === "partial" && (s.missingCount === 0 || !answeredAny)) return false
-      if (state.summaryFilter === "untouched" && (s.missingCount === 0 || answeredAny)) return false
       if (state.summaryFilter === "locked" && !s.locked) return false
       return true
     })
@@ -177,7 +181,7 @@ export function AdminDashboard() {
 
         {summary && (
           <div
-            className="grid grid-cols-2 md:grid-cols-5 gap-4"
+            className="grid grid-cols-2 md:grid-cols-4 gap-4"
             role="group"
             aria-label="Filter schools by dashboard summary"
           >
@@ -185,7 +189,6 @@ export function AdminDashboard() {
               { filter: "all", label: "Total Days", total: summary.totalSchools, valueClass: "text-primary", labelClass: "text-primary/80", cardClass: "bg-primary/5 border-primary/20" },
               { filter: "complete", label: "Complete", total: summary.complete, valueClass: "text-foreground", cardClass: "border-border hover:border-primary/20" },
               { filter: "partial", label: "Partial", total: summary.partial, valueClass: "text-amber-600", cardClass: "border-border hover:border-amber-500/20" },
-              { filter: "untouched", label: "Untouched", total: summary.untouched, valueClass: "text-destructive", cardClass: "border-border hover:border-destructive/20" },
               { filter: "locked", label: "Locked", total: summary.locked, valueClass: "text-secondary", labelClass: "text-secondary/80", cardClass: "bg-secondary/5 border-secondary/15 hover:border-secondary/30" },
             ].map(({ filter, label, total, valueClass = "", labelClass = "text-muted-foreground", cardClass = "" }) => {
               const active = state.summaryFilter === filter

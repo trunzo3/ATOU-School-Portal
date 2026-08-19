@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button"
 import { StatusBadge } from "@/components/ui/status-badge"
 import { TimePicker } from "@/components/ui/time-picker"
 import { AtouLogo } from "@/components/shared/atou-logo"
-import { formatPacificTime } from "@/lib/utils"
+import { formatPacificTime, cn } from "@/lib/utils"
 import { AlertCircle, CalendarDays, Plus, Trash2, Info, Users, Save, CheckCircle2, ChevronRight, Printer } from "lucide-react"
 
 interface SchoolFormProps {
@@ -26,6 +26,10 @@ interface SchoolFormProps {
 }
 
 type SaveState = "dirty" | "saving" | "saved";
+
+// "one" through "ten" spelled out for the missing-count note; numerals beyond
+const missingCountWord = (n: number) =>
+  ["one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten"][n - 1] ?? String(n)
 
 function QuestionTitle({ number, children }: { number: number; children: React.ReactNode }) {
   return (
@@ -271,8 +275,16 @@ export function SchoolForm({ code, email, initialAnswers, onSaveAnswer, onSaveTe
     return { lines, warnings, pending };
   }
 
+  // Bumped on every teacher edit; a save only marks the list "saved" if no
+  // edit happened while its request was in flight (otherwise the newer edit
+  // would be silently treated as saved and could be lost).
+  const teacherRevRef = useRef(0)
+  // Prevents overlapping teacher saves (manual click + pending autosave)
+  const teacherSaveInFlightRef = useRef(false)
+
   const handleTeacherChange = (index: number, field: string, value: any) => {
     setTeacherSaveError("")
+    teacherRevRef.current++
     const newRows = [...teacherRows];
     newRows[index] = { ...newRows[index], [field]: value };
     setTeacherRows(newRows);
@@ -281,33 +293,53 @@ export function SchoolForm({ code, email, initialAnswers, onSaveAnswer, onSaveTe
 
   const addTeacher = () => {
     setTeacherSaveError("")
+    teacherRevRef.current++
     setTeacherRows([...teacherRows, { firstName: "", lastName: "", email: "", studentCount: 0 }]);
     setTeachersSaved(false);
   }
 
   const removeTeacher = (index: number) => {
     setTeacherSaveError("")
+    teacherRevRef.current++
     const newRows = teacherRows.filter((_, i) => i !== index);
     setTeacherRows(newRows.length ? newRows : [{ firstName: "", lastName: "", email: "", studentCount: 0 }]);
     setTeachersSaved(false);
   }
 
+  // First name, last name, and email are required for every teacher; the
+  // student count is NOT — a row saves without it and the count can be
+  // added later (its field shows a red outline until then).
+  const rowIsBlank = (r: any) =>
+    !String(r.firstName || "").trim() && !String(r.lastName || "").trim() &&
+    !String(r.email || "").trim() && !(Number(r.studentCount) > 0)
+  const rowIdentityComplete = (r: any) =>
+    Boolean(String(r.firstName || "").trim() && String(r.lastName || "").trim() && String(r.email || "").trim())
+  // Partially typed: something is filled in, but not all three required fields
+  const rowIsPartial = (r: any) => !rowIsBlank(r) && !rowIdentityComplete(r)
+  const rowMissingCount = (r: any) => rowIdentityComplete(r) && !(Number(r.studentCount) > 0)
+
+  const nonBlankTeacherRows = teacherRows.filter(r => !rowIsBlank(r))
+  const hasPartialTeacherRows = teacherRows.some(rowIsPartial)
+  const canSaveTeacherList = !hasPartialTeacherRows && nonBlankTeacherRows.length > 0
+  const missingCountTotal = teacherRows.filter(rowMissingCount).length
+
   const saveTeacherList = async () => {
-    // Validate
-    const valid = teacherRows.every(r => r.firstName && r.lastName && r.email && r.studentCount >= 0);
-    if (!valid) {
-      alert("Please fill out all teacher fields before saving.");
-      return;
-    }
+    if (!canSaveTeacherList || teacherSaveInFlightRef.current) return;
+    if (autoSaveTimeout.current) clearTimeout(autoSaveTimeout.current);
+    const rev = teacherRevRef.current;
+    teacherSaveInFlightRef.current = true;
     setSavingTeacher(true);
     setTeacherSaveError("");
     try {
-      await onSaveTeachers(teacherRows);
-      setTeachersSaved(true);
+      await onSaveTeachers(nonBlankTeacherRows);
+      // Only acknowledge if nothing changed while the request was in
+      // flight; otherwise stay dirty so the newer edit gets saved too.
+      if (teacherRevRef.current === rev) setTeachersSaved(true);
     } catch {
       setTeacherSaveError("We couldn't save the teacher list. Check your connection, then use Save List to try again.");
       setFinishRequested(false);
     } finally {
+      teacherSaveInFlightRef.current = false;
       setSavingTeacher(false);
     }
   }
@@ -315,9 +347,11 @@ export function SchoolForm({ code, email, initialAnswers, onSaveAnswer, onSaveTe
   // Debounced auto-save for teachers (optional, but requested for background save)
   const autoSaveTimeout = useRef<NodeJS.Timeout | null>(null);
   useEffect(() => {
-    if (!teachersSaved && !isReadOnly) {
-      const valid = teacherRows.every(r => r.firstName && r.lastName && r.email && r.studentCount > 0);
-      if (valid) {
+    // Not while a save is in flight: when it finishes, savingTeacher flips
+    // and this effect re-runs, scheduling a save of the latest draft if the
+    // in-flight save couldn't acknowledge it (edited mid-request).
+    if (!teachersSaved && !isReadOnly && !savingTeacher) {
+      if (canSaveTeacherList) {
         if (autoSaveTimeout.current) clearTimeout(autoSaveTimeout.current);
         autoSaveTimeout.current = setTimeout(() => {
           saveTeacherList();
@@ -325,11 +359,9 @@ export function SchoolForm({ code, email, initialAnswers, onSaveAnswer, onSaveTe
       }
     }
     return () => { if (autoSaveTimeout.current) clearTimeout(autoSaveTimeout.current) };
-  }, [teacherRows, teachersSaved]);
+  }, [teacherRows, teachersSaved, savingTeacher]);
 
-  const teacherDraftCanAutosave =
-    teacherRows.length > 0 &&
-    teacherRows.every(r => r.firstName && r.lastName && r.email && r.studentCount > 0)
+  const teacherDraftCanAutosave = canSaveTeacherList
 
   useEffect(() => {
     if (!finishRequested || !onDone) return
@@ -586,25 +618,35 @@ export function SchoolForm({ code, email, initialAnswers, onSaveAnswer, onSaveTe
             </div>
             
             {teacherRows.map((row, i) => (
-              <div key={i} className="grid grid-cols-1 md:grid-cols-12 gap-3 items-start md:items-center p-4 md:p-0 border border-border rounded-xl md:border-none md:bg-transparent bg-muted/25 shadow-sm md:shadow-none print:border-b print:rounded-none print:py-2">
-                <div className="md:hidden text-xs font-bold uppercase tracking-wider text-muted-foreground mb-1">Teacher {i+1}</div>
-                <div className="col-span-3">
-                   <Input placeholder="First Name" value={row.firstName} onChange={(e) => handleTeacherChange(i, "firstName", e.target.value)} disabled={isReadOnly || initialAnswers.school.locked} className="print:border-none print:p-0 print:h-auto" />
+              <div key={i} className="space-y-1.5 print:space-y-0">
+                <div className="grid grid-cols-1 md:grid-cols-12 gap-3 items-start md:items-center p-4 md:p-0 border border-border rounded-xl md:border-none md:bg-transparent bg-muted/25 shadow-sm md:shadow-none print:border-b print:rounded-none print:py-2">
+                  <div className="md:hidden text-xs font-bold uppercase tracking-wider text-muted-foreground mb-1">Teacher {i+1}</div>
+                  <div className="col-span-3">
+                     <Input placeholder="First Name" value={row.firstName} onChange={(e) => handleTeacherChange(i, "firstName", e.target.value)} disabled={isReadOnly || initialAnswers.school.locked} className="print:border-none print:p-0 print:h-auto" />
+                  </div>
+                  <div className="col-span-3">
+                     <Input placeholder="Last Name" value={row.lastName} onChange={(e) => handleTeacherChange(i, "lastName", e.target.value)} disabled={isReadOnly || initialAnswers.school.locked} className="print:border-none print:p-0 print:h-auto" />
+                  </div>
+                  <div className="col-span-4">
+                     <Input type="email" placeholder="Email Address" value={row.email} onChange={(e) => handleTeacherChange(i, "email", e.target.value)} disabled={isReadOnly || initialAnswers.school.locked} className="print:border-none print:p-0 print:h-auto" />
+                  </div>
+                  <div className="col-span-2 flex gap-2 items-center">
+                     <Input type="number" min="0" step="1" inputMode="numeric" placeholder="Count" value={row.studentCount || ""} onChange={(e) => handleTeacherChange(i, "studentCount", parseInt(e.target.value)||0)} disabled={isReadOnly || initialAnswers.school.locked} className={cn(
+                       "[-moz-appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none print:border-none print:p-0 print:h-auto",
+                       // Saved row missing its count: red outline, no message —
+                       // come back and fill in the number (doesn't block anything)
+                       rowMissingCount(row) && "border-destructive bg-destructive/10 focus-visible:ring-destructive/30 print:bg-transparent",
+                     )} />
+                    {!isReadOnly && !initialAnswers.school.locked && (
+                      <Button variant="ghost" size="icon" className="text-destructive h-10 w-10 flex-shrink-0 no-print rounded-full hover:bg-destructive/10" onClick={() => removeTeacher(i)}>
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    )}
+                  </div>
                 </div>
-                <div className="col-span-3">
-                   <Input placeholder="Last Name" value={row.lastName} onChange={(e) => handleTeacherChange(i, "lastName", e.target.value)} disabled={isReadOnly || initialAnswers.school.locked} className="print:border-none print:p-0 print:h-auto" />
-                </div>
-                <div className="col-span-4">
-                   <Input type="email" placeholder="Email Address" value={row.email} onChange={(e) => handleTeacherChange(i, "email", e.target.value)} disabled={isReadOnly || initialAnswers.school.locked} className="print:border-none print:p-0 print:h-auto" />
-                </div>
-                <div className="col-span-2 flex gap-2 items-center">
-                   <Input type="number" min="0" step="1" inputMode="numeric" placeholder="Count" value={row.studentCount || ""} onChange={(e) => handleTeacherChange(i, "studentCount", parseInt(e.target.value)||0)} disabled={isReadOnly || initialAnswers.school.locked} className="[-moz-appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none print:border-none print:p-0 print:h-auto" />
-                  {!isReadOnly && !initialAnswers.school.locked && (
-                    <Button variant="ghost" size="icon" className="text-destructive h-10 w-10 flex-shrink-0 no-print rounded-full hover:bg-destructive/10" onClick={() => removeTeacher(i)}>
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  )}
-                </div>
+                {rowIsPartial(row) && (
+                  <p className="text-sm text-foreground no-print">First name, last name, and email address are required.</p>
+                )}
               </div>
             ))}
             
@@ -616,9 +658,14 @@ export function SchoolForm({ code, email, initialAnswers, onSaveAnswer, onSaveTe
             </div>
 
             <div className="flex flex-col sm:flex-row justify-between items-center pt-4 border-t gap-4">
-              <div className="flex items-center gap-2 font-medium">
-                <Users className="h-5 w-5 text-muted-foreground" />
-                Total Students: <span className="text-lg">{totalStudents}</span>
+              <div className={cn("flex items-center gap-2 font-medium", missingCountTotal > 0 && "text-destructive")}>
+                <Users className={cn("h-5 w-5", missingCountTotal > 0 ? "text-destructive" : "text-muted-foreground")} />
+                <span>
+                  Total Students: <span className="text-lg">{totalStudents}</span>
+                  {missingCountTotal > 0 && (
+                    <>, {missingCountWord(missingCountTotal)} teacher count{missingCountTotal === 1 ? "" : "s"} missing</>
+                  )}
+                </span>
               </div>
               
               {!isReadOnly && !initialAnswers.school.locked && (
@@ -627,7 +674,7 @@ export function SchoolForm({ code, email, initialAnswers, onSaveAnswer, onSaveTe
                     <Plus className="h-4 w-4 mr-2" /> Add Teacher
                   </Button>
                   {!teachersSaved && (
-                    <Button onClick={saveTeacherList} disabled={savingTeacher} className="w-full sm:w-auto">
+                    <Button onClick={saveTeacherList} disabled={savingTeacher || !canSaveTeacherList} className="w-full sm:w-auto">
                       <Save className="h-4 w-4 mr-2" /> {savingTeacher ? "Saving..." : "Save List"}
                     </Button>
                   )}

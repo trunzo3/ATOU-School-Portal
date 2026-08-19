@@ -46,10 +46,20 @@ export function AdminSettings() {
   const [baseId, setBaseId] = useState("")
   const [tableId, setTableId] = useState("")
   const [testEmail, setTestEmail] = useState("")
+  const [policyUrl, setPolicyUrl] = useState("")
+  const [policyUrlLoaded, setPolicyUrlLoaded] = useState(false)
   const [testResponse, setTestResponse] = useState<{
     kind: "success" | "error"
     text: string
   } | null>(null)
+
+  // Prefill the cancellation policy link once, without clobbering edits.
+  useEffect(() => {
+    if (emailStatus && !policyUrlLoaded) {
+      setPolicyUrlLoaded(true)
+      setPolicyUrl(emailStatus.cancellationPolicyUrl)
+    }
+  }, [emailStatus, policyUrlLoaded])
 
   useEffect(() => {
     if (settings) {
@@ -83,6 +93,24 @@ export function AdminSettings() {
               ? "Live email sending is on"
               : "Live email sending is off",
           })
+        },
+        onError: (error) => {
+          setTestResponse({ kind: "error", text: apiErrorMessage(error) })
+        },
+      },
+    )
+  }
+
+  const handleSavePolicyUrl = (e: React.FormEvent) => {
+    e.preventDefault()
+    setTestResponse(null)
+    updateEmailSettings.mutate(
+      { data: { enabled: emailStatus?.enabled ?? false, cancellationPolicyUrl: policyUrl.trim() } },
+      {
+        onSuccess: (status) => {
+          setPolicyUrl(status.cancellationPolicyUrl)
+          queryClient.invalidateQueries({ queryKey: getGetEmailStatusQueryKey() })
+          toast({ title: "Cancellation policy link saved" })
         },
         onError: (error) => {
           setTestResponse({ kind: "error", text: apiErrorMessage(error) })
@@ -176,6 +204,31 @@ export function AdminSettings() {
                 email can still be sent while live delivery is off.
               </p>
             </div>
+
+            <form onSubmit={handleSavePolicyUrl} className="space-y-2">
+              <Label htmlFor="policyUrl">Cancellation policy link</Label>
+              <div className="flex flex-col sm:flex-row gap-3">
+                <Input
+                  id="policyUrl"
+                  type="url"
+                  inputMode="url"
+                  placeholder="https://touchofunderstanding.org/..."
+                  value={policyUrl}
+                  onChange={(e) => setPolicyUrl(e.target.value)}
+                />
+                <Button
+                  type="submit"
+                  variant="outline"
+                  disabled={updateEmailSettings.isPending}
+                  className="sm:flex-shrink-0"
+                >
+                  {updateEmailSettings.isPending ? "Saving…" : "Save Link"}
+                </Button>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                The CANCELLATION POLICY link in Pam's email signature points here. Leave it blank to use touchofunderstanding.org.
+              </p>
+            </form>
 
             <form onSubmit={handleTestEmail} className="space-y-3">
               <div className="space-y-2">

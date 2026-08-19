@@ -190,10 +190,12 @@ export interface EmailStatus {
   configured: boolean;
   enabled: boolean;
   from: string;
+  cancellationPolicyUrl: string;
 }
 
 export interface EmailSettingsInput {
   enabled: boolean;
+  cancellationPolicyUrl?: string;
 }
 
 export interface TestEmailInput {

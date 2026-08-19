@@ -154,6 +154,7 @@ function AdminSchoolFormWrapper({ schoolId, detail, adminEmail, handleSaveAnswer
         onSaveAnswer={onSaveAnswer}
         onSaveTeachers={onSaveTeachers}
         isReadOnly={detail.locked}
+        showPrintButton={false}
       />
     </AdminLayout>
   )

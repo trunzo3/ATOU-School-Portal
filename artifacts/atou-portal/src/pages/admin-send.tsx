@@ -16,6 +16,7 @@ import { Input, Textarea } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Badge } from "@/components/ui/badge"
 import { AtouLogo } from "@/components/shared/atou-logo"
+import { EmailSignaturePreview } from "@/components/shared/email-signature-preview"
 import { formatPacificTime } from "@/lib/utils"
 import { ChevronLeft, Eye, EyeOff, Mail, Save, Search, Send, X, AlertCircle, CheckCircle2 } from "lucide-react"
 import { useEffect, useMemo, useRef, useState } from "react"
@@ -313,6 +314,7 @@ export function AdminSend() {
               />
               <p className="text-xs text-muted-foreground">
                 {"{{school_name}}"}, {"{{workshop_date}}"}, and {"{{link}}"} are filled in automatically for each school.
+                Pam's ATOU signature is added automatically at the end of every email.
               </p>
             </div>
 
@@ -351,6 +353,10 @@ export function AdminSend() {
                 <div>
                   <span className="text-xs text-muted-foreground block">Message</span>
                   <p className="text-sm whitespace-pre-wrap">{fillMergeFields(message, previewSchool)}</p>
+                </div>
+                <div className="border-t border-secondary/20 pt-3">
+                  <span className="text-xs text-muted-foreground block mb-2">Signature (added automatically)</span>
+                  <EmailSignaturePreview cancellationPolicyUrl={emailStatus?.cancellationPolicyUrl} />
                 </div>
               </div>
             )}

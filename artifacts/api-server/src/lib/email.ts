@@ -18,6 +18,8 @@ export async function sendEmail(args: {
   to: string[];
   subject: string;
   text: string;
+  // Optional HTML body; the text part stays as the plain-text fallback.
+  html?: string;
 }): Promise<SendResult> {
   if (!emailConfigured()) {
     return { delivered: false };
@@ -34,6 +36,7 @@ export async function sendEmail(args: {
         to: args.to,
         subject: args.subject,
         text: args.text,
+        ...(args.html ? { html: args.html } : {}),
       }),
     });
     if (!resp.ok) {

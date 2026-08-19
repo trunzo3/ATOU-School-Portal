@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button"
 import { StatusBadge } from "@/components/ui/status-badge"
 import { AtouLogo } from "@/components/shared/atou-logo"
 import { formatPacificTime } from "@/lib/utils"
-import { Clock, Plus, Trash2, Info, Users, Save, CheckCircle2, ChevronRight } from "lucide-react"
+import { Clock, Plus, Trash2, Info, Users, Save, CheckCircle2, ChevronRight, Printer } from "lucide-react"
 
 interface SchoolFormProps {
   code: string;
@@ -16,6 +16,8 @@ interface SchoolFormProps {
   onSaveAnswer: (key: string, value: string) => Promise<void>;
   onSaveTeachers: (rows: any[]) => Promise<void>;
   isReadOnly?: boolean;
+  // The admin school-detail page has its own Print Form action, so it hides this one.
+  showPrintButton?: boolean;
 }
 
 type SaveState = "dirty" | "saving" | "saved";
@@ -37,7 +39,7 @@ function QuestionTitle({ number, children }: { number: number; children: React.R
   )
 }
 
-export function SchoolForm({ code, email, initialAnswers, onSaveAnswer, onSaveTeachers, isReadOnly }: SchoolFormProps) {
+export function SchoolForm({ code, email, initialAnswers, onSaveAnswer, onSaveTeachers, isReadOnly, showPrintButton = true }: SchoolFormProps) {
   // Extract state per question
   const getQ = (key: string) => initialAnswers.questions.find(q => q.questionKey === key)
   
@@ -420,9 +422,20 @@ export function SchoolForm({ code, email, initialAnswers, onSaveAnswer, onSaveTe
             {initialAnswers.school.workshopDate ? formatPacificTime(initialAnswers.school.workshopDate).split(',')[0] : "Date TBD"}
           </p>
         </div>
-        {initialAnswers.school.locked && (
-          <StatusBadge complete={true} text="Form Locked" />
-        )}
+        <div className="flex items-center gap-3 flex-shrink-0 flex-wrap">
+          {initialAnswers.school.locked && (
+            <StatusBadge complete={true} text="Form Locked" />
+          )}
+          {showPrintButton && (
+            <Button
+              variant="outline"
+              className="no-print bg-white shadow-sm"
+              onClick={() => window.print()}
+            >
+              <Printer className="h-4 w-4 mr-2" /> Print form
+            </Button>
+          )}
+        </div>
       </div>
 
       <div className="text-sm bg-accent/50 text-accent-foreground p-5 rounded-xl border border-accent flex gap-3 no-print items-start">

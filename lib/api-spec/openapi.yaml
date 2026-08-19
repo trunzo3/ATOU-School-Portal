@@ -828,11 +828,13 @@ components:
         configured: { type: boolean }
         enabled: { type: boolean }
         from: { type: string }
-      required: [configured, enabled, from]
+        cancellationPolicyUrl: { type: string }
+      required: [configured, enabled, from, cancellationPolicyUrl]
     EmailSettingsInput:
       type: object
       properties:
         enabled: { type: boolean }
+        cancellationPolicyUrl: { type: string }
       required: [enabled]
     TestEmailInput:
       type: object

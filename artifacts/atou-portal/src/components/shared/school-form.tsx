@@ -8,7 +8,7 @@ import { StatusBadge } from "@/components/ui/status-badge"
 import { TimePicker } from "@/components/ui/time-picker"
 import { AtouLogo } from "@/components/shared/atou-logo"
 import { formatPacificTime } from "@/lib/utils"
-import { CalendarDays, Plus, Trash2, Info, Users, Save, CheckCircle2, ChevronRight, Printer } from "lucide-react"
+import { AlertCircle, CalendarDays, Plus, Trash2, Info, Users, Save, CheckCircle2, ChevronRight, Printer } from "lucide-react"
 
 interface SchoolFormProps {
   code: string;
@@ -19,6 +19,8 @@ interface SchoolFormProps {
   isReadOnly?: boolean;
   // The admin school-detail page has its own Print Form action, so it hides this one.
   showPrintButton?: boolean;
+  // Supplied only by the school portal. The admin version intentionally omits it.
+  onDone?: () => void;
 }
 
 type SaveState = "dirty" | "saving" | "saved";
@@ -40,7 +42,7 @@ function QuestionTitle({ number, children }: { number: number; children: React.R
   )
 }
 
-export function SchoolForm({ code, email, initialAnswers, onSaveAnswer, onSaveTeachers, isReadOnly, showPrintButton = true }: SchoolFormProps) {
+export function SchoolForm({ code, email, initialAnswers, onSaveAnswer, onSaveTeachers, isReadOnly, showPrintButton = true, onDone }: SchoolFormProps) {
   // Extract state per question
   const getQ = (key: string) => initialAnswers.questions.find(q => q.questionKey === key)
   
@@ -66,9 +68,14 @@ export function SchoolForm({ code, email, initialAnswers, onSaveAnswer, onSaveTe
   const [teacherRows, setTeacherRows] = useState(initialTeachers)
   const [teachersSaved, setTeachersSaved] = useState(true) // Track dirty state
   const [savingTeacher, setSavingTeacher] = useState(false)
+  const [teacherSaveError, setTeacherSaveError] = useState("")
 
   // Per-question save state so each section can show a Save button / "Saved" label
   const [saveStates, setSaveStates] = useState<Record<string, SaveState>>({})
+  // Clicking Done requests navigation, but navigation waits until autosaves
+  // already triggered by editing/blur have settled. Done itself never saves.
+  const [finishRequested, setFinishRequested] = useState(false)
+  const [answerSaveError, setAnswerSaveError] = useState("")
   // Values saved during this session (the prop may lag behind a refetch)
   const lastSavedRef = useRef<Record<string, string>>({})
   // Latest draft value per key, so a completing save can tell if it's still current
@@ -79,6 +86,7 @@ export function SchoolForm({ code, email, initialAnswers, onSaveAnswer, onSaveTe
   const saveSeqRef = useRef<Record<string, number>>({})
 
   const markEdited = (key: string, value: string, savedValue: string | undefined) => {
+    setAnswerSaveError("")
     draftRef.current[key] = value
     const baseline = lastSavedRef.current[key] ?? savedValue ?? ""
     setSaveStates(s => {
@@ -111,11 +119,12 @@ export function SchoolForm({ code, email, initialAnswers, onSaveAnswer, onSaveTe
         // Only report "saved" if the field hasn't been edited again meanwhile
         setSaveStates(s => ({ ...s, [key]: latest === value ? "saved" : "dirty" }))
       }
-    } catch (err) {
+    } catch {
       if (saveSeqRef.current[key] === seq) {
         setSaveStates(s => ({ ...s, [key]: "dirty" }))
       }
-      throw err
+      setAnswerSaveError("We couldn't save one of your changes. Please use the Save button in that section to try again.")
+      setFinishRequested(false)
     } finally {
       if (inFlightRef.current[key] === value) inFlightRef.current[key] = undefined
     }
@@ -199,6 +208,7 @@ export function SchoolForm({ code, email, initialAnswers, onSaveAnswer, onSaveTe
   }
 
   const handleTeacherChange = (index: number, field: string, value: any) => {
+    setTeacherSaveError("")
     const newRows = [...teacherRows];
     newRows[index] = { ...newRows[index], [field]: value };
     setTeacherRows(newRows);
@@ -206,11 +216,13 @@ export function SchoolForm({ code, email, initialAnswers, onSaveAnswer, onSaveTe
   }
 
   const addTeacher = () => {
+    setTeacherSaveError("")
     setTeacherRows([...teacherRows, { firstName: "", lastName: "", email: "", studentCount: 0 }]);
     setTeachersSaved(false);
   }
 
   const removeTeacher = (index: number) => {
+    setTeacherSaveError("")
     const newRows = teacherRows.filter((_, i) => i !== index);
     setTeacherRows(newRows.length ? newRows : [{ firstName: "", lastName: "", email: "", studentCount: 0 }]);
     setTeachersSaved(false);
@@ -224,9 +236,16 @@ export function SchoolForm({ code, email, initialAnswers, onSaveAnswer, onSaveTe
       return;
     }
     setSavingTeacher(true);
-    await onSaveTeachers(teacherRows);
-    setTeachersSaved(true);
-    setSavingTeacher(false);
+    setTeacherSaveError("");
+    try {
+      await onSaveTeachers(teacherRows);
+      setTeachersSaved(true);
+    } catch {
+      setTeacherSaveError("We couldn't save the teacher list. Check your connection, then use Save List to try again.");
+      setFinishRequested(false);
+    } finally {
+      setSavingTeacher(false);
+    }
   }
 
   // Debounced auto-save for teachers (optional, but requested for background save)
@@ -243,6 +262,32 @@ export function SchoolForm({ code, email, initialAnswers, onSaveAnswer, onSaveTe
     }
     return () => { if (autoSaveTimeout.current) clearTimeout(autoSaveTimeout.current) };
   }, [teacherRows, teachersSaved]);
+
+  const teacherDraftCanAutosave =
+    teacherRows.length > 0 &&
+    teacherRows.every(r => r.firstName && r.lastName && r.email && r.studentCount > 0)
+
+  useEffect(() => {
+    if (!finishRequested || !onDone) return
+
+    const answerSavePending = Object.entries(saveStates).some(([key, state]) =>
+      state === "saving" ||
+      (state === "dirty" && Boolean((draftRef.current[key] || "").trim()))
+    )
+    const teacherSavePending =
+      savingTeacher || (!teachersSaved && teacherDraftCanAutosave)
+
+    if (!answerSavePending && !teacherSavePending) {
+      onDone()
+    }
+  }, [
+    finishRequested,
+    onDone,
+    saveStates,
+    savingTeacher,
+    teachersSaved,
+    teacherDraftCanAutosave,
+  ])
 
 
   const totalStudents = teacherRows.reduce((sum, r) => sum + (Number(r.studentCount) || 0), 0);
@@ -531,6 +576,13 @@ export function SchoolForm({ code, email, initialAnswers, onSaveAnswer, onSaveTe
               )}
             </div>
 
+            {teacherSaveError && (
+              <div role="alert" className="no-print flex items-start gap-2 rounded-xl border border-destructive/20 bg-destructive/10 p-3 text-sm font-medium text-destructive">
+                <AlertCircle className="h-4 w-4 mt-0.5 flex-shrink-0" />
+                <span>{teacherSaveError}</span>
+              </div>
+            )}
+
             {initialAnswers.teachers.current && (
               <div className="text-xs text-muted-foreground text-right no-print">
                 Last updated by {initialAnswers.teachers.current.enteredBy} at {formatPacificTime(initialAnswers.teachers.current.enteredAt)}
@@ -773,6 +825,39 @@ export function SchoolForm({ code, email, initialAnswers, onSaveAnswer, onSaveTe
       </Card>
 
     </div>
+
+    {onDone && (
+      <div className="mt-8 no-print rounded-2xl border border-primary/20 bg-primary/5 p-5 sm:p-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-5">
+        <div>
+          <h2 className="font-serif text-xl font-bold text-foreground">Finished making changes?</h2>
+          <p className="text-sm text-muted-foreground mt-1">
+            Your information saves as you enter it. Review what ATOU has received when you are done.
+          </p>
+          {answerSaveError && (
+            <p role="alert" className="mt-3 flex items-start gap-2 text-sm font-semibold text-destructive">
+              <AlertCircle className="h-4 w-4 mt-0.5 flex-shrink-0" />
+              {answerSaveError}
+            </p>
+          )}
+        </div>
+        <Button
+          type="button"
+          size="lg"
+          onClick={() => setFinishRequested(true)}
+          disabled={finishRequested}
+          className="sm:flex-shrink-0 gap-2 font-bold"
+        >
+          {finishRequested ? (
+            "Finishing..."
+          ) : (
+            <>
+              Done — Review Information
+              <ChevronRight className="h-5 w-5" />
+            </>
+          )}
+        </Button>
+      </div>
+    )}
 
     <article className="atou-print-document hidden print:block" aria-label="A Touch of Understanding workshop logistics form">
       <header className="atou-print-masthead">

@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react"
-import { useLocation, useParams, Link } from "wouter"
+import { useLocation, useParams } from "wouter"
 import { useIdentifyPortalUser, useFetchPortalAnswers, useSaveAnswer, useSaveTeachers, useGetPortalPages } from "@workspace/api-client-react"
 import { PortalLayout } from "@/components/layout/portal-layout"
 import { SchoolForm } from "@/components/shared/school-form"
@@ -8,7 +8,8 @@ import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Label } from "@/components/ui/label"
 import { AtouLogo } from "@/components/shared/atou-logo"
-import { AlertCircle, FileText } from "lucide-react"
+import { PortalHelpfulInformation } from "@/components/shared/portal-helpful-information"
+import { AlertCircle } from "lucide-react"
 
 export function PortalEntry() {
   const { code } = useParams<{ code: string }>()
@@ -126,23 +127,7 @@ export function PortalEntry() {
   return (
     <PortalLayout schoolName={answers?.school.name}>
       
-      {pages && pages.length > 0 && (
-        <section aria-labelledby="helpful-information-title" className="mb-8 p-6 bg-white border border-border rounded-xl shadow-sm no-print">
-          <h3 id="helpful-information-title" className="font-serif text-lg font-bold mb-4 flex items-center gap-3 text-foreground">
-            <span className="h-10 w-10 rounded-full bg-secondary/10 text-secondary flex items-center justify-center border border-secondary/20" aria-hidden="true"><FileText className="h-5 w-5" /></span>
-            Helpful Information
-          </h3>
-          <div className="flex flex-wrap gap-3">
-            {pages.map(page => (
-              <Link key={page.id} href={`/s/${code}/pages/${page.slug}`}>
-                <Button variant="outline" className="rounded-full bg-white hover:bg-secondary/5 hover:text-secondary hover:border-secondary/30 transition-colors shadow-sm">
-                  {page.title}
-                </Button>
-              </Link>
-            ))}
-          </div>
-        </section>
-      )}
+      <PortalHelpfulInformation code={code!} pages={pages} />
 
       {answers && (
         <SchoolForm 
@@ -152,6 +137,7 @@ export function PortalEntry() {
           onSaveAnswer={handleSaveAnswer}
           onSaveTeachers={handleSaveTeachers}
           isReadOnly={answers.school.locked}
+          onDone={() => setLocation(`/s/${code}/done`)}
         />
       )}
     </PortalLayout>

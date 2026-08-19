@@ -463,6 +463,7 @@ export function SchoolForm({ code, email, initialAnswers, onSaveAnswer, onSaveTe
               <Label>Start Time</Label>
               <Input 
                 type="time" 
+                step={300}
                 value={timeValue} 
                 onChange={e => { setTimeValue(e.target.value); markEdited("workshop_time", e.target.value, isClockTime ? rawTimeValue.trim() : "") }} 
                 onBlur={() => handleSave("workshop_time", timeValue, qTime?.current?.value)}

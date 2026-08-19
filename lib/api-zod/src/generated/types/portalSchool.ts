@@ -12,4 +12,6 @@ export interface PortalSchool {
   /** @nullable */
   workshopDate: string | null;
   locked: boolean;
+  /** @nullable */
+  approxStudents: string | null;
 }

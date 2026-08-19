@@ -598,7 +598,8 @@ components:
         name: { type: string }
         workshopDate: { type: ["string", "null"] }
         locked: { type: boolean }
-      required: [id, name, workshopDate, locked]
+        approxStudents: { type: ["string", "null"] }
+      required: [id, name, workshopDate, locked, approxStudents]
     AnswerVersion:
       type: object
       properties:

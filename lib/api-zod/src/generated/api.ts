@@ -38,7 +38,8 @@ export const IdentifyPortalUserResponse = zod.object({
   "id": zod.number(),
   "name": zod.string(),
   "workshopDate": zod.string().nullable(),
-  "locked": zod.boolean()
+  "locked": zod.boolean(),
+  "approxStudents": zod.string().nullable()
 })
 })
 
@@ -77,7 +78,8 @@ export const FetchPortalAnswersResponse = zod.object({
   "id": zod.number(),
   "name": zod.string(),
   "workshopDate": zod.string().nullable(),
-  "locked": zod.boolean()
+  "locked": zod.boolean(),
+  "approxStudents": zod.string().nullable()
 }),
   "questions": zod.array(zod.object({
   "questionKey": zod.string(),

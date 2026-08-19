@@ -30,6 +30,12 @@ export function SchoolForm({ code, email, initialAnswers, onSaveAnswer, onSaveTe
   const isClockTime = /^\d{1,2}:\d{2}$/.test(rawTimeValue.trim())
   const [timeValue, setTimeValue] = useState(isClockTime ? rawTimeValue.trim() : "")
   const [timingNote, setTimingNote] = useState(getQ("timing_note")?.current?.value || "")
+  const cleanTime = (v: string | undefined) => {
+    const t = (v || "").trim()
+    return /^\d{1,2}:\d{2}$/.test(t) ? t : ""
+  }
+  const [lunchStart, setLunchStart] = useState(cleanTime(getQ("lunch_start")?.current?.value))
+  const [lunchEnd, setLunchEnd] = useState(cleanTime(getQ("lunch_end")?.current?.value))
   const [activityArea, setActivityArea] = useState(getQ("activity_area")?.current?.value || "")
   const [speakerArea, setSpeakerArea] = useState(getQ("speaker_area")?.current?.value || "")
   const [notes, setNotes] = useState(getQ("notes")?.current?.value || "")
@@ -115,21 +121,60 @@ export function SchoolForm({ code, email, initialAnswers, onSaveAnswer, onSaveTe
     )
   }
 
+  // Time helpers: "HH:MM" <-> minutes since midnight, formatted "h:mm AM/PM".
+  const parseHM = (s: string): number | null => {
+    const m = /^(\d{1,2}):(\d{2})$/.exec((s || "").trim());
+    if (!m) return null;
+    const h = Number(m[1]);
+    const mm = Number(m[2]);
+    if (h > 23 || mm > 59) return null;
+    return h * 60 + mm;
+  }
+  const fmtMin = (mins: number) => {
+    const d = new Date();
+    d.setHours(Math.floor(mins / 60) % 24, mins % 60, 0);
+    return d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+  }
+
   const computeBreakTimes = (startTimeStr: string) => {
-    if (!startTimeStr) return null;
-    const [h, m] = startTimeStr.split(':').map(Number);
-    if (isNaN(h) || isNaN(m)) return null;
-    
-    const start = new Date();
-    start.setHours(h, m, 0);
-    
-    const fmt = (d: Date) => d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
-    
-    const s1End = new Date(start.getTime() + 90 * 60000);
-    const s2Start = new Date(s1End.getTime() + 15 * 60000);
-    const s2End = new Date(s2Start.getTime() + 90 * 60000);
-    
-    return `${fmt(start)} – ${fmt(s1End)}, break, ${fmt(s2Start)} – ${fmt(s2End)}`;
+    const start = parseHM(startTimeStr);
+    if (start === null) return null;
+    const s1End = start + 90;
+    const s2Start = s1End + 15;
+    const s2End = s2Start + 90;
+    return `${fmtMin(start)} – ${fmtMin(s1End)}, break, ${fmtMin(s2Start)} – ${fmtMin(s2End)}`;
+  }
+
+  // The live schedule shown under the time fields.
+  // 104 students or fewer: two 1.5-hour sessions with a 15-minute break.
+  // 105 or more: two 1.5-hour morning sessions (15-minute break between
+  // them), then the school's lunch, then a third 1.5-hour session.
+  const buildSchedule = (threeSessions: boolean) => {
+    const start = parseHM(timeValue);
+    if (start === null) return null;
+    const s1End = start + 90;
+    const s2Start = s1End + 15;
+    const s2End = s2Start + 90;
+    const lines: { label: string; time: string }[] = [
+      { label: "Session 1", time: `${fmtMin(start)} – ${fmtMin(s1End)}` },
+      { label: "Break", time: `${fmtMin(s1End)} – ${fmtMin(s2Start)}` },
+      { label: "Session 2", time: `${fmtMin(s2Start)} – ${fmtMin(s2End)}` },
+    ];
+    const warnings: string[] = [];
+    let pending: string | null = null;
+    if (threeSessions) {
+      const ls = parseHM(lunchStart);
+      const le = parseHM(lunchEnd);
+      if (ls === null || le === null) {
+        pending = "Enter your school's lunch time to see the afternoon session.";
+      } else {
+        if (ls < s2End) warnings.push(`Lunch starts before the morning sessions end (${fmtMin(s2End)}). Please adjust the start time or check the lunch time.`);
+        if (le <= ls) warnings.push("Lunch end needs to be after lunch start.");
+        lines.push({ label: "Lunch", time: `${fmtMin(ls)} – ${fmtMin(le)}` });
+        if (le > ls) lines.push({ label: "Session 3", time: `${fmtMin(le)} – ${fmtMin(le + 90)}` });
+      }
+    }
+    return { lines, warnings, pending };
   }
 
   const handleTeacherChange = (index: number, field: string, value: any) => {
@@ -180,6 +225,12 @@ export function SchoolForm({ code, email, initialAnswers, onSaveAnswer, onSaveTe
 
 
   const totalStudents = teacherRows.reduce((sum, r) => sum + (Number(r.studentCount) || 0), 0);
+
+  // Student count that drives the two- vs three-session schedule: the live
+  // teacher list total when there is one, otherwise ATOU's approximate count.
+  const approxCount = parseInt(initialAnswers.school.approxStudents || "", 10);
+  const effectiveStudents = totalStudents > 0 ? totalStudents : (isNaN(approxCount) ? 0 : approxCount);
+  const needsThreeSessions = effectiveStudents >= 105;
 
   // Collapsed/expanded state per question's history. Expanding sticks until
   // the user collapses it or leaves the page — saves/refetches don't reset it.
@@ -445,7 +496,9 @@ export function SchoolForm({ code, email, initialAnswers, onSaveAnswer, onSaveTe
             <div>
               <CardTitle>Workshop time</CardTitle>
               <CardDescription className="text-base mt-2">
-                (Please provide a 3hr 15 minute time frame. This will allow for a break in between the workshop sections)
+                {needsThreeSessions
+                  ? `(With ${effectiveStudents} students, the workshop runs three 1.5 hour sessions: two before lunch with a 15 minute break between them, and one after lunch. Please provide a start time and your school's lunch time.)`
+                  : "(Please provide a 3hr 15 minute time frame. This will allow for a break in between the workshop sections)"}
               </CardDescription>
             </div>
             {!qTime?.current && <StatusBadge complete={false} text="Missing" />}
@@ -474,12 +527,56 @@ export function SchoolForm({ code, email, initialAnswers, onSaveAnswer, onSaveTe
               />
             </div>
             
-            {timeValue && (
-              <div className="bg-primary/5 text-primary p-3 rounded-md font-medium text-sm border border-primary/20">
-                Calculated Schedule: <br/>
-                {computeBreakTimes(timeValue)}
+            {needsThreeSessions && (
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-2">
+                  <Label>School Lunch Starts</Label>
+                  <Input
+                    type="time"
+                    step={300}
+                    value={lunchStart}
+                    onChange={e => { setLunchStart(e.target.value); markEdited("lunch_start", e.target.value, cleanTime(getQ("lunch_start")?.current?.value)) }}
+                    onBlur={() => handleSave("lunch_start", lunchStart, cleanTime(getQ("lunch_start")?.current?.value))}
+                    disabled={isReadOnly || initialAnswers.school.locked}
+                    className="print:border-none print:p-0 print:h-auto"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>School Lunch Ends</Label>
+                  <Input
+                    type="time"
+                    step={300}
+                    value={lunchEnd}
+                    onChange={e => { setLunchEnd(e.target.value); markEdited("lunch_end", e.target.value, cleanTime(getQ("lunch_end")?.current?.value)) }}
+                    onBlur={() => handleSave("lunch_end", lunchEnd, cleanTime(getQ("lunch_end")?.current?.value))}
+                    disabled={isReadOnly || initialAnswers.school.locked}
+                    className="print:border-none print:p-0 print:h-auto"
+                  />
+                </div>
               </div>
             )}
+
+            {(() => {
+              const schedule = timeValue ? buildSchedule(needsThreeSessions) : null;
+              if (!schedule) return null;
+              return (
+                <div className="bg-primary/5 text-primary p-3 rounded-md text-sm border border-primary/20 space-y-1">
+                  <div className="font-semibold">Calculated Schedule</div>
+                  {schedule.lines.map((l, i) => (
+                    <div key={i} className="flex justify-between gap-4">
+                      <span className={l.label === "Break" || l.label === "Lunch" ? "text-primary/70" : "font-medium"}>{l.label}</span>
+                      <span>{l.time}</span>
+                    </div>
+                  ))}
+                  {schedule.pending && (
+                    <div className="text-primary/80 pt-1">{schedule.pending}</div>
+                  )}
+                  {schedule.warnings.map((w, i) => (
+                    <div key={i} className="text-destructive pt-1">{w}</div>
+                  ))}
+                </div>
+              );
+            })()}
 
             <div className="space-y-2 pt-4">
               <Label className="text-muted-foreground flex justify-between">
@@ -496,10 +593,18 @@ export function SchoolForm({ code, email, initialAnswers, onSaveAnswer, onSaveTe
               />
             </div>
             
-            {renderSectionSave(["workshop_time", "timing_note"], () => {
-              handleSave("workshop_time", timeValue, qTime?.current?.value)
-              handleSave("timing_note", timingNote, qNote?.current?.value)
-            })}
+            {renderSectionSave(
+              needsThreeSessions
+                ? ["workshop_time", "timing_note", "lunch_start", "lunch_end"]
+                : ["workshop_time", "timing_note"],
+              () => {
+                handleSave("workshop_time", timeValue, qTime?.current?.value)
+                handleSave("timing_note", timingNote, qNote?.current?.value)
+                if (needsThreeSessions) {
+                  handleSave("lunch_start", lunchStart, cleanTime(getQ("lunch_start")?.current?.value))
+                  handleSave("lunch_end", lunchEnd, cleanTime(getQ("lunch_end")?.current?.value))
+                }
+              })}
 
             {qTime?.current && (
               <div className="text-xs text-muted-foreground no-print">
@@ -508,6 +613,16 @@ export function SchoolForm({ code, email, initialAnswers, onSaveAnswer, onSaveTe
             )}
           </div>
           {renderWorkshopTimeHistory(qTime, qNote)}
+          {(["lunch_start", "lunch_end"] as const).map(key => {
+            const hist = (getQ(key)?.history || []).map((h: any) => ({ ...h, value: formatStartTime(h.value) }));
+            if (hist.length === 0) return null;
+            return (
+              <div key={key} className="mt-1">
+                <div className="text-xs text-muted-foreground mt-3">{key === "lunch_start" ? "Lunch start" : "Lunch end"}</div>
+                {renderHistory(key, hist)}
+              </div>
+            );
+          })}
         </CardContent>
       </Card>
 

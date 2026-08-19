@@ -36,12 +36,14 @@ function portalSchool(school: {
   name: string;
   workshopDate: string | null;
   locked: boolean;
+  approxStudents: string | null;
 }) {
   return {
     id: school.id,
     name: school.name,
     workshopDate: school.workshopDate,
     locked: school.locked,
+    approxStudents: school.approxStudents,
   };
 }
 

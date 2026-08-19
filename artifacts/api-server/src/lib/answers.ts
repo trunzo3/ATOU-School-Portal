@@ -12,6 +12,8 @@ import { PAM_EMAIL } from "./auth";
 export const QUESTION_KEYS = [
   "workshop_time",
   "timing_note",
+  "lunch_start",
+  "lunch_end",
   "activity_area",
   "speaker_area",
   "notes",
@@ -115,7 +117,9 @@ export async function getQuestionStates(schoolId: number): Promise<QuestionState
       : null,
   });
   for (const q of questions) {
-    if (q.questionKey === "timing_note") continue; // optional, not tracked in grid
+    // timing_note is optional; the lunch times feed the workshop-time
+    // schedule and aren't tracked as their own grid columns.
+    if (["timing_note", "lunch_start", "lunch_end"].includes(q.questionKey)) continue;
     states.push({
       questionKey: q.questionKey,
       answered: q.current !== null,

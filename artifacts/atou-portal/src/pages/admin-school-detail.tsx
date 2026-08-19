@@ -6,7 +6,6 @@ import { SchoolForm } from "@/components/shared/school-form"
 import { Button } from "@/components/ui/button"
 import { Switch } from "@/components/ui/switch"
 import { Label } from "@/components/ui/label"
-import { AtouLogo } from "@/components/shared/atou-logo"
 import { Printer, ChevronLeft, Lock, Unlock, Mail } from "lucide-react"
 import { useQueryClient } from "@tanstack/react-query"
 import { useToast } from "@/hooks/use-toast"
@@ -108,14 +107,6 @@ function AdminSchoolFormWrapper({ schoolId, detail, adminEmail, handleSaveAnswer
 
   return (
     <AdminLayout>
-      <div className="hidden print:flex items-center gap-4 border-b-2 border-brand-navy pb-4 mb-6">
-        <AtouLogo className="h-20 w-20" />
-        <div>
-          <p className="text-xs font-bold uppercase tracking-[0.16em] text-primary">A Touch of Understanding</p>
-          <h1 className="font-serif text-3xl font-bold text-foreground">Workshop Logistics Form</h1>
-          <p className="text-lg text-muted-foreground mt-1">{detail.name}</p>
-        </div>
-      </div>
       <div className="mb-6 flex flex-col lg:flex-row justify-between items-start lg:items-end gap-4 no-print border-b pb-6">
         <div className="min-w-0">
           <Link href="/admin">

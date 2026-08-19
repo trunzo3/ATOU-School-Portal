@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Label } from "@/components/ui/label"
+import { AtouLogo } from "@/components/shared/atou-logo"
 import { AlertCircle, FileText } from "lucide-react"
 
 export function PortalEntry() {
@@ -87,9 +88,7 @@ export function PortalEntry() {
       <PortalLayout>
         <Card className="mt-6 sm:mt-12 max-w-md mx-auto border-t-8 border-t-primary shadow-lg border-x-border border-b-border rounded-2xl">
           <CardHeader className="text-center pb-2">
-            <div className="mx-auto mb-4 h-14 w-14 rounded-full bg-primary/10 text-primary flex items-center justify-center border border-primary/20" aria-hidden="true">
-              <FileText className="h-6 w-6" />
-            </div>
+            <AtouLogo className="mx-auto mb-4 h-28 w-auto max-w-[70%] sm:h-32 drop-shadow-sm" />
             <CardTitle className="text-2xl">Welcome</CardTitle>
             <CardDescription className="text-base mt-2">Please verify your email address to access your school's workshop form.</CardDescription>
           </CardHeader>

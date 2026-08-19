@@ -18,16 +18,7 @@ export function PortalLayout({ children, schoolName }: { children: React.ReactNo
         )}
       </header>
 
-      {/* Print-only header */}
-      <div className="hidden print:flex mb-8 border-b-2 border-brand-navy pb-4 items-center gap-4">
-        <AtouLogo className="h-18 w-18" />
-        <div>
-          <h1 className="font-serif text-3xl font-bold text-foreground">A Touch of Understanding</h1>
-          <p className="text-xl text-muted-foreground mt-1">Workshop Logistics Form: {schoolName}</p>
-        </div>
-      </div>
-
-      <main className="flex-1 flex flex-col items-center p-4 sm:p-8 sm:py-12">
+      <main className="flex-1 flex flex-col items-center p-4 sm:p-8 sm:py-12 print:block print:p-0">
         <div className="w-full max-w-4xl">
           {children}
         </div>

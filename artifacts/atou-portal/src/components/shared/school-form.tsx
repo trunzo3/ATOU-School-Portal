@@ -5,6 +5,7 @@ import { Input, Textarea } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Button } from "@/components/ui/button"
 import { StatusBadge } from "@/components/ui/status-badge"
+import { AtouLogo } from "@/components/shared/atou-logo"
 import { formatPacificTime } from "@/lib/utils"
 import { Clock, Plus, Trash2, Info, Users, Save, CheckCircle2, ChevronRight } from "lucide-react"
 
@@ -18,6 +19,23 @@ interface SchoolFormProps {
 }
 
 type SaveState = "dirty" | "saving" | "saved";
+
+function QuestionTitle({ number, children }: { number: number; children: React.ReactNode }) {
+  return (
+    <CardTitle className="flex items-start gap-3">
+      <span
+        aria-hidden="true"
+        className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary text-sm font-sans font-bold text-primary-foreground"
+      >
+        {number}
+      </span>
+      <span>
+        <span className="sr-only">Question {number}: </span>
+        {children}
+      </span>
+    </CardTitle>
+  )
+}
 
 export function SchoolForm({ code, email, initialAnswers, onSaveAnswer, onSaveTeachers, isReadOnly }: SchoolFormProps) {
   // Extract state per question
@@ -374,9 +392,24 @@ export function SchoolForm({ code, email, initialAnswers, onSaveAnswer, onSaveTe
   const qAct = getQ("activity_area");
   const qSpk = getQ("speaker_area");
   const qNotes = getQ("notes");
+  const calculatedSchedule = timeValue ? buildSchedule(needsThreeSessions) : null;
+  const workshopDate = initialAnswers.school.workshopDate
+    ? new Intl.DateTimeFormat("en-US", {
+        month: "long",
+        day: "numeric",
+        year: "numeric",
+      }).format(new Date(`${initialAnswers.school.workshopDate}T12:00:00`))
+    : "Date TBD";
+  const workshopStart = timeValue
+    ? formatStartTime(timeValue)
+    : formatStartTime(qTime?.current?.value || "") || "Not provided";
+  const printableTeachers = teacherRows.filter(
+    row => row.firstName.trim() || row.lastName.trim() || row.email.trim() || Number(row.studentCount) > 0
+  );
 
   return (
-    <div className="space-y-8 print:space-y-6 w-full max-w-3xl mx-auto pb-12">
+    <>
+    <div className="space-y-8 w-full max-w-3xl mx-auto pb-12 no-print">
       
       {/* Header Info */}
       <div className="bg-primary/5 border border-primary/20 rounded-xl p-6 sm:p-8 print:border-none print:p-0 print:bg-transparent flex flex-col sm:flex-row justify-between items-start gap-4">
@@ -404,9 +437,9 @@ export function SchoolForm({ code, email, initialAnswers, onSaveAnswer, onSaveTe
         <CardHeader className="print:px-0">
           <div className="flex justify-between items-start">
             <div>
-              <CardTitle className="flex items-center gap-2">
+              <QuestionTitle number={1}>
                 Teachers' names for each grade level and student count for each teacher
-              </CardTitle>
+              </QuestionTitle>
               <CardDescription className="text-base mt-2">
                 (this will allow us to pack the take-home materials separately for each teacher)
               </CardDescription>
@@ -494,7 +527,7 @@ export function SchoolForm({ code, email, initialAnswers, onSaveAnswer, onSaveTe
         <CardHeader className="print:px-0">
           <div className="flex justify-between items-start">
             <div>
-              <CardTitle>Workshop time</CardTitle>
+              <QuestionTitle number={2}>Workshop time</QuestionTitle>
               <CardDescription className="text-base mt-2">
                 {needsThreeSessions
                   ? `(With ${effectiveStudents} students, the workshop runs three 1.5 hour sessions: two before lunch with a 15 minute break between them, and one after lunch. Please provide a start time and your school's lunch time.)`
@@ -631,7 +664,7 @@ export function SchoolForm({ code, email, initialAnswers, onSaveAnswer, onSaveTe
         <CardHeader className="print:px-0">
           <div className="flex justify-between items-start">
             <div>
-              <CardTitle>Area for activity stations</CardTitle>
+              <QuestionTitle number={3}>Area for activity stations</QuestionTitle>
               <CardDescription className="text-base mt-2">
                 (2 classrooms near each other or MP room or Library)
               </CardDescription>
@@ -665,7 +698,7 @@ export function SchoolForm({ code, email, initialAnswers, onSaveAnswer, onSaveTe
         <CardHeader className="print:px-0">
           <div className="flex justify-between items-start">
             <div>
-              <CardTitle>An additional separate area for speakers</CardTitle>
+              <QuestionTitle number={4}>An additional separate area for speakers</QuestionTitle>
               <CardDescription className="text-base mt-2">
                 (if in a classroom, please provide #)
               </CardDescription>
@@ -698,7 +731,7 @@ export function SchoolForm({ code, email, initialAnswers, onSaveAnswer, onSaveTe
       <Card className="border-l-4 border-l-secondary print:shadow-none print:border-b-2 print:border-l-0 print:border-black print:rounded-none">
         <CardHeader className="print:px-0">
           <div>
-            <CardTitle>Anything else we should know?</CardTitle>
+            <QuestionTitle number={5}>Anything else we should know?</QuestionTitle>
             <CardDescription className="text-base mt-2">
               Optional notes for the ATOU team.
             </CardDescription>
@@ -726,5 +759,182 @@ export function SchoolForm({ code, email, initialAnswers, onSaveAnswer, onSaveTe
       </Card>
 
     </div>
+
+    <article className="atou-print-document hidden print:block" aria-label="A Touch of Understanding workshop logistics form">
+      <header className="atou-print-masthead">
+        <AtouLogo className="atou-print-logo" />
+        <div>
+          <p className="atou-print-eyebrow">A Touch of Understanding</p>
+          <h1>Workshop Logistics Form</h1>
+          <p className="atou-print-subtitle">School workshop planning details</p>
+        </div>
+      </header>
+
+      <div className="atou-print-metadata">
+        <div>
+          <span>School</span>
+          <strong>{initialAnswers.school.name}</strong>
+        </div>
+        <div>
+          <span>Workshop date</span>
+          <strong>{workshopDate}</strong>
+        </div>
+      </div>
+
+      <dl className="atou-print-summary">
+        <div>
+          <dt>Total students</dt>
+          <dd>{totalStudents || "—"}</dd>
+        </div>
+        <div>
+          <dt>Workshop start</dt>
+          <dd>{workshopStart}</dd>
+        </div>
+        <div>
+          <dt>Teachers participating</dt>
+          <dd>{printableTeachers.length || "—"}</dd>
+        </div>
+      </dl>
+
+      <section className="atou-print-section">
+        <div className="atou-print-section-heading">
+          <span aria-hidden="true">1</span>
+          <div>
+            <h2>Teachers &amp; Student Counts</h2>
+            <p>Listed by teacher so take-home materials can be packed separately.</p>
+          </div>
+        </div>
+        <table className="atou-print-teacher-table">
+          <thead>
+            <tr>
+              <th>Teacher</th>
+              <th>Email</th>
+              <th>Students</th>
+            </tr>
+          </thead>
+          <tbody>
+            {printableTeachers.length ? printableTeachers.map((row, index) => (
+              <tr key={index}>
+                <td>{[row.firstName, row.lastName].filter(Boolean).join(" ") || "—"}</td>
+                <td>{row.email || "—"}</td>
+                <td>{Number(row.studentCount) || "—"}</td>
+              </tr>
+            )) : (
+              <tr>
+                <td colSpan={3} className="atou-print-empty">No teacher information provided.</td>
+              </tr>
+            )}
+          </tbody>
+          <tfoot>
+            <tr>
+              <td colSpan={2}>Total students</td>
+              <td>{totalStudents || "—"}</td>
+            </tr>
+          </tfoot>
+        </table>
+      </section>
+
+      <section className="atou-print-section">
+        <div className="atou-print-section-heading">
+          <span aria-hidden="true">2</span>
+          <div>
+            <h2>Workshop Time</h2>
+            <p>
+              {needsThreeSessions
+                ? "Three 1.5-hour sessions, including the school lunch period."
+                : "Three hours 15 minutes total, including a scheduled break."}
+            </p>
+          </div>
+        </div>
+        <div className="atou-print-detail-grid">
+          <div>
+            <span>Start time</span>
+            <strong>{workshopStart}</strong>
+          </div>
+          <div>
+            <span>Timing notes / constraints</span>
+            <strong>{timingNote.trim() || "None provided"}</strong>
+          </div>
+          {needsThreeSessions && (
+            <>
+              <div>
+                <span>School lunch starts</span>
+                <strong>{lunchStart ? formatStartTime(lunchStart) : "Not provided"}</strong>
+              </div>
+              <div>
+                <span>School lunch ends</span>
+                <strong>{lunchEnd ? formatStartTime(lunchEnd) : "Not provided"}</strong>
+              </div>
+            </>
+          )}
+        </div>
+        <div className="atou-print-schedule">
+          <span>Calculated schedule</span>
+          {calculatedSchedule ? (
+            <>
+              <div>
+                {calculatedSchedule.lines.map((line, index) => (
+                  <span key={line.label}>
+                    <strong>{line.label}</strong> {line.time}
+                    {index < calculatedSchedule.lines.length - 1 && <b aria-hidden="true">•</b>}
+                  </span>
+                ))}
+              </div>
+              {calculatedSchedule.pending && <p>{calculatedSchedule.pending}</p>}
+              {calculatedSchedule.warnings.map(warning => <p key={warning}>{warning}</p>)}
+            </>
+          ) : (
+            <strong>Available after a valid start time is provided.</strong>
+          )}
+        </div>
+      </section>
+
+      <section className="atou-print-section">
+        <div className="atou-print-section-heading">
+          <span aria-hidden="true">3</span>
+          <div>
+            <h2>Area for Activity Stations</h2>
+            <p>Two nearby classrooms, a multipurpose room, or the library.</p>
+          </div>
+        </div>
+        <div className="atou-print-answer">
+          <span>Activity stations</span>
+          <strong>{activityArea.trim() || "Not provided"}</strong>
+        </div>
+      </section>
+
+      <section className="atou-print-section">
+        <div className="atou-print-section-heading">
+          <span aria-hidden="true">4</span>
+          <div>
+            <h2>Additional Separate Area for Speakers</h2>
+            <p>If using a classroom, include the room number.</p>
+          </div>
+        </div>
+        <div className="atou-print-answer">
+          <span>Speaker area</span>
+          <strong>{speakerArea.trim() || "Not provided"}</strong>
+        </div>
+      </section>
+
+      <section className="atou-print-section">
+        <div className="atou-print-section-heading">
+          <span aria-hidden="true">5</span>
+          <div>
+            <h2>Anything Else We Should Know?</h2>
+            <p>Additional notes for the ATOU team.</p>
+          </div>
+        </div>
+        <div className="atou-print-answer atou-print-notes">
+          <strong>{notes.trim() || "No additional notes provided."}</strong>
+        </div>
+      </section>
+
+      <footer className="atou-print-footer">
+        <span>A Touch of Understanding · Workshop Logistics</span>
+        <span>{initialAnswers.school.name} · {workshopDate}</span>
+      </footer>
+    </article>
+    </>
   )
 }

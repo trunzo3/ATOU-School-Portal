@@ -176,14 +176,330 @@
 
 @media print {
   @page {
-    margin: 0.5in;
+    size: auto;
+    margin: 12mm;
   }
+  html,
   body {
     background-color: white !important;
     -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  body {
+    color: #132d52 !important;
   }
   /* Hide non-printable elements by default */
   .no-print {
     display: none !important;
+  }
+
+  .atou-print-document {
+    width: 100%;
+    max-width: none;
+    color: #132d52;
+    font-size: 9pt;
+    line-height: 1.35;
+  }
+
+  .atou-print-masthead {
+    display: flex;
+    align-items: center;
+    gap: 4mm;
+    min-height: 26mm;
+    margin: 0;
+    padding: 4mm 6mm;
+    background: #132d52 !important;
+    color: #fff !important;
+    break-inside: avoid;
+  }
+
+  .atou-print-logo {
+    width: 20mm;
+    height: 20mm;
+    flex: 0 0 auto;
+  }
+
+  .atou-print-masthead h1 {
+    margin: 0.5mm 0 0;
+    color: #fff !important;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 20pt;
+    font-weight: 700;
+    line-height: 1.05;
+    letter-spacing: 0.01em;
+  }
+
+  .atou-print-eyebrow,
+  .atou-print-subtitle {
+    margin: 0;
+    color: #fff !important;
+  }
+
+  .atou-print-eyebrow {
+    font-size: 6.5pt;
+    font-weight: 700;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+  }
+
+  .atou-print-subtitle {
+    margin-top: 1mm;
+    color: #c9d7e7 !important;
+    font-size: 8pt;
+  }
+
+  .atou-print-metadata {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 10mm;
+    margin: 0 0 5mm;
+    padding: 3mm 6mm;
+    border-bottom: 1.2pt solid #132d52;
+    background: #f1f5f9 !important;
+    break-inside: avoid;
+  }
+
+  .atou-print-metadata > div {
+    display: flex;
+    align-items: baseline;
+    gap: 2mm;
+    min-width: 0;
+  }
+
+  .atou-print-metadata span,
+  .atou-print-summary dt,
+  .atou-print-detail-grid span,
+  .atou-print-answer span,
+  .atou-print-schedule > span {
+    color: #64748b !important;
+    font-size: 6.5pt;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+
+  .atou-print-metadata strong {
+    overflow-wrap: anywhere;
+  }
+
+  .atou-print-summary {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 2mm;
+    margin: 0 0 5mm;
+    break-inside: avoid;
+  }
+
+  .atou-print-summary > div {
+    min-height: 13mm;
+    padding: 2.5mm 3mm;
+    border: 0.5pt solid #dbe3ec;
+    border-left: 2pt solid #173f6d;
+    border-radius: 1mm;
+    background: #f8fafc !important;
+  }
+
+  .atou-print-summary dt,
+  .atou-print-summary dd {
+    margin: 0;
+  }
+
+  .atou-print-summary dd {
+    margin-top: 1mm;
+    font-size: 10pt;
+    font-weight: 700;
+    overflow-wrap: anywhere;
+  }
+
+  .atou-print-section {
+    margin: 0 0 4mm;
+  }
+
+  .atou-print-section-heading {
+    display: flex;
+    align-items: flex-start;
+    gap: 2mm;
+    padding-bottom: 1.2mm;
+    border-bottom: 1pt solid #173f6d;
+    break-after: avoid;
+  }
+
+  .atou-print-section-heading > span {
+    display: flex;
+    width: 5mm;
+    height: 5mm;
+    flex: 0 0 5mm;
+    align-items: center;
+    justify-content: center;
+    margin-top: 0.2mm;
+    border-radius: 50%;
+    background: #118a9a !important;
+    color: #fff !important;
+    font-size: 7pt;
+    font-weight: 700;
+  }
+
+  .atou-print-section-heading h2 {
+    margin: 0;
+    color: #132d52 !important;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 10.5pt;
+    font-weight: 700;
+    line-height: 1.15;
+  }
+
+  .atou-print-section-heading p {
+    margin: 0.5mm 0 0;
+    color: #64748b !important;
+    font-size: 7pt;
+    font-style: italic;
+  }
+
+  .atou-print-teacher-table {
+    width: 100%;
+    margin-top: 2mm;
+    border-collapse: collapse;
+    table-layout: fixed;
+  }
+
+  .atou-print-teacher-table thead {
+    display: table-header-group;
+  }
+
+  .atou-print-teacher-table tfoot {
+    display: table-row-group;
+  }
+
+  .atou-print-teacher-table tr {
+    break-inside: avoid;
+  }
+
+  .atou-print-teacher-table th,
+  .atou-print-teacher-table td {
+    padding: 1.6mm 2.5mm;
+    text-align: left;
+    overflow-wrap: anywhere;
+  }
+
+  .atou-print-teacher-table th {
+    background: #173f6d !important;
+    color: #fff !important;
+    font-size: 6.5pt;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .atou-print-teacher-table th:nth-child(1),
+  .atou-print-teacher-table td:nth-child(1) {
+    width: 30%;
+  }
+
+  .atou-print-teacher-table th:nth-child(3),
+  .atou-print-teacher-table td:nth-child(3) {
+    width: 16%;
+    text-align: right;
+  }
+
+  .atou-print-teacher-table tbody tr:nth-child(odd) {
+    background: #f8fafc !important;
+  }
+
+  .atou-print-teacher-table tbody td {
+    border-bottom: 0.5pt solid #e2e8f0;
+  }
+
+  .atou-print-teacher-table tfoot td {
+    border-top: 1pt solid #173f6d;
+    font-weight: 700;
+  }
+
+  .atou-print-empty {
+    color: #64748b !important;
+    font-style: italic;
+    text-align: left !important;
+  }
+
+  .atou-print-detail-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1.5mm;
+    margin-top: 2mm;
+    break-inside: avoid;
+  }
+
+  .atou-print-detail-grid > div,
+  .atou-print-answer {
+    min-width: 0;
+    padding: 2.2mm 3mm;
+    border: 0.5pt solid #dbe3ec;
+    border-radius: 1mm;
+    background: #f8fafc !important;
+  }
+
+  .atou-print-detail-grid strong,
+  .atou-print-answer strong {
+    display: block;
+    margin-top: 0.8mm;
+    font-size: 8.5pt;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+  }
+
+  .atou-print-schedule {
+    margin-top: 2mm;
+    padding: 2.2mm 3mm;
+    border: 0.5pt solid #a7ddd3;
+    border-left: 2pt solid #16a085;
+    border-radius: 1mm;
+    background: #eaf7f4 !important;
+    break-inside: avoid;
+  }
+
+  .atou-print-schedule > div {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1mm 2mm;
+    margin-top: 0.8mm;
+  }
+
+  .atou-print-schedule > div > span {
+    display: inline-flex;
+    gap: 1mm;
+  }
+
+  .atou-print-schedule b {
+    margin-left: 1mm;
+    color: #118a9a !important;
+  }
+
+  .atou-print-schedule p {
+    margin: 1mm 0 0;
+    color: #8c3c56 !important;
+    font-size: 7pt;
+  }
+
+  .atou-print-answer {
+    margin-top: 1.5mm;
+    break-inside: avoid;
+  }
+
+  .atou-print-notes {
+    min-height: 12mm;
+  }
+
+  .atou-print-footer {
+    display: flex;
+    justify-content: space-between;
+    gap: 6mm;
+    margin-top: 5mm;
+    padding: 2.5mm 4mm;
+    background: #132d52 !important;
+    color: #c9d7e7 !important;
+    font-size: 6.5pt;
+    break-inside: avoid;
+  }
+
+  .atou-print-footer span:last-child {
+    text-align: right;
   }
 }

@@ -1,2 +1,3 @@
 - [Orval codegen quirks](orval-codegen-quirks.md) — several OpenAPI constructs emit validators or types unsupported by this workspace.
 - [ATOU Airtable base](airtable-atou-base.md) — base/table ids, Workshops-only rule, contact-name lookup returns record ids.
+- [Email sending switch scope](email-sending-switch.md) — email_sending_enabled gates school mailings only; operational emails (password resets) check just the Resend key.

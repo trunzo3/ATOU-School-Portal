@@ -178,6 +178,60 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorMessage"
+  /admin/forgot-password:
+    post:
+      operationId: adminForgotPassword
+      tags: [admin]
+      summary: Request a password reset email (never reveals whether the email exists)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ForgotPasswordInput"
+      responses:
+        "200":
+          description: Neutral acknowledgement
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ForgotPasswordResult"
+        "429":
+          description: Too many reset requests
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorMessage"
+        "503":
+          description: Email sending is not available
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ForgotPasswordResult"
+  /admin/reset-password:
+    post:
+      operationId: adminResetPassword
+      tags: [admin]
+      summary: Set a new password using a reset token
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ResetPasswordInput"
+      responses:
+        "200":
+          description: Password updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OkStatus"
+        "400":
+          description: Invalid, expired, or already-used token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorMessage"
   /admin/dev-login:
     post:
       operationId: adminDevLogin
@@ -746,6 +800,23 @@ components:
         email: { type: string }
         createdAt: { type: string }
       required: [id, email, createdAt]
+    ForgotPasswordInput:
+      type: object
+      properties:
+        email: { type: string, minLength: 3 }
+      required: [email]
+    ForgotPasswordResult:
+      type: object
+      properties:
+        sent: { type: boolean }
+        message: { type: string }
+      required: [sent, message]
+    ResetPasswordInput:
+      type: object
+      properties:
+        token: { type: string, minLength: 1 }
+        password: { type: string, minLength: 8 }
+      required: [token, password]
     AdminUserInput:
       type: object
       properties:

@@ -1,26 +1,25 @@
-import { useGetAdminUsers, useCreateAdminUser, useDeleteAdminUser, useGetAdminMe, getGetAdminUsersQueryKey } from "@workspace/api-client-react"
+import { useGetAdminUsers, useCreateAdminUser, useDeleteAdminUser, useUpdateAdminUser, useGetAdminMe, getGetAdminUsersQueryKey } from "@workspace/api-client-react"
 import { AdminLayout } from "@/components/layout/admin-layout"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Label } from "@/components/ui/label"
-import { Trash2, UserPlus } from "lucide-react"
+import { PasswordInput } from "@/components/shared/password-input"
+import { KeyRound, Trash2, UserPlus } from "lucide-react"
 import { useState } from "react"
 import { useToast } from "@/hooks/use-toast"
 import { useQueryClient } from "@tanstack/react-query"
 import { formatPacificTime } from "@/lib/utils"
+import { DeleteConfirmDialog } from "@/components/shared/delete-confirm-dialog"
 import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog"
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
 
 export function AdminUsers() {
   const { data: users } = useGetAdminUsers()
@@ -58,6 +57,29 @@ export function AdminUsers() {
     })
   }
 
+  const updateUser = useUpdateAdminUser()
+  const [resetTarget, setResetTarget] = useState<{ id: number; email: string } | null>(null)
+  const [newPassword, setNewPassword] = useState("")
+
+  const closeReset = () => {
+    setResetTarget(null)
+    setNewPassword("")
+  }
+
+  const handleResetPassword = (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!resetTarget) return
+    updateUser.mutate({ id: resetTarget.id, data: { password: newPassword } }, {
+      onSuccess: () => {
+        toast({ title: "Password updated", description: `${resetTarget.email} can now sign in with the new password.` })
+        closeReset()
+      },
+      onError: (err: any) => {
+        toast({ title: "Error updating password", description: err?.data?.error ?? err?.message, variant: "destructive" })
+      }
+    })
+  }
+
   return (
     <AdminLayout>
       <div className="space-y-6 max-w-4xl">
@@ -80,7 +102,7 @@ export function AdminUsers() {
               </div>
               <div className="space-y-2 flex-1 w-full">
                 <Label htmlFor="password">Password (min 8 chars)</Label>
-                <Input id="password" type="password" autoComplete="new-password" value={password} onChange={e => setPassword(e.target.value)} required minLength={8} />
+                <PasswordInput id="password" autoComplete="new-password" value={password} onChange={e => setPassword(e.target.value)} required minLength={8} />
               </div>
               <Button type="submit" disabled={createUser.isPending} className="w-full sm:w-auto">
                 <UserPlus className="h-4 w-4 mr-2" />
@@ -109,35 +131,69 @@ export function AdminUsers() {
                     {formatPacificTime(user.createdAt)}
                   </TableCell>
                   <TableCell className="text-right">
-                    {user.id !== me?.id && (
-                      <AlertDialog>
-                        <AlertDialogTrigger asChild>
-                          <Button variant="ghost" size="icon" className="rounded-full h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10 opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity">
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </AlertDialogTrigger>
-                        <AlertDialogContent className="rounded-2xl">
-                          <AlertDialogHeader>
-                            <AlertDialogTitle>Remove Admin User</AlertDialogTitle>
-                            <AlertDialogDescription>
-                              Are you sure you want to remove {user.email}? They will immediately lose access to the dashboard.
-                            </AlertDialogDescription>
-                          </AlertDialogHeader>
-                          <AlertDialogFooter>
-                            <AlertDialogCancel className="rounded-full">Cancel</AlertDialogCancel>
-                            <AlertDialogAction onClick={() => handleDelete(user.id)} className="rounded-full bg-destructive text-destructive-foreground hover:bg-destructive/90">
-                              Remove User
-                            </AlertDialogAction>
-                          </AlertDialogFooter>
-                        </AlertDialogContent>
-                      </AlertDialog>
-                    )}
+                    <div className="flex justify-end gap-1">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="rounded-full h-8 text-primary hover:text-primary hover:bg-primary/10"
+                        onClick={() => setResetTarget({ id: user.id, email: user.email })}
+                      >
+                        <KeyRound className="h-4 w-4 mr-1.5" />
+                        Reset Password
+                      </Button>
+                      {user.id !== me?.id && (
+                        <DeleteConfirmDialog
+                          trigger={
+                            <Button variant="ghost" size="icon" className="rounded-full h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10" title="Remove user">
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          }
+                          title="Remove Admin User"
+                          description={`Are you sure you want to remove ${user.email}? They will immediately lose access to the dashboard.`}
+                          confirmLabel="Remove User"
+                          onConfirm={() => handleDelete(user.id)}
+                          pending={deleteUser.isPending}
+                        />
+                      )}
+                    </div>
                   </TableCell>
                 </TableRow>
               ))}
             </TableBody>
           </Table>
         </Card>
+
+        <Dialog open={resetTarget !== null} onOpenChange={(open) => { if (!open) closeReset() }}>
+          <DialogContent className="rounded-2xl sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle>Reset Password</DialogTitle>
+              <DialogDescription>
+                Set a new password for {resetTarget?.email}. They'll use it the next time they sign in.
+              </DialogDescription>
+            </DialogHeader>
+            <form onSubmit={handleResetPassword} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="reset-new-password">New Password (min 8 chars)</Label>
+                <PasswordInput
+                  id="reset-new-password"
+                  autoComplete="new-password"
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  required
+                  minLength={8}
+                />
+              </div>
+              <DialogFooter>
+                <Button type="button" variant="outline" className="rounded-full" onClick={closeReset}>
+                  Cancel
+                </Button>
+                <Button type="submit" className="rounded-full" disabled={newPassword.length < 8 || updateUser.isPending}>
+                  {updateUser.isPending ? "Saving..." : "Set New Password"}
+                </Button>
+              </DialogFooter>
+            </form>
+          </DialogContent>
+        </Dialog>
       </div>
     </AdminLayout>
   )

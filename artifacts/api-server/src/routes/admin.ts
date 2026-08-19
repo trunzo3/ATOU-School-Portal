@@ -1,8 +1,9 @@
 import { Router, type IRouter, type Response } from "express";
-import { asc, desc, eq } from "drizzle-orm";
+import { and, asc, desc, eq, gt, isNull } from "drizzle-orm";
 import {
   db,
   adminUsersTable,
+  passwordResetTokensTable,
   answersTable,
   appSettingsTable,
   contactsTable,
@@ -11,8 +12,11 @@ import {
   schoolsTable,
   teacherSnapshotsTable,
 } from "@workspace/db";
+import crypto from "node:crypto";
 import {
   AdminLoginBody,
+  AdminForgotPasswordBody,
+  AdminResetPasswordBody,
   SetSchoolLockBody,
   UpdateEmailTemplateBody,
   SendEmailsBody,
@@ -33,7 +37,7 @@ import {
   verifyPassword,
   type AdminRequest,
 } from "../lib/auth";
-import { schoolLink } from "../lib/appUrl";
+import { appBaseUrl, schoolLink } from "../lib/appUrl";
 import { getQuestionStates, missingCount, normalizeEmail } from "../lib/answers";
 import {
   EMAIL_FROM,
@@ -94,6 +98,122 @@ router.post("/admin/login", async (req, res): Promise<void> => {
   }
   setSessionCookie(res, admin.id, admin.email);
   res.json(adminOut(admin));
+});
+
+// --- password reset ---
+
+const RESET_TOKEN_TTL_MS = 1000 * 60 * 60; // 1 hour
+const NEUTRAL_RESET_MESSAGE =
+  "If that email matches an account, a password reset link has been sent.";
+
+function hashResetToken(token: string): string {
+  return crypto.createHash("sha256").update(token).digest("hex");
+}
+
+// Basic in-memory guard: at most 3 reset requests per email per 15 minutes.
+const resetRequestLog = new Map<string, number[]>();
+function resetRequestAllowed(email: string): boolean {
+  const now = Date.now();
+  const windowMs = 1000 * 60 * 15;
+  const recent = (resetRequestLog.get(email) ?? []).filter((t) => now - t < windowMs);
+  if (recent.length >= 3) {
+    resetRequestLog.set(email, recent);
+    return false;
+  }
+  recent.push(now);
+  resetRequestLog.set(email, recent);
+  return true;
+}
+
+router.post("/admin/forgot-password", async (req, res): Promise<void> => {
+  const parsed = AdminForgotPasswordBody.safeParse(req.body);
+  if (!parsed.success) {
+    res.status(400).json({ error: "Enter your email address." });
+    return;
+  }
+  // Password resets are operational email: they only need Resend to be
+  // configured, independent of the school-mailing on/off switch.
+  if (!emailConfigured()) {
+    res.status(503).json({
+      sent: false,
+      message:
+        "Password reset emails can't be sent right now. Please contact an administrator to reset your password.",
+    });
+    return;
+  }
+  const email = normalizeEmail(parsed.data.email);
+  if (!resetRequestAllowed(email)) {
+    res.status(429).json({
+      error: "Too many reset requests. Please wait a few minutes and try again.",
+    });
+    return;
+  }
+  const [admin] = await db.select().from(adminUsersTable).where(eq(adminUsersTable.email, email));
+  if (admin) {
+    const token = crypto.randomBytes(32).toString("base64url");
+    await db.insert(passwordResetTokensTable).values({
+      adminId: admin.id,
+      tokenHash: hashResetToken(token),
+      expiresAt: new Date(Date.now() + RESET_TOKEN_TTL_MS),
+    });
+    const resetLink = `${appBaseUrl()}/reset-password?token=${token}`;
+    const body = `A password reset was requested for your A Touch of Understanding admin account.
+
+Set a new password here (this link works once and expires in 1 hour):
+${resetLink}
+
+If you didn't request this, you can ignore this email — your password is unchanged.`;
+    const result = await sendEmail({
+      to: [admin.email],
+      subject: "Reset your A Touch of Understanding admin password",
+      text: body,
+    });
+    if (!result.delivered) {
+      req.log.warn({ provider: "resend" }, "Password reset email was rejected");
+      // Stay neutral to the caller: don't reveal that the account exists.
+    }
+  }
+  res.json({ sent: true, message: NEUTRAL_RESET_MESSAGE });
+});
+
+router.post("/admin/reset-password", async (req, res): Promise<void> => {
+  const parsed = AdminResetPasswordBody.safeParse(req.body);
+  if (!parsed.success) {
+    res.status(400).json({
+      error: "A reset token and a new password of at least 8 characters are required.",
+    });
+    return;
+  }
+  const newPasswordHash = hashPassword(parsed.data.password);
+  // Claim the token atomically (single-use): the conditional UPDATE marks it
+  // used only if it is still unused and unexpired, so concurrent requests
+  // with the same link can't both succeed.
+  const reset = await db.transaction(async (tx) => {
+    const [claimed] = await tx
+      .update(passwordResetTokensTable)
+      .set({ usedAt: new Date() })
+      .where(
+        and(
+          eq(passwordResetTokensTable.tokenHash, hashResetToken(parsed.data.token)),
+          isNull(passwordResetTokensTable.usedAt),
+          gt(passwordResetTokensTable.expiresAt, new Date()),
+        ),
+      )
+      .returning();
+    if (!claimed) return false;
+    await tx
+      .update(adminUsersTable)
+      .set({ passwordHash: newPasswordHash, passwordChangedAt: new Date() })
+      .where(eq(adminUsersTable.id, claimed.adminId));
+    return true;
+  });
+  if (!reset) {
+    res.status(400).json({
+      error: "This reset link is invalid, expired, or already used. Please request a new one.",
+    });
+    return;
+  }
+  res.json({ ok: true });
 });
 
 // Temporary development-only login. Remove before going live.
@@ -538,7 +658,7 @@ router.post("/admin/admins", requireAdmin, async (req, res): Promise<void> => {
   res.status(201).json(adminOut(admin!));
 });
 
-router.patch("/admin/admins/:id", requireAdmin, async (req, res): Promise<void> => {
+router.patch("/admin/admins/:id", requireAdmin, async (req: AdminRequest, res): Promise<void> => {
   const parsed = UpdateAdminUserBody.safeParse(req.body);
   if (!parsed.success) {
     res.status(400).json({ error: "Password must be at least 8 characters." });
@@ -546,12 +666,18 @@ router.patch("/admin/admins/:id", requireAdmin, async (req, res): Promise<void> 
   }
   const [admin] = await db
     .update(adminUsersTable)
-    .set({ passwordHash: hashPassword(parsed.data.password) })
+    // Invalidate sessions issued before this change so old cookies stop working.
+    .set({ passwordHash: hashPassword(parsed.data.password), passwordChangedAt: new Date() })
     .where(eq(adminUsersTable.id, idParam(req)))
     .returning();
   if (!admin) {
     res.status(404).json({ error: "Admin not found." });
     return;
+  }
+  // If the caller changed their own password, refresh their cookie so they
+  // stay signed in on this device.
+  if (req.admin?.id === admin.id) {
+    setSessionCookie(res, admin.id, admin.email);
   }
   res.json(adminOut(admin));
 });

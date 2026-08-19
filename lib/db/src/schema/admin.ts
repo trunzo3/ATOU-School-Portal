@@ -4,6 +4,9 @@ export const adminUsersTable = pgTable("admin_users", {
   id: serial("id").primaryKey(),
   email: text("email").notNull().unique(),
   passwordHash: text("password_hash").notNull(),
+  // Sessions issued before this moment are rejected, so a password reset
+  // signs out every device that was using the old password.
+  passwordChangedAt: timestamp("password_changed_at", { withTimezone: true }),
   createdAt: timestamp("created_at", { withTimezone: true })
     .notNull()
     .defaultNow(),
@@ -32,5 +35,21 @@ export const appSettingsTable = pgTable("app_settings", {
     .$onUpdate(() => new Date()),
 });
 
+// Single-use, time-limited password reset tokens. Only the SHA-256 hash of
+// the token is stored; the raw token exists only inside the emailed link.
+export const passwordResetTokensTable = pgTable("password_reset_tokens", {
+  id: serial("id").primaryKey(),
+  adminId: integer("admin_id")
+    .notNull()
+    .references(() => adminUsersTable.id, { onDelete: "cascade" }),
+  tokenHash: text("token_hash").notNull().unique(),
+  expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+  usedAt: timestamp("used_at", { withTimezone: true }),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+});
+
 export type AdminUser = typeof adminUsersTable.$inferSelect;
+export type PasswordResetToken = typeof passwordResetTokensTable.$inferSelect;
 export type InfoPage = typeof infoPagesTable.$inferSelect;

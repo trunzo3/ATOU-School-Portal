@@ -7,6 +7,8 @@ import NotFound from '@/pages/not-found';
 import { Route, Switch, useLocation, Router as WouterRouter } from 'wouter';
 
 import { AdminLogin } from "@/pages/admin-login"
+import { ForgotPassword } from "@/pages/forgot-password"
+import { ResetPassword } from "@/pages/reset-password"
 import { AdminDashboard } from "@/pages/admin-dashboard"
 import { AdminSchoolDetail } from "@/pages/admin-school-detail"
 import { AdminSend } from "@/pages/admin-send"
@@ -25,6 +27,8 @@ function Router() {
       <Switch>
         {/* Admin Routes */}
         <Route path="/" component={AdminLogin} />
+        <Route path="/forgot-password" component={ForgotPassword} />
+        <Route path="/reset-password" component={ResetPassword} />
         <Route path="/admin" component={AdminDashboard} />
         <Route path="/admin/schools/:id" component={AdminSchoolDetail} />
         <Route path="/admin/send" component={AdminSend} />

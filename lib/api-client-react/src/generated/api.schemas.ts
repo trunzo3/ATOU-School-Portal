@@ -108,6 +108,23 @@ export interface AdminUser {
   createdAt: string;
 }
 
+export interface ForgotPasswordInput {
+  /** @minLength 3 */
+  email: string;
+}
+
+export interface ForgotPasswordResult {
+  sent: boolean;
+  message: string;
+}
+
+export interface ResetPasswordInput {
+  /** @minLength 1 */
+  token: string;
+  /** @minLength 8 */
+  password: string;
+}
+
 export interface AdminUserInput {
   /** @minLength 3 */
   email: string;

@@ -35,6 +35,8 @@ import type {
   EmailTemplate,
   EmailTemplateInput,
   ErrorMessage,
+  ForgotPasswordInput,
+  ForgotPasswordResult,
   HealthStatus,
   InfoPage,
   InfoPageInput,
@@ -43,6 +45,7 @@ import type {
   PagesExport,
   PortalIdentity,
   PortalSession,
+  ResetPasswordInput,
   SchoolAnswers,
   SchoolDetail,
   SchoolLockUpdate,
@@ -595,6 +598,148 @@ export const useAdminLogin = <TError = ErrorType<ErrorMessage>,
         TContext
       > => {
       return useMutation(getAdminLoginMutationOptions(options));
+    }
+
+export const getAdminForgotPasswordUrl = () => {
+
+
+
+
+  return `/api/admin/forgot-password`
+}
+
+/**
+ * @summary Request a password reset email (never reveals whether the email exists)
+ */
+export const adminForgotPassword = async (forgotPasswordInput: ForgotPasswordInput, options?: Parameters<typeof customFetch>[1]): Promise<ForgotPasswordResult> => {
+
+  return customFetch<ForgotPasswordResult>(getAdminForgotPasswordUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(forgotPasswordInput)
+  }
+);}
+
+
+
+
+
+export const getAdminForgotPasswordMutationOptions = <TError = ErrorType<ErrorMessage | ForgotPasswordResult>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminForgotPassword>>, TError,{data: BodyType<ForgotPasswordInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof adminForgotPassword>>, TError,{data: BodyType<ForgotPasswordInput>}, TContext> => {
+
+const mutationKey = ['adminForgotPassword'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof adminForgotPassword>>, {data: BodyType<ForgotPasswordInput>}> = (props) => {
+          const {data} = props ?? {};
+
+          return  adminForgotPassword(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type AdminForgotPasswordMutationResult = NonNullable<Awaited<ReturnType<typeof adminForgotPassword>>>
+    export type AdminForgotPasswordMutationBody = BodyType<ForgotPasswordInput>
+    export type AdminForgotPasswordMutationError = ErrorType<ErrorMessage | ForgotPasswordResult>
+
+    /**
+ * @summary Request a password reset email (never reveals whether the email exists)
+ */
+export const useAdminForgotPassword = <TError = ErrorType<ErrorMessage | ForgotPasswordResult>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminForgotPassword>>, TError,{data: BodyType<ForgotPasswordInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof adminForgotPassword>>,
+        TError,
+        {data: BodyType<ForgotPasswordInput>},
+        TContext
+      > => {
+      return useMutation(getAdminForgotPasswordMutationOptions(options));
+    }
+
+export const getAdminResetPasswordUrl = () => {
+
+
+
+
+  return `/api/admin/reset-password`
+}
+
+/**
+ * @summary Set a new password using a reset token
+ */
+export const adminResetPassword = async (resetPasswordInput: ResetPasswordInput, options?: Parameters<typeof customFetch>[1]): Promise<OkStatus> => {
+
+  return customFetch<OkStatus>(getAdminResetPasswordUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(resetPasswordInput)
+  }
+);}
+
+
+
+
+
+export const getAdminResetPasswordMutationOptions = <TError = ErrorType<ErrorMessage>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminResetPassword>>, TError,{data: BodyType<ResetPasswordInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof adminResetPassword>>, TError,{data: BodyType<ResetPasswordInput>}, TContext> => {
+
+const mutationKey = ['adminResetPassword'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof adminResetPassword>>, {data: BodyType<ResetPasswordInput>}> = (props) => {
+          const {data} = props ?? {};
+
+          return  adminResetPassword(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type AdminResetPasswordMutationResult = NonNullable<Awaited<ReturnType<typeof adminResetPassword>>>
+    export type AdminResetPasswordMutationBody = BodyType<ResetPasswordInput>
+    export type AdminResetPasswordMutationError = ErrorType<ErrorMessage>
+
+    /**
+ * @summary Set a new password using a reset token
+ */
+export const useAdminResetPassword = <TError = ErrorType<ErrorMessage>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminResetPassword>>, TError,{data: BodyType<ResetPasswordInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof adminResetPassword>>,
+        TError,
+        {data: BodyType<ResetPasswordInput>},
+        TContext
+      > => {
+      return useMutation(getAdminResetPasswordMutationOptions(options));
     }
 
 export const getAdminDevLoginUrl = () => {

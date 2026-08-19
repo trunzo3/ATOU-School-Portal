@@ -1,9 +1,10 @@
 import { useState } from "react"
-import { useLocation } from "wouter"
+import { Link, useLocation } from "wouter"
 import { useAdminLogin, useAdminDevLogin } from "@workspace/api-client-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { PasswordInput } from "@/components/shared/password-input"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { AtouLogo } from "@/components/shared/atou-logo"
 import { useToast } from "@/hooks/use-toast"
@@ -84,15 +85,19 @@ export function AdminLogin() {
               </div>
               <div className="space-y-2">
                 <Label htmlFor="password">Password</Label>
-                <Input 
-                  id="password" 
-                  type="password" 
+                <PasswordInput
+                  id="password"
                   autoComplete="current-password"
-                  value={password} 
-                  onChange={(e) => setPassword(e.target.value)} 
-                  required 
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
                   className="bg-muted/20"
                 />
+                <div className="text-right">
+                  <Link href="/forgot-password" className="text-sm text-primary hover:underline">
+                    Forgot password?
+                  </Link>
+                </div>
               </div>
               <Button type="submit" className="w-full h-12 text-base font-bold shadow-md hover:shadow-lg transition-all" disabled={login.isPending}>
                 {login.isPending ? "Signing in..." : "Sign In"}

@@ -11,6 +11,7 @@ import { useState, useRef, useEffect } from "react"
 import { useQueryClient } from "@tanstack/react-query"
 import { useToast } from "@/hooks/use-toast"
 import { formatPacificTime } from "@/lib/utils"
+import { DeleteConfirmDialog } from "@/components/shared/delete-confirm-dialog"
 import {
   Dialog,
   DialogContent,
@@ -145,14 +146,12 @@ export function AdminPages() {
   }
 
   const handleDelete = (id: number) => {
-    if (confirm("Are you sure you want to delete this page?")) {
-      deletePage.mutate({ id }, {
-        onSuccess: () => {
-          toast({ title: "Page deleted" })
-          queryClient.invalidateQueries({ queryKey: getGetAdminPagesQueryKey() })
-        }
-      })
-    }
+    deletePage.mutate({ id }, {
+      onSuccess: () => {
+        toast({ title: "Page deleted" })
+        queryClient.invalidateQueries({ queryKey: getGetAdminPagesQueryKey() })
+      }
+    })
   }
 
   const handleExport = async () => {
@@ -236,13 +235,22 @@ export function AdminPages() {
                   </TableCell>
                   <TableCell className="text-sm text-muted-foreground font-medium">{formatPacificTime(page.updatedAt)}</TableCell>
                   <TableCell className="text-right">
-                    <div className="flex justify-end gap-1 opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity">
+                    <div className="flex justify-end gap-1">
                       <Button variant="ghost" size="icon" className="rounded-full h-8 w-8 hover:bg-primary/10" onClick={() => handleOpenEdit(page)}>
                         <Edit2 className="h-4 w-4 text-primary" />
                       </Button>
-                      <Button variant="ghost" size="icon" className="rounded-full h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10" onClick={() => handleDelete(page.id)}>
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
+                      <DeleteConfirmDialog
+                        trigger={
+                          <Button variant="ghost" size="icon" className="rounded-full h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10" title="Delete page">
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        }
+                        title="Delete Page"
+                        description={`Are you sure you want to delete "${page.title}"? Schools will no longer be able to read it.`}
+                        confirmLabel="Delete Page"
+                        onConfirm={() => handleDelete(page.id)}
+                        pending={deletePage.isPending}
+                      />
                     </div>
                   </TableCell>
                 </TableRow>

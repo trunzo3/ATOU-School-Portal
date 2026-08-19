@@ -241,6 +241,41 @@ export const AdminLoginResponse = zod.object({
 
 
 /**
+ * @summary Request a password reset email (never reveals whether the email exists)
+ */
+export const adminForgotPasswordBodyEmailMin = 3;
+
+
+
+export const AdminForgotPasswordBody = zod.object({
+  "email": zod.string().min(adminForgotPasswordBodyEmailMin)
+})
+
+export const AdminForgotPasswordResponse = zod.object({
+  "sent": zod.boolean(),
+  "message": zod.string()
+})
+
+
+/**
+ * @summary Set a new password using a reset token
+ */
+
+export const adminResetPasswordBodyPasswordMin = 8;
+
+
+
+export const AdminResetPasswordBody = zod.object({
+  "token": zod.string().min(1),
+  "password": zod.string().min(adminResetPasswordBodyPasswordMin)
+})
+
+export const AdminResetPasswordResponse = zod.object({
+  "ok": zod.boolean()
+})
+
+
+/**
  * @summary Temporary development-only login as Pam
  */
 export const AdminDevLoginResponse = zod.object({

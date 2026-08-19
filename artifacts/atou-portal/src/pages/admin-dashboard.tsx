@@ -388,7 +388,7 @@ export function AdminDashboard() {
                   })}
 
                   <TableCell className="text-right">
-                    <div className="flex justify-end gap-1 opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity">
+                    <div className="flex justify-end gap-1">
                       <Button variant="ghost" size="icon" className="rounded-full h-8 w-8 hover:bg-muted" onClick={() => copyLink(school.link)} title="Copy Portal Link">
                         <Copy className="h-4 w-4 text-muted-foreground" />
                       </Button>

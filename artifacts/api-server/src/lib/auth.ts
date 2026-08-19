@@ -30,14 +30,19 @@ export function verifyPassword(password: string, stored: string): boolean {
 
 // --- signed session cookie ---
 
-type SessionPayload = { adminId: number; email: string; exp: number };
+type SessionPayload = { adminId: number; email: string; exp: number; iat?: number };
 
 function sign(data: string): string {
   return crypto.createHmac("sha256", SESSION_SECRET).update(data).digest("base64url");
 }
 
 export function createSessionToken(adminId: number, email: string): string {
-  const payload: SessionPayload = { adminId, email, exp: Date.now() + SESSION_TTL_MS };
+  const payload: SessionPayload = {
+    adminId,
+    email,
+    exp: Date.now() + SESSION_TTL_MS,
+    iat: Date.now(),
+  };
   const data = Buffer.from(JSON.stringify(payload)).toString("base64url");
   return `${data}.${sign(data)}`;
 }
@@ -94,6 +99,12 @@ export async function requireAdmin(
     .from(adminUsersTable)
     .where(eq(adminUsersTable.id, payload.adminId));
   if (!admin) {
+    res.status(401).json({ error: "Not signed in" });
+    return;
+  }
+  // Sessions issued before the last password change are no longer valid:
+  // resetting a password signs out every device holding an old cookie.
+  if (admin.passwordChangedAt && (payload.iat ?? 0) < admin.passwordChangedAt.getTime()) {
     res.status(401).json({ error: "Not signed in" });
     return;
   }

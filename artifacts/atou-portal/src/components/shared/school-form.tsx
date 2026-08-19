@@ -597,7 +597,7 @@ export function SchoolForm({ code, email, initialAnswers, onSaveAnswer, onSaveTe
                   <div className="font-semibold">Calculated Schedule</div>
                   {schedule.lines.map((l, i) => (
                     <div key={i} className="flex justify-between gap-4">
-                      <span className={l.label === "Break" || l.label === "Lunch" ? "text-primary/70" : "font-medium"}>{l.label}</span>
+                      <span className={l.label === "Lunch" ? "font-semibold text-amber-700 dark:text-amber-300" : l.label === "Break" ? "text-primary/70" : "font-medium"}>{l.label}</span>
                       <span>{l.time}</span>
                     </div>
                   ))}

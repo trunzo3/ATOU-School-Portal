@@ -792,6 +792,12 @@ components:
       properties:
         email: { type: string, minLength: 3 }
         value: { type: string, minLength: 1 }
+        # When set, and it identifies the latest history entry for this
+        # question written by the same person, that entry is updated in
+        # place instead of a new one being appended. Used so one edit
+        # session produces one history entry while still saving every
+        # keystroke immediately.
+        amendId: { type: number }
       required: [email, value]
     TeachersInput:
       type: object

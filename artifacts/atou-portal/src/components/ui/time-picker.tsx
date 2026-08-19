@@ -1,4 +1,4 @@
-import { useRef } from "react"
+import { useEffect, useRef } from "react"
 import {
   Select,
   SelectContent,
@@ -15,14 +15,25 @@ import { cn } from "@/lib/utils"
 interface TimePickerProps {
   value: string // "HH:MM" in 24-hour time, or "" when unset
   onChange: (value: string) => void
-  // Called once focus leaves the whole picker (mirrors the old input onBlur save)
-  onBlurCommit?: (value: string) => void
+  // Called once per edit session, when the person is truly done with the
+  // whole control: focus or a click lands somewhere outside it. Moving
+  // between the hour/minute/AM-PM parts, or pausing inside the control,
+  // does NOT end the session.
+  onSessionEnd?: (value: string) => void
   disabled?: boolean
   className?: string
   "aria-label"?: string
 }
 
 const pad = (n: number) => String(n).padStart(2, "0")
+
+// True when an element lives inside a dropdown's portaled content (rendered
+// outside the picker wrapper in the DOM). Clicks/focus there are part of
+// using the picker, never a reason to end the edit session. While a foreign
+// dropdown is open the picker's own session has already ended (the click on
+// its trigger was an outside interaction), so this check is safe globally.
+const isInDropdownPortal = (el: Element) =>
+  Boolean(el.closest('[data-radix-popper-content-wrapper], [role="listbox"]'))
 
 function parseValue(value: string): { hour12: number; minute: number; period: "AM" | "PM" } | null {
   const m = /^(\d{1,2}):(\d{2})$/.exec((value || "").trim())
@@ -39,7 +50,7 @@ function toValue(hour12: number, minute: number, period: "AM" | "PM"): string {
   return `${pad(h)}:${pad(minute)}`
 }
 
-export function TimePicker({ value, onChange, onBlurCommit, disabled, className, "aria-label": ariaLabel }: TimePickerProps) {
+export function TimePicker({ value, onChange, onSessionEnd, disabled, className, "aria-label": ariaLabel }: TimePickerProps) {
   const wrapperRef = useRef<HTMLDivElement>(null)
   const valueRef = useRef(value)
   valueRef.current = value
@@ -58,30 +69,69 @@ export function TimePicker({ value, onChange, onBlurCommit, disabled, className,
   const update = (part: Partial<{ hour12: number; minute: number; period: "AM" | "PM" }>) => {
     const base = parsed ?? { hour12: 8, minute: 0, period: "AM" as const }
     const next = { ...base, ...part }
+    sessionActiveRef.current = true
     onChange(toValue(next.hour12, next.minute, next.period))
   }
 
-  // How many of THIS picker's dropdowns are currently open. Commit only when
-  // none are open and focus has left the picker — checked both on blur and
-  // whenever one of our dropdowns closes, so a change made just before
-  // clicking away still gets saved.
+  // How many of THIS picker's dropdowns are currently open. While one is
+  // open, clicks and focus land in its portaled content (outside the
+  // wrapper in the DOM), so outside-detection must be paused.
   const openCountRef = useRef(0)
 
-  const maybeCommit = () => {
-    // Wait a tick so focus lands before we check where it went.
-    setTimeout(() => {
+  // An edit session starts when the person interacts with the picker and
+  // ends only when focus or a click positively lands OUTSIDE the whole
+  // control. Momentary "focus is nowhere" states (which happen between a
+  // dropdown closing and Radix restoring focus to the trigger) never end
+  // the session — that was the cause of one-history-entry-per-part saves.
+  const sessionActiveRef = useRef(false)
+  const onSessionEndRef = useRef(onSessionEnd)
+  onSessionEndRef.current = onSessionEnd
+
+  useEffect(() => {
+    const handleOutside = (target: EventTarget | null) => {
+      if (!sessionActiveRef.current) return
       if (openCountRef.current > 0) return
       const wrapper = wrapperRef.current
       if (!wrapper) return
-      const active = document.activeElement
-      if (active && wrapper.contains(active)) return
-      onBlurCommit?.(valueRef.current)
-    }, 0)
-  }
+      if (target instanceof Node && wrapper.contains(target)) return
+      if (target instanceof Element && isInDropdownPortal(target)) return
+      sessionActiveRef.current = false
+      onSessionEndRef.current?.(valueRef.current)
+    }
+    const onPointerDown = (e: PointerEvent) => handleOutside(e.target)
+    const onFocusIn = (e: FocusEvent) => handleOutside(e.target)
+    document.addEventListener("pointerdown", onPointerDown, true)
+    document.addEventListener("focusin", onFocusIn, true)
+    return () => {
+      document.removeEventListener("pointerdown", onPointerDown, true)
+      document.removeEventListener("focusin", onFocusIn, true)
+    }
+  }, [])
 
   const handleOpenChange = (open: boolean) => {
     openCountRef.current = Math.max(0, openCountRef.current + (open ? 1 : -1))
-    if (!open) maybeCommit()
+    if (open) {
+      sessionActiveRef.current = true
+      return
+    }
+    // A dropdown just closed. If it was dismissed by an interaction outside
+    // the control (non-modal outside click), the document listeners above
+    // skipped it because the dropdown was still open — so re-check once
+    // focus has settled. Only a POSITIVE "focus is on a real element
+    // outside the wrapper" ends the session; focus resting on <body> (the
+    // transient state while Radix restores focus to the trigger) never does.
+    setTimeout(() => {
+      if (!sessionActiveRef.current || openCountRef.current > 0) return
+      const wrapper = wrapperRef.current
+      const active = document.activeElement
+      if (!wrapper || !(active instanceof Element) || active === document.body) return
+      if (wrapper.contains(active)) return
+      // The just-closed dropdown's portal can still hold focus for a beat
+      // before Radix returns it to the trigger — that is NOT "outside".
+      if (isInDropdownPortal(active)) return
+      sessionActiveRef.current = false
+      onSessionEndRef.current?.(valueRef.current)
+    }, 0)
   }
 
   const fmtPrint = parsed ? `${parsed.hour12}:${pad(parsed.minute)} ${parsed.period}` : ""
@@ -90,7 +140,7 @@ export function TimePicker({ value, onChange, onBlurCommit, disabled, className,
     <div className={className}>
       <div
         ref={wrapperRef}
-        onBlur={maybeCommit}
+        onFocus={() => { sessionActiveRef.current = true }}
         role="group"
         aria-label={ariaLabel}
         className="flex flex-wrap items-center gap-2 print:hidden"

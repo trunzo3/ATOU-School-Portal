@@ -1,5 +1,5 @@
 import { Router, type IRouter } from "express";
-import { asc, eq } from "drizzle-orm";
+import { and, asc, eq, sql } from "drizzle-orm";
 import {
   db,
   answersTable,
@@ -127,10 +127,40 @@ router.put("/portal/:code/answers/:questionKey", async (req, res): Promise<void>
     return;
   }
 
-  const [saved] = await db
-    .insert(answersTable)
-    .values({ schoolId: school.id, questionKey, value: parsed.data.value, enteredBy: email })
-    .returning();
+  // When the client is amending an in-progress edit (amendId), update that
+  // history entry in place instead of appending a new one — but only if it
+  // is still the latest entry for this question and was written by the same
+  // person. The check and the update happen in ONE conditional statement so
+  // a save that lands in between can't have its newer entry rewritten; if
+  // the condition no longer holds, we fall back to appending.
+  let saved: typeof answersTable.$inferSelect | undefined;
+  const amendId = parsed.data.amendId;
+  if (amendId != null) {
+    [saved] = await db
+      .update(answersTable)
+      .set({ value: parsed.data.value, enteredAt: new Date() })
+      .where(
+        and(
+          eq(answersTable.id, amendId),
+          eq(answersTable.schoolId, school.id),
+          eq(answersTable.questionKey, questionKey),
+          sql`lower(trim(${answersTable.enteredBy})) = ${email}`,
+          sql`not exists (
+            select 1 from ${answersTable} newer
+            where newer.school_id = ${school.id}
+              and newer.question_key = ${questionKey}
+              and (newer.entered_at, newer.id) > (${answersTable.enteredAt}, ${answersTable.id})
+          )`,
+        ),
+      )
+      .returning();
+  }
+  if (!saved) {
+    [saved] = await db
+      .insert(answersTable)
+      .values({ schoolId: school.id, questionKey, value: parsed.data.value, enteredBy: email })
+      .returning();
+  }
 
   // Write-back to Airtable (no-op while the connection is off).
   // "notes" and "timing_note" stay in our database only.

@@ -14,7 +14,9 @@ interface SchoolFormProps {
   code: string;
   email: string;
   initialAnswers: SchoolAnswers;
-  onSaveAnswer: (key: string, value: string) => Promise<void>;
+  // Returns the saved history entry so an in-progress edit can keep
+  // amending it (amendId) instead of appending a new entry per keystroke.
+  onSaveAnswer: (key: string, value: string, amendId?: number) => Promise<{ id: number } | void>;
   onSaveTeachers: (rows: any[]) => Promise<void>;
   isReadOnly?: boolean;
   // The admin school-detail page has its own Print Form action, so it hides this one.
@@ -84,6 +86,14 @@ export function SchoolForm({ code, email, initialAnswers, onSaveAnswer, onSaveTe
   const inFlightRef = useRef<Record<string, string | undefined>>({})
   // Monotonic save counter per key so an older save can't clobber a newer one
   const saveSeqRef = useRef<Record<string, number>>({})
+  // In-progress edit session per question (time pickers): the id of the
+  // history entry being amended in place. One edit session = one entry.
+  const amendIdRef = useRef<Record<string, number | undefined>>({})
+  // Bumped when a session ends, so a save resolving late can't revive it
+  const sessionTokenRef = useRef<Record<string, number>>({})
+  // Serializes session saves per key so the first save's id (the entry to
+  // amend) is known before the next part-change saves
+  const sessionChainRef = useRef<Record<string, Promise<void>>>({})
 
   const markEdited = (key: string, value: string, savedValue: string | undefined) => {
     setAnswerSaveError("")
@@ -128,6 +138,60 @@ export function SchoolForm({ code, email, initialAnswers, onSaveAnswer, onSaveTe
     } finally {
       if (inFlightRef.current[key] === value) inFlightRef.current[key] = undefined
     }
+  }
+
+  // Saves a mid-edit value immediately (so nothing is lost if the tab is
+  // closed) while amending the SAME history entry for the whole edit
+  // session. Saves are chained per key so the first save's id is known
+  // before the next one fires.
+  const handleSessionSave = (key: string, value: string, currentValue: string | undefined) => {
+    const token = sessionTokenRef.current[key] ?? 0
+    const prev = sessionChainRef.current[key] ?? Promise.resolve()
+    sessionChainRef.current[key] = prev.then(async () => {
+      const baseline = lastSavedRef.current[key] ?? currentValue
+      if (value === baseline) return
+      if (!value.trim()) return // Server rejects empty values
+      // A newer part-change is queued behind us; let it do the saving
+      if ((draftRef.current[key] ?? value) !== value) return
+      if (inFlightRef.current[key] === value) return
+      const seq = (saveSeqRef.current[key] = (saveSeqRef.current[key] ?? 0) + 1)
+      inFlightRef.current[key] = value
+      setSaveStates(s => ({ ...s, [key]: "saving" }))
+      try {
+        const saved = await onSaveAnswer(key, value, amendIdRef.current[key])
+        // Keep amending this entry only while the same session is open
+        if (saved && (sessionTokenRef.current[key] ?? 0) === token) {
+          amendIdRef.current[key] = saved.id
+        }
+        if (saveSeqRef.current[key] === seq) {
+          lastSavedRef.current[key] = value
+          const latest = draftRef.current[key] ?? value
+          setSaveStates(s => ({ ...s, [key]: latest === value ? "saved" : "dirty" }))
+        }
+      } catch {
+        if (saveSeqRef.current[key] === seq) {
+          setSaveStates(s => ({ ...s, [key]: "dirty" }))
+        }
+        setAnswerSaveError("We couldn't save one of your changes. Please use the Save button in that section to try again.")
+        setFinishRequested(false)
+      } finally {
+        if (inFlightRef.current[key] === value) inFlightRef.current[key] = undefined
+      }
+    })
+  }
+
+  // Called when focus truly leaves a time picker: the edit session is over,
+  // so the next change starts a fresh history entry. The safety-net save
+  // runs INSIDE the session (amending the same entry, deduped if already
+  // saved), and the session only closes after every queued save settles —
+  // otherwise a save still in flight would append instead of amend.
+  const endEditSession = (key: string, value: string, currentValue: string | undefined) => {
+    handleSessionSave(key, value, currentValue)
+    const prev = sessionChainRef.current[key] ?? Promise.resolve()
+    sessionChainRef.current[key] = prev.then(() => {
+      sessionTokenRef.current[key] = (sessionTokenRef.current[key] ?? 0) + 1
+      amendIdRef.current[key] = undefined
+    })
   }
 
   // One Save button / "Saved" label per section, driven by that section's question keys
@@ -624,8 +688,8 @@ export function SchoolForm({ code, email, initialAnswers, onSaveAnswer, onSaveTe
               <TimePicker
                 aria-label="Start Time"
                 value={timeValue}
-                onChange={v => { setTimeValue(v); markEdited("workshop_time", v, isClockTime ? rawTimeValue.trim() : "") }}
-                onBlurCommit={v => handleSave("workshop_time", v, qTime?.current?.value)}
+                onChange={v => { setTimeValue(v); markEdited("workshop_time", v, isClockTime ? rawTimeValue.trim() : ""); handleSessionSave("workshop_time", v, qTime?.current?.value) }}
+                onSessionEnd={v => endEditSession("workshop_time", v, qTime?.current?.value)}
                 disabled={isReadOnly || initialAnswers.school.locked}
               />
             </div>
@@ -637,8 +701,8 @@ export function SchoolForm({ code, email, initialAnswers, onSaveAnswer, onSaveTe
                   <TimePicker
                     aria-label="School Lunch Starts"
                     value={lunchStart}
-                    onChange={v => { setLunchStart(v); markEdited("lunch_start", v, cleanTime(getQ("lunch_start")?.current?.value)) }}
-                    onBlurCommit={v => handleSave("lunch_start", v, cleanTime(getQ("lunch_start")?.current?.value))}
+                    onChange={v => { setLunchStart(v); markEdited("lunch_start", v, cleanTime(getQ("lunch_start")?.current?.value)); handleSessionSave("lunch_start", v, cleanTime(getQ("lunch_start")?.current?.value)) }}
+                    onSessionEnd={v => endEditSession("lunch_start", v, cleanTime(getQ("lunch_start")?.current?.value))}
                     disabled={isReadOnly || initialAnswers.school.locked}
                   />
                 </div>
@@ -647,8 +711,8 @@ export function SchoolForm({ code, email, initialAnswers, onSaveAnswer, onSaveTe
                   <TimePicker
                     aria-label="School Lunch Ends"
                     value={lunchEnd}
-                    onChange={v => { setLunchEnd(v); markEdited("lunch_end", v, cleanTime(getQ("lunch_end")?.current?.value)) }}
-                    onBlurCommit={v => handleSave("lunch_end", v, cleanTime(getQ("lunch_end")?.current?.value))}
+                    onChange={v => { setLunchEnd(v); markEdited("lunch_end", v, cleanTime(getQ("lunch_end")?.current?.value)); handleSessionSave("lunch_end", v, cleanTime(getQ("lunch_end")?.current?.value)) }}
+                    onSessionEnd={v => endEditSession("lunch_end", v, cleanTime(getQ("lunch_end")?.current?.value))}
                     disabled={isReadOnly || initialAnswers.school.locked}
                   />
                 </div>

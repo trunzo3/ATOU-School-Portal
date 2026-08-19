@@ -29,13 +29,14 @@ export function AdminSchoolDetail() {
   // The email we attribute Admin edits to
   const adminEmail = "programcoordinator@touchofunderstanding.org"
 
-  const handleSaveAnswer = async (questionKey: string, value: string) => {
-    await saveAnswer.mutateAsync({ 
+  const handleSaveAnswer = async (questionKey: string, value: string, amendId?: number) => {
+    const saved = await saveAnswer.mutateAsync({ 
       code: detail.code, 
       questionKey, 
-      data: { email: adminEmail, value } 
+      data: { email: adminEmail, value, ...(amendId != null ? { amendId } : {}) } 
     })
     queryClient.invalidateQueries({ queryKey: getGetAdminSchoolQueryKey(schoolId) })
+    return saved
   }
 
   const handleSaveTeachers = async (rows: any[]) => {
@@ -94,9 +95,10 @@ function AdminSchoolFormWrapper({ schoolId, detail, adminEmail, handleSaveAnswer
   }, [detail.code])
 
   // After every save, re-fetch so the history trail updates immediately
-  const onSaveAnswer = async (key: string, value: string) => {
-    await handleSaveAnswer(key, value)
+  const onSaveAnswer = async (key: string, value: string, amendId?: number) => {
+    const saved = await handleSaveAnswer(key, value, amendId)
     refreshAnswers()
+    return saved
   }
   const onSaveTeachers = async (rows: any[]) => {
     await handleSaveTeachers(rows)

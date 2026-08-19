@@ -66,14 +66,15 @@ export function PortalEntry() {
   const saveAnswer = useSaveAnswer()
   const saveTeachers = useSaveTeachers()
 
-  const handleSaveAnswer = async (questionKey: string, value: string) => {
-    await saveAnswer.mutateAsync({ 
+  const handleSaveAnswer = async (questionKey: string, value: string, amendId?: number) => {
+    const saved = await saveAnswer.mutateAsync({ 
       code: code!, 
       questionKey, 
-      data: { email, value } 
+      data: { email, value, ...(amendId != null ? { amendId } : {}) } 
     })
     // Form is optimistic/local, so we just reload in background to keep history fresh
     loadForm(email)
+    return saved
   }
 
   const handleSaveTeachers = async (rows: any[]) => {

@@ -86,6 +86,7 @@ export interface AnswerInput {
   email: string;
   /** @minLength 1 */
   value: string;
+  amendId?: number;
 }
 
 export interface TeachersInput {

@@ -140,7 +140,8 @@ export const saveAnswerBodyEmailMin = 3;
 
 export const SaveAnswerBody = zod.object({
   "email": zod.string().min(saveAnswerBodyEmailMin),
-  "value": zod.string().min(1)
+  "value": zod.string().min(1),
+  "amendId": zod.number().optional()
 })
 
 export const SaveAnswerResponse = zod.object({

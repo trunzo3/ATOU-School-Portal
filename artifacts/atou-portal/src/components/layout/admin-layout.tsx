@@ -29,7 +29,7 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
 
   const navLinks = [
     { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
-    { href: "/admin/send", label: "Send Links", icon: Send },
+    { href: "/admin/send", label: "Send Emails", icon: Send },
     { href: "/admin/pages", label: "Info Pages", icon: FileText },
     { href: "/admin/admins", label: "Admin Users", icon: Users },
     { href: "/admin/settings", label: "Settings", icon: Settings },

@@ -25,7 +25,17 @@ export const infoPagesTable = pgTable("info_pages", {
     .$onUpdate(() => new Date()),
 });
 
-// Single-row key/value settings (email template, Airtable connection).
+export const emailTemplatesTable = pgTable("email_templates", {
+  id: text("id").primaryKey(),
+  name: text("name").notNull(),
+  subject: text("subject").notNull(),
+  body: text("body").notNull(),
+  sortOrder: integer("sort_order").notNull().default(0),
+  updatedAt: timestamp("updated_at", { withTimezone: true })
+    .notNull()
+    .defaultNow()
+    .$onUpdate(() => new Date()),
+});
 export const appSettingsTable = pgTable("app_settings", {
   key: text("key").primaryKey(),
   value: text("value").notNull(),
@@ -53,3 +63,5 @@ export const passwordResetTokensTable = pgTable("password_reset_tokens", {
 export type AdminUser = typeof adminUsersTable.$inferSelect;
 export type PasswordResetToken = typeof passwordResetTokensTable.$inferSelect;
 export type InfoPage = typeof infoPagesTable.$inferSelect;
+
+export type EmailTemplateRow = typeof emailTemplatesTable.$inferSelect;

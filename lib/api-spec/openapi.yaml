@@ -438,22 +438,27 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/SendEmailsResult"
-  /admin/template:
+  /admin/templates:
     get:
-      operationId: getEmailTemplate
+      operationId: getEmailTemplates
       tags: [admin]
-      summary: Editable logistics email template
+      summary: Named email templates for the compose picker
       responses:
         "200":
-          description: Template
+          description: Templates
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/EmailTemplate"
+                type: array
+                items:
+                  $ref: "#/components/schemas/EmailTemplate"
+  /admin/templates/{id}:
     put:
       operationId: updateEmailTemplate
       tags: [admin]
-      summary: Save the email template
+      summary: Save new subject and body for one template
+      parameters:
+        - $ref: "#/components/parameters/TemplateId"
       requestBody:
         required: true
         content:
@@ -467,6 +472,12 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/EmailTemplate"
+        "404":
+          description: Unknown template
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorMessage"
   /admin/admins:
     get:
       operationId: getAdminUsers
@@ -670,6 +681,11 @@ components:
       in: path
       required: true
       schema: { type: number }
+    TemplateId:
+      name: id
+      in: path
+      required: true
+      schema: { type: string }
   schemas:
     HealthStatus:
       type: object
@@ -970,10 +986,12 @@ components:
     EmailTemplate:
       type: object
       properties:
+        id: { type: string }
+        name: { type: string }
         subject: { type: string }
         body: { type: string }
-        updatedAt: { type: ["string", "null"] }
-      required: [subject, body, updatedAt]
+        updatedAt: { type: string }
+      required: [id, name, subject, body, updatedAt]
     EmailTemplateInput:
       type: object
       properties:

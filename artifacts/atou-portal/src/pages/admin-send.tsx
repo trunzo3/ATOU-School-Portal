@@ -1,12 +1,13 @@
 import {
   useGetAdminSchools,
-  useGetEmailTemplate,
+  useGetEmailTemplates,
   useUpdateEmailTemplate,
   useGetEmailSends,
   useGetEmailStatus,
   useSendEmails,
   getGetEmailSendsQueryKey,
   getGetAdminSchoolsQueryKey,
+  getGetEmailTemplatesQueryKey,
 } from "@workspace/api-client-react"
 import { useQueryClient } from "@tanstack/react-query"
 import { AdminLayout } from "@/components/layout/admin-layout"
@@ -15,6 +16,23 @@ import { Button } from "@/components/ui/button"
 import { Input, Textarea } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Badge } from "@/components/ui/badge"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 import { AtouLogo } from "@/components/shared/atou-logo"
 import { EmailSignaturePreview } from "@/components/shared/email-signature-preview"
 import { formatPacificTime } from "@/lib/utils"
@@ -45,7 +63,7 @@ function fillMergeFields(
 
 export function AdminSend() {
   const { data: schools } = useGetAdminSchools()
-  const { data: template } = useGetEmailTemplate()
+  const { data: templates } = useGetEmailTemplates()
   const { data: sends } = useGetEmailSends()
   const { data: emailStatus } = useGetEmailStatus()
   const updateTemplate = useUpdateEmailTemplate()
@@ -57,24 +75,43 @@ export function AdminSend() {
   const [selection, setSelection] = useState<Record<number, string[]>>({})
   const [subject, setSubject] = useState("")
   const [message, setMessage] = useState("")
-  const [templateLoaded, setTemplateLoaded] = useState(false)
-  const editedRef = useRef(false)
+  const [selectedTemplateId, setSelectedTemplateId] = useState<string | null>(null)
+  // What the last applied template put into the fields, so we can tell
+  // untouched template content apart from the admin's own typing.
+  const appliedRef = useRef<{ subject: string; body: string } | null>(null)
+  const [pendingTemplateId, setPendingTemplateId] = useState<string | null>(null)
+  const [confirmSaveOpen, setConfirmSaveOpen] = useState(false)
   const [showPreview, setShowPreview] = useState(false)
   const [addQuery, setAddQuery] = useState("")
   const [confirmation, setConfirmation] = useState<string | null>(null)
   const consumedRef = useRef(false)
 
-  // Prefill subject/message from the saved template once — but never over
-  // something the user already started typing.
-  useEffect(() => {
-    if (template && !templateLoaded) {
-      setTemplateLoaded(true)
-      if (!editedRef.current) {
-        setSubject(template.subject)
-        setMessage(template.body)
-      }
+  const selectedTemplate = (templates || []).find(t => t.id === selectedTemplateId)
+
+  // The compose fields hold something worth protecting when they are
+  // non-empty and no longer identical to the template that filled them.
+  const composeDirty =
+    (subject.trim() !== "" || message.trim() !== "") &&
+    !(appliedRef.current &&
+      appliedRef.current.subject === subject &&
+      appliedRef.current.body === message)
+
+  const applyTemplate = (id: string) => {
+    const t = (templates || []).find(tpl => tpl.id === id)
+    if (!t) return
+    setSubject(t.subject)
+    setMessage(t.body)
+    setSelectedTemplateId(id)
+    appliedRef.current = { subject: t.subject, body: t.body }
+  }
+
+  const handlePickTemplate = (id: string) => {
+    if (composeDirty) {
+      setPendingTemplateId(id)
+    } else {
+      applyTemplate(id)
     }
-  }, [template, templateLoaded])
+  }
 
   // Consume the selection handed over from the dashboard (or school detail).
   useEffect(() => {
@@ -129,8 +166,17 @@ export function AdminSend() {
     : []
 
   const handleSaveTemplate = () => {
-    updateTemplate.mutate({ data: { subject, body: message } }, {
-      onSuccess: () => toast({ title: "Saved as the default template" }),
+    if (!selectedTemplate) return
+    setConfirmSaveOpen(false)
+    updateTemplate.mutate({ id: selectedTemplate.id, data: { subject, body: message } }, {
+      onSuccess: () => {
+        appliedRef.current = { subject, body: message }
+        toast({ title: `Saved to the "${selectedTemplate.name}" template` })
+        queryClient.invalidateQueries({ queryKey: getGetEmailTemplatesQueryKey() })
+      },
+      onError: () => {
+        toast({ title: "Saving failed", description: "The template was not changed. Please try again.", variant: "destructive" })
+      },
     })
   }
 
@@ -299,17 +345,35 @@ export function AdminSend() {
               </div>
             )}
 
+            {/* Template picker */}
+            <div className="space-y-2">
+              <Label htmlFor="email-template">Template</Label>
+              <Select value={selectedTemplateId ?? ""} onValueChange={handlePickTemplate}>
+                <SelectTrigger id="email-template" className="max-w-sm">
+                  <SelectValue placeholder="Choose a template (optional)..." />
+                </SelectTrigger>
+                <SelectContent>
+                  {(templates || []).map(t => (
+                    <SelectItem key={t.id} value={t.id}>{t.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <p className="text-xs text-muted-foreground">
+                Picking a template fills in the subject and message below. You can still edit them before sending.
+              </p>
+            </div>
+
             {/* Subject and message */}
             <div className="space-y-2">
               <Label htmlFor="email-subject">Subject</Label>
-              <Input id="email-subject" value={subject} onChange={e => { editedRef.current = true; setSubject(e.target.value) }} />
+              <Input id="email-subject" value={subject} onChange={e => setSubject(e.target.value)} />
             </div>
             <div className="space-y-2">
               <Label htmlFor="email-message">Message</Label>
               <Textarea
                 id="email-message"
                 value={message}
-                onChange={e => { editedRef.current = true; setMessage(e.target.value) }}
+                onChange={e => setMessage(e.target.value)}
                 className="min-h-[260px]"
               />
               <p className="text-xs text-muted-foreground">
@@ -335,11 +399,21 @@ export function AdminSend() {
                   {showPreview ? "Hide preview" : "Preview"}
                 </Button>
               )}
-              <Button variant="outline" onClick={handleSaveTemplate} disabled={updateTemplate.isPending || !subject.trim() || !message.trim()}>
+              <Button
+                variant="outline"
+                onClick={() => setConfirmSaveOpen(true)}
+                disabled={updateTemplate.isPending || !selectedTemplate || !subject.trim() || !message.trim()}
+                title={selectedTemplate ? `Save the subject and message to the "${selectedTemplate.name}" template` : "Choose a template above to save into"}
+              >
                 <Save className="h-4 w-4 mr-2" />
-                Save as template
+                {selectedTemplate ? `Save to "${selectedTemplate.name}"` : "Save as template"}
               </Button>
             </div>
+            {!selectedTemplate && (
+              <p className="text-xs text-muted-foreground -mt-1">
+                To save your wording as a template, first choose which template to save it into.
+              </p>
+            )}
 
             {showPreview && previewSchool && (
               <div className="border border-secondary/20 rounded-xl p-5 bg-secondary/5 space-y-3">
@@ -362,6 +436,51 @@ export function AdminSend() {
             )}
           </CardContent>
         </Card>
+
+        {/* Confirm replacing typed content with a template */}
+        <AlertDialog open={pendingTemplateId !== null} onOpenChange={open => { if (!open) setPendingTemplateId(null) }}>
+          <AlertDialogContent className="rounded-2xl">
+            <AlertDialogHeader>
+              <AlertDialogTitle>Replace what you've written?</AlertDialogTitle>
+              <AlertDialogDescription>
+                The subject and message will be replaced with the "
+                {(templates || []).find(t => t.id === pendingTemplateId)?.name ?? "selected"}
+                " template. Your current wording will be lost.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel className="rounded-full">Keep my wording</AlertDialogCancel>
+              <AlertDialogAction
+                className="rounded-full"
+                onClick={() => {
+                  if (pendingTemplateId) applyTemplate(pendingTemplateId)
+                  setPendingTemplateId(null)
+                }}
+              >
+                Use the template
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+
+        {/* Confirm overwriting a saved template */}
+        <AlertDialog open={confirmSaveOpen} onOpenChange={setConfirmSaveOpen}>
+          <AlertDialogContent className="rounded-2xl">
+            <AlertDialogHeader>
+              <AlertDialogTitle>Overwrite this template?</AlertDialogTitle>
+              <AlertDialogDescription>
+                The current subject and message will replace what's saved in the "
+                {selectedTemplate?.name}" template.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel className="rounded-full">Cancel</AlertDialogCancel>
+              <AlertDialogAction className="rounded-full" onClick={handleSaveTemplate}>
+                Save template
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
 
         {/* Sent log */}
         <Card className="border-t-4 border-t-secondary">

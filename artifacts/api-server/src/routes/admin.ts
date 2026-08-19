@@ -8,6 +8,8 @@ import {
   appSettingsTable,
   contactsTable,
   emailSendsTable,
+  emailTemplatesTable,
+  type EmailTemplateRow,
   infoPagesTable,
   schoolsTable,
   teacherSnapshotsTable,
@@ -383,8 +385,7 @@ Hello,
 Please fill in your workshop logistics for {{school_name}} ({{workshop_date}}) here: {{link}}
 
 Thank you,
-Pam
-A Touch of Understanding`;
+Pam`;
 
 const EMAIL_SENDING_ENABLED_KEY = "email_sending_enabled";
 const CANCELLATION_POLICY_URL_KEY = "cancellation_policy_url";
@@ -413,36 +414,94 @@ async function cancellationPolicyUrl(): Promise<string> {
   return stored || DEFAULT_CANCELLATION_POLICY_URL;
 }
 
-router.get("/admin/template", requireAdmin, async (_req, res): Promise<void> => {
-  const [row] = await db
+// The follow-up template shares the same subject line as the request template.
+const FOLLOW_UP_BODY = `Hello,
+
+I'm sorry to bother you again however your workshop is quickly approaching and we need to gather the logistics.
+
+Please complete your workshop logistics here: {{link}}
+
+Thank you,
+Pam`;
+
+// Remove a manually typed outro (the "Pam Evers" contact block, or a trailing
+// "A Touch of Understanding" line) from migrated wording — the polished ATOU
+// signature is appended automatically to every email, so keeping a typed one
+// in the template would make it appear twice. The body keeps its
+// "Thank you,\nPam" sign-off.
+function stripTypedOutro(body: string): string {
+  const match = /^[ \t]*Pam Evers[ \t]*$/m.exec(body);
+  let cut = match ? body.slice(0, match.index) : body;
+  cut = cut.replace(/\s+$/, "");
+  return cut.replace(/\n[ \t]*A Touch of Understanding[^\n]*$/i, "");
+}
+
+// Seed the named templates once. The "Logistics Request" template inherits any
+// wording Pam already saved under the old single-template settings keys.
+async function ensureEmailTemplates(): Promise<void> {
+  const existing = await db.select().from(emailTemplatesTable);
+  if (existing.length > 0) return;
+  const savedSubject = await settingValue("email_template_subject");
+  const savedBodyRaw = await settingValue("email_template");
+  const savedBody = savedBodyRaw === null ? null : stripTypedOutro(savedBodyRaw);
+  await db
+    .insert(emailTemplatesTable)
+    .values([
+      {
+        id: "logistics-request",
+        name: "Logistics Request",
+        subject: savedSubject ?? DEFAULT_SUBJECT,
+        body: savedBody ?? DEFAULT_TEMPLATE,
+        sortOrder: 0,
+      },
+      {
+        id: "logistics-follow-up",
+        name: "Logistics Follow-Up",
+        subject: DEFAULT_SUBJECT,
+        body: FOLLOW_UP_BODY,
+        sortOrder: 1,
+      },
+    ])
+    .onConflictDoNothing();
+}
+
+function templateOut(t: EmailTemplateRow) {
+  return {
+    id: t.id,
+    name: t.name,
+    subject: t.subject,
+    body: t.body,
+    updatedAt: t.updatedAt.toISOString(),
+  };
+}
+
+router.get("/admin/templates", requireAdmin, async (_req, res): Promise<void> => {
+  await ensureEmailTemplates();
+  const rows = await db
     .select()
-    .from(appSettingsTable)
-    .where(eq(appSettingsTable.key, "email_template"));
-  const subject = await settingValue("email_template_subject");
-  res.json({
-    subject: subject ?? DEFAULT_SUBJECT,
-    body: row ? row.value : DEFAULT_TEMPLATE,
-    updatedAt: row ? row.updatedAt.toISOString() : null,
-  });
+    .from(emailTemplatesTable)
+    .orderBy(asc(emailTemplatesTable.sortOrder), asc(emailTemplatesTable.name));
+  res.json(rows.map(templateOut));
 });
 
-router.put("/admin/template", requireAdmin, async (req, res): Promise<void> => {
+router.put("/admin/templates/:id", requireAdmin, async (req, res): Promise<void> => {
   const parsed = UpdateEmailTemplateBody.safeParse(req.body);
   if (!parsed.success) {
     res.status(400).json({ error: "Template subject and body are required." });
     return;
   }
-  await saveSetting("email_template_subject", parsed.data.subject);
-  await saveSetting("email_template", parsed.data.body);
+  await ensureEmailTemplates();
+  const id = String(req.params["id"]);
   const [row] = await db
-    .select()
-    .from(appSettingsTable)
-    .where(eq(appSettingsTable.key, "email_template"));
-  res.json({
-    subject: parsed.data.subject,
-    body: parsed.data.body,
-    updatedAt: row ? row.updatedAt.toISOString() : null,
-  });
+    .update(emailTemplatesTable)
+    .set({ subject: parsed.data.subject, body: parsed.data.body })
+    .where(eq(emailTemplatesTable.id, id))
+    .returning();
+  if (!row) {
+    res.status(404).json({ error: "That template no longer exists." });
+    return;
+  }
+  res.json(templateOut(row));
 });
 
 router.get("/admin/email-status", requireAdmin, async (_req, res): Promise<void> => {

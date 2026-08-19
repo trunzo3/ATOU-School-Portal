@@ -262,10 +262,11 @@ export interface SendEmailsResult {
 }
 
 export interface EmailTemplate {
+  id: string;
+  name: string;
   subject: string;
   body: string;
-  /** @nullable */
-  updatedAt: string | null;
+  updatedAt: string;
 }
 
 export interface EmailTemplateInput {

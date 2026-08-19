@@ -492,18 +492,25 @@ export const SendEmailsResponse = zod.object({
 
 
 /**
- * @summary Editable logistics email template
+ * @summary Named email templates for the compose picker
  */
-export const GetEmailTemplateResponse = zod.object({
+export const GetEmailTemplatesResponseItem = zod.object({
+  "id": zod.string(),
+  "name": zod.string(),
   "subject": zod.string(),
   "body": zod.string(),
-  "updatedAt": zod.string().nullable()
+  "updatedAt": zod.string()
 })
+export const GetEmailTemplatesResponse = zod.array(GetEmailTemplatesResponseItem)
 
 
 /**
- * @summary Save the email template
+ * @summary Save new subject and body for one template
  */
+export const UpdateEmailTemplateParams = zod.object({
+  "id": zod.coerce.string()
+})
+
 
 
 
@@ -514,9 +521,11 @@ export const UpdateEmailTemplateBody = zod.object({
 })
 
 export const UpdateEmailTemplateResponse = zod.object({
+  "id": zod.string(),
+  "name": zod.string(),
   "subject": zod.string(),
   "body": zod.string(),
-  "updatedAt": zod.string().nullable()
+  "updatedAt": zod.string()
 })
 
 

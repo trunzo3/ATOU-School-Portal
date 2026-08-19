@@ -107,7 +107,7 @@ export function PortalDone() {
 
   if (loadFailed) {
     return (
-      <PortalLayout>
+      <PortalLayout tinted>
         <div className="max-w-xl mx-auto py-16 text-center">
           <AlertCircle className="h-10 w-10 text-destructive mx-auto mb-4" />
           <h2 className="font-serif text-2xl font-bold">We couldn&apos;t load your information</h2>
@@ -122,7 +122,7 @@ export function PortalDone() {
 
   if (!answers) {
     return (
-      <PortalLayout>
+      <PortalLayout tinted>
         <div className="text-center py-20 text-muted-foreground animate-pulse">Loading your information...</div>
       </PortalLayout>
     )
@@ -150,20 +150,14 @@ export function PortalDone() {
 
   const requiredItems = [
     { label: "Teachers and student counts", complete: teachersComplete },
-    { label: "Workshop start time", complete: Boolean(workshopTime) },
-    ...(needsLunchTimes
-      ? [
-          { label: "School lunch start time", complete: Boolean(lunchStart) },
-          { label: "School lunch end time", complete: Boolean(lunchEnd) },
-        ]
-      : []),
+    { label: "Workshop time", complete: Boolean(workshopTime) },
     { label: "Activity station area", complete: Boolean(activityArea) },
     { label: "Speaker area", complete: Boolean(speakerArea) },
   ]
   const missingItems = requiredItems.filter(item => !item.complete)
 
   return (
-    <PortalLayout schoolName={answers.school.name}>
+    <PortalLayout schoolName={answers.school.name} tinted>
       <PortalHelpfulInformation code={code!} pages={pages} />
 
       <div className="max-w-3xl mx-auto space-y-6 pb-8">
@@ -190,12 +184,17 @@ export function PortalDone() {
           <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-amber-950 flex gap-3 items-start">
             <AlertCircle className="h-5 w-5 mt-0.5 flex-shrink-0" />
             <div>
-              <p className="font-bold">
-                {missingItems.length} required item{missingItems.length === 1 ? " is" : "s are"} still missing.
-              </p>
+              <p className="font-bold">A few things are still needed</p>
+              <p className="text-sm mt-1">You can come back to this page any time. Here&apos;s what&apos;s still open:</p>
               <ul className="text-sm mt-2 list-disc pl-5 space-y-1">
                 {missingItems.map(item => <li key={item.label}>{item.label}</li>)}
               </ul>
+              <p className="text-sm mt-2">
+                <Link href={`/s/${code}`} className="font-semibold underline underline-offset-4 hover:text-amber-700">
+                  Return to the form
+                </Link>{" "}
+                to add them.
+              </p>
             </div>
           </div>
         )}
@@ -242,7 +241,7 @@ export function PortalDone() {
         <Card className="rounded-2xl shadow-sm">
           <CardHeader className="border-b bg-muted/20 flex-row items-center justify-between gap-4">
             <CardTitle className="text-xl">Workshop Time</CardTitle>
-            <StatusBadge complete={Boolean(workshopTime) && (!needsLunchTimes || Boolean(lunchStart && lunchEnd))} text={workshopTime && (!needsLunchTimes || (lunchStart && lunchEnd)) ? "Provided" : "Missing"} />
+            <StatusBadge complete={Boolean(workshopTime)} text={workshopTime ? "Provided" : "Missing"} />
           </CardHeader>
           <CardContent className="p-5 sm:p-6">
             <dl className="grid sm:grid-cols-2 gap-4">
@@ -259,8 +258,9 @@ export function PortalDone() {
         </Card>
 
         <Card className="rounded-2xl shadow-sm">
-          <CardHeader className="border-b bg-muted/20">
+          <CardHeader className="border-b bg-muted/20 flex-row items-center justify-between gap-4">
             <CardTitle className="text-xl">Workshop Spaces</CardTitle>
+            <StatusBadge complete={Boolean(activityArea && speakerArea)} text={activityArea && speakerArea ? "Provided" : "Missing"} />
           </CardHeader>
           <CardContent className="p-5 sm:p-6">
             <dl className="grid sm:grid-cols-2 gap-4">
@@ -271,8 +271,9 @@ export function PortalDone() {
         </Card>
 
         <Card className="rounded-2xl shadow-sm">
-          <CardHeader className="border-b bg-muted/20">
+          <CardHeader className="border-b bg-muted/20 flex-row items-center justify-between gap-4">
             <CardTitle className="text-xl">Anything Else We Should Know?</CardTitle>
+            <StatusBadge complete={Boolean(notes)} text={notes ? "Provided" : "Optional"} neutral />
           </CardHeader>
           <CardContent className="p-5 sm:p-6">
             <dl>

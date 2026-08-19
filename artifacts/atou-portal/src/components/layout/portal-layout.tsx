@@ -1,8 +1,8 @@
 import { AtouLogo } from "@/components/shared/atou-logo"
 
-export function PortalLayout({ children, schoolName }: { children: React.ReactNode, schoolName?: string }) {
+export function PortalLayout({ children, schoolName, tinted = false }: { children: React.ReactNode, schoolName?: string, tinted?: boolean }) {
   return (
-    <div className="min-h-[100dvh] flex flex-col bg-muted/30 text-foreground">
+    <div className={`min-h-[100dvh] flex flex-col text-foreground ${tinted ? "bg-primary/5" : "bg-muted/30"}`}>
       <header className="bg-card/95 backdrop-blur border-b px-4 py-4 sm:px-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4 sticky top-0 z-50 no-print">
         <div className="flex items-center gap-3">
           <AtouLogo className="h-14 w-14 flex-shrink-0 drop-shadow-sm" />

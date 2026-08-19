@@ -6,6 +6,7 @@ import { SchoolForm } from "@/components/shared/school-form"
 import { Button } from "@/components/ui/button"
 import { Switch } from "@/components/ui/switch"
 import { Label } from "@/components/ui/label"
+import { AtouLogo } from "@/components/shared/atou-logo"
 import { Printer, ChevronLeft, Lock, Unlock, Mail } from "lucide-react"
 import { useQueryClient } from "@tanstack/react-query"
 import { useToast } from "@/hooks/use-toast"
@@ -24,7 +25,7 @@ export function AdminSchoolDetail() {
   const queryClient = useQueryClient()
   const { toast } = useToast()
 
-  if (isLoading || !detail) return <AdminLayout><div className="p-8">Loading...</div></AdminLayout>
+  if (isLoading || !detail) return <AdminLayout><div className="p-8 text-muted-foreground animate-pulse">Loading school...</div></AdminLayout>
 
   // The email we attribute Admin edits to
   const adminEmail = "programcoordinator@touchofunderstanding.org"
@@ -103,35 +104,44 @@ function AdminSchoolFormWrapper({ schoolId, detail, adminEmail, handleSaveAnswer
     refreshAnswers()
   }
 
-  if (!answers) return <AdminLayout><div className="p-8">Loading form data...</div></AdminLayout>
+  if (!answers) return <AdminLayout><div className="p-8 text-muted-foreground animate-pulse">Loading form data...</div></AdminLayout>
 
   return (
     <AdminLayout>
-      <div className="mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4 no-print border-b pb-6">
+      <div className="hidden print:flex items-center gap-4 border-b-2 border-brand-navy pb-4 mb-6">
+        <AtouLogo className="h-20 w-20" />
         <div>
+          <p className="text-xs font-bold uppercase tracking-[0.16em] text-primary">A Touch of Understanding</p>
+          <h1 className="font-serif text-3xl font-bold text-foreground">Workshop Logistics Form</h1>
+          <p className="text-lg text-muted-foreground mt-1">{detail.name}</p>
+        </div>
+      </div>
+      <div className="mb-6 flex flex-col lg:flex-row justify-between items-start lg:items-end gap-4 no-print border-b pb-6">
+        <div className="min-w-0">
           <Link href="/admin">
             <Button variant="ghost" size="sm" className="mb-2 -ml-2 text-muted-foreground">
               <ChevronLeft className="h-4 w-4 mr-1" /> Back to Dashboard
             </Button>
           </Link>
-          <h1 className="text-2xl font-serif font-semibold text-foreground flex items-center gap-2">
+          <p className="text-xs font-bold uppercase tracking-[0.16em] text-primary mb-1">School Workshop</p>
+          <h1 className="text-3xl font-serif font-bold text-foreground flex items-center gap-2">
             {detail.name}
             {detail.locked && <Lock className="h-5 w-5 text-muted-foreground" />}
           </h1>
-          <div className="text-sm text-muted-foreground mt-2">
+          <div className="text-sm text-muted-foreground mt-2 break-words">
             <strong>Authorized Contacts:</strong> {detail.contacts.map((c:any) => c.email).join(", ")}
           </div>
         </div>
 
-        <div className="flex items-center gap-4">
-          <div className="flex items-center space-x-2 bg-muted/50 p-2 rounded-lg border">
+        <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+          <div className="flex items-center space-x-2 bg-muted/50 p-2 rounded-full border">
             {detail.locked ? <Lock className="h-4 w-4 text-muted-foreground" /> : <Unlock className="h-4 w-4 text-primary" />}
             <Switch id="lock-toggle" checked={detail.locked} onCheckedChange={handleToggleLock} />
             <Label htmlFor="lock-toggle" className="cursor-pointer font-medium pr-1">Lock Form</Label>
           </div>
           
           {!detail.locked && (
-            <Button variant="outline" onClick={() => {
+            <Button variant="outline" className="border-secondary/35 text-secondary hover:bg-secondary hover:text-secondary-foreground" onClick={() => {
               sessionStorage.setItem("atou_send_selection", JSON.stringify([schoolId]))
               navigate("/admin/send")
             }}>
@@ -139,7 +149,7 @@ function AdminSchoolFormWrapper({ schoolId, detail, adminEmail, handleSaveAnswer
             </Button>
           )}
 
-          <Button variant="outline" onClick={() => window.print()}>
+          <Button variant="outline" className="border-primary/35 text-primary hover:bg-primary hover:text-primary-foreground" onClick={() => window.print()}>
             <Printer className="h-4 w-4 mr-2" /> Print Form
           </Button>
         </div>

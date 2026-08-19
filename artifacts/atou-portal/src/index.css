@@ -1,8 +1,8 @@
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;500;600&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
+
 @import "tailwindcss";
 @import "tw-animate-css";
 @plugin "@tailwindcss/typography";
-
-@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;500;600&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
 
 @custom-variant dark (&:is(.dark *));
 
@@ -52,6 +52,10 @@
   --color-sidebar-accent-border: var(--sidebar-accent-border);
   --color-sidebar-ring: hsl(var(--sidebar-ring));
 
+  --color-brand-navy: hsl(var(--brand-navy));
+  --color-brand-turquoise: hsl(var(--brand-turquoise));
+  --color-brand-plum: hsl(var(--brand-plum));
+
   --font-sans: 'Plus Jakarta Sans', sans-serif;
   --font-serif: 'Fraunces', serif;
 
@@ -62,90 +66,97 @@
 }
 
 :root {
-  /* Warm Sage and Cream Palette */
-  --background: 40 33% 98%;      /* Very warm off-white #faf8f5 */
-  --foreground: 215 25% 15%;     /* Deep calm gray-blue #1c232e */
-  --border: 40 15% 90%;          /* Soft beige border */
+  /* ATOU Brand Palette: Crisp White, Navy, Turquoise, Plum */
+  --brand-navy: 215 58% 22%;
+  --brand-turquoise: 189 72% 34%;
+  --brand-plum: 295 43% 32%;
+
+  --background: 210 25% 98%;     /* Cool near-white canvas */
+  --foreground: var(--brand-navy);
+  --border: 210 20% 92%;         /* Light dividers */
   
-  --card: 0 0% 100%;             /* Pure white card */
-  --card-foreground: 215 25% 15%;
-  --card-border: 40 15% 90%;
+  --card: 0 0% 100%;
+  --card-foreground: var(--brand-navy);
+  --card-border: 210 20% 92%;
   
   --popover: 0 0% 100%;
-  --popover-foreground: 215 25% 15%;
-  --popover-border: 40 15% 90%;
+  --popover-foreground: var(--brand-navy);
+  --popover-border: 210 20% 92%;
   
-  --primary: 195 35% 30%;        /* Calm deep slate blue #325566 */
+  /* Dark enough to retain white-text contrast while reading as bright turquoise. */
+  --primary: var(--brand-turquoise);
   --primary-foreground: 0 0% 100%;
   
-  --secondary: 40 20% 93%;       /* Soft taupe #f2efe9 */
-  --secondary-foreground: 215 25% 20%;
+  --secondary: var(--brand-plum);
+  --secondary-foreground: 0 0% 100%;
   
-  --muted: 40 20% 93%;           
-  --muted-foreground: 215 15% 45%;
+  --muted: 210 20% 96%;          /* Very light gray for backgrounds */
+  --muted-foreground: 215 25% 45%; /* Lighter navy/gray for text */
   
-  --accent: 35 45% 85%;          /* Warm sand */
-  --accent-foreground: 215 35% 20%;
+  --accent: 189 55% 94%;         /* Very light turquoise */
+  --accent-foreground: 189 72% 25%;
   
-  --destructive: 0 50% 45%;      /* Restful muted red */
+  --destructive: 0 70% 50%;
   --destructive-foreground: 0 0% 100%;
+
+  --input: 210 20% 86%;          /* Slightly darker border for inputs */
+  --ring: var(--brand-turquoise);
   
-  --input: 40 15% 85%;
-  --ring: 195 35% 30%;
-  
-  --sidebar: 40 33% 96%;
-  --sidebar-foreground: 215 25% 15%;
-  --sidebar-border: 40 15% 88%;
-  --sidebar-primary: 195 35% 30%;
+  --sidebar: 215 58% 18%;
+  --sidebar-foreground: 210 25% 97%;
+  --sidebar-border: 215 40% 26%;
+  --sidebar-primary: var(--brand-turquoise);
   --sidebar-primary-foreground: 0 0% 100%;
-  --sidebar-accent: 40 20% 90%;
-  --sidebar-accent-foreground: 215 25% 15%;
-  --sidebar-ring: 195 35% 30%;
+  --sidebar-accent: 215 42% 25%;
+  --sidebar-accent-foreground: 210 25% 97%;
+  --sidebar-ring: var(--brand-turquoise);
   
-  --radius: 0.5rem;
+  --radius: 0.5rem;              /* General slight rounding */
 }
 
 .dark {
-  /* Minimal Dark Mode - requested default to light mode unless requested, 
-     we will just provide a cohesive dark mode for completeness, keeping it calm. */
-  --background: 215 25% 10%;
-  --foreground: 40 33% 95%;
-  --border: 215 25% 20%;
+  /* Fallback dark mode (navy/dark slate focus) */
+  --background: 215 50% 10%;
+  --foreground: 210 20% 96%;
+  --border: 215 30% 20%;
   
-  --card: 215 25% 13%;
-  --card-foreground: 40 33% 95%;
-  --card-border: 215 25% 20%;
+  --card: 215 45% 13%;
+  --card-foreground: 210 20% 96%;
+  --card-border: 215 30% 20%;
   
-  --popover: 215 25% 13%;
-  --popover-foreground: 40 33% 95%;
-  --popover-border: 215 25% 20%;
+  --popover: 215 45% 13%;
+  --popover-foreground: 210 20% 96%;
+  --popover-border: 215 30% 20%;
   
-  --primary: 195 35% 65%;
-  --primary-foreground: 215 25% 10%;
+  --primary: 192 42% 53%;
+  --primary-foreground: 0 0% 100%;
   
-  --secondary: 215 25% 20%;
-  --secondary-foreground: 40 33% 95%;
+  --secondary: 295 43% 45%;
+  --secondary-foreground: 0 0% 100%;
   
-  --muted: 215 25% 20%;
-  --muted-foreground: 215 15% 65%;
+  --muted: 215 30% 18%;
+  --muted-foreground: 215 20% 70%;
   
-  --accent: 215 35% 25%;
-  --accent-foreground: 40 33% 95%;
+  --accent: 215 30% 20%;
+  --accent-foreground: 192 42% 80%;
   
-  --destructive: 0 50% 45%;
+  --destructive: 0 60% 50%;
   --destructive-foreground: 0 0% 100%;
   
-  --input: 215 25% 20%;
-  --ring: 195 35% 65%;
-  
-  --sidebar: 215 25% 11%;
-  --sidebar-foreground: 40 33% 95%;
-  --sidebar-border: 215 25% 20%;
-  --sidebar-primary: 195 35% 65%;
-  --sidebar-primary-foreground: 215 25% 10%;
-  --sidebar-accent: 215 25% 18%;
-  --sidebar-accent-foreground: 40 33% 95%;
-  --sidebar-ring: 195 35% 65%;
+  --input: 215 30% 25%;
+  --ring: 192 42% 53%;
+
+  --sidebar: 215 50% 10%;
+  --sidebar-foreground: 210 20% 96%;
+  --sidebar-border: 215 30% 20%;
+  --sidebar-primary: 192 42% 53%;
+  --sidebar-primary-foreground: 0 0% 100%;
+  --sidebar-accent: 215 30% 18%;
+  --sidebar-accent-foreground: 210 20% 96%;
+  --sidebar-ring: 192 42% 53%;
+  --brand-navy: 210 20% 96%;
+  --brand-turquoise: 189 62% 58%;
+  --brand-plum: 295 43% 62%;
 }
 
 @layer base {
@@ -153,10 +164,13 @@
     @apply border-border;
   }
   body {
-    @apply font-sans antialiased bg-background text-foreground;
+    @apply min-w-0 font-sans antialiased bg-background text-foreground;
   }
   h1, h2, h3, h4, h5, h6 {
-    @apply font-serif;
+    @apply font-serif text-balance;
+  }
+  ::selection {
+    @apply bg-primary/20 text-foreground;
   }
 }
 

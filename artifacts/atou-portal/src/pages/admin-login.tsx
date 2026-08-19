@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { AtouLogo } from "@/components/shared/atou-logo"
 import { useToast } from "@/hooks/use-toast"
 
 export function AdminLogin() {
@@ -44,14 +45,17 @@ export function AdminLogin() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 bg-background">
-      <div className="w-full max-w-md space-y-8">
+    <div className="min-h-screen flex items-center justify-center p-4 sm:p-8 bg-background relative overflow-hidden">
+      <div className="absolute -top-36 -right-28 h-80 w-80 rounded-full bg-primary/10 blur-3xl" aria-hidden="true" />
+      <div className="absolute -bottom-44 -left-28 h-96 w-96 rounded-full bg-secondary/10 blur-3xl" aria-hidden="true" />
+      <div className="w-full max-w-md space-y-8 relative">
         <div className="text-center space-y-2">
-          <h1 className="text-3xl font-serif font-semibold text-primary">A Touch of Understanding</h1>
-          <p className="text-muted-foreground">Workshop Logistics Portal</p>
+          <AtouLogo className="mx-auto h-24 w-24 mb-5 drop-shadow-md" />
+          <h1 className="text-3xl sm:text-4xl font-serif font-bold text-foreground">A Touch of Understanding</h1>
+          <p className="text-primary font-bold uppercase tracking-[0.16em] text-xs mt-2">Workshop Logistics Admin</p>
         </div>
         
-        <Card>
+        <Card className="border-t-8 border-x-border border-b-border rounded-2xl shadow-lg border-t-primary">
           <CardHeader>
             <CardTitle>Sign In</CardTitle>
             <CardDescription>Program coordinators, please sign in to manage workshops.</CardDescription>
@@ -63,9 +67,11 @@ export function AdminLogin() {
                 <Input 
                   id="email" 
                   type="email" 
+                  autoComplete="username"
                   value={email} 
                   onChange={(e) => setEmail(e.target.value)} 
                   required 
+                  className="bg-muted/20"
                 />
               </div>
               <div className="space-y-2">
@@ -73,21 +79,23 @@ export function AdminLogin() {
                 <Input 
                   id="password" 
                   type="password" 
+                  autoComplete="current-password"
                   value={password} 
                   onChange={(e) => setPassword(e.target.value)} 
                   required 
+                  className="bg-muted/20"
                 />
               </div>
-              <Button type="submit" className="w-full" disabled={login.isPending}>
+              <Button type="submit" className="w-full h-12 text-base font-bold shadow-md hover:shadow-lg transition-all" disabled={login.isPending}>
                 {login.isPending ? "Signing in..." : "Sign In"}
               </Button>
             </form>
           </CardContent>
         </Card>
         
-        <div className="border-t pt-8">
-          <Button variant="outline" className="w-full text-muted-foreground" onClick={handleDevLogin} disabled={devLogin.isPending}>
-            Temporary: log in as Pam (development only)
+        <div className="border-t pt-6 text-center">
+          <Button variant="outline" className="text-xs rounded-full" onClick={handleDevLogin} disabled={devLogin.isPending}>
+            Developer Login (Pam)
           </Button>
         </div>
       </div>

@@ -85,15 +85,18 @@ export function PortalEntry() {
   if (!identified) {
     return (
       <PortalLayout>
-        <Card className="mt-12 max-w-md mx-auto shadow-md border-[#e2e4e0]">
+        <Card className="mt-6 sm:mt-12 max-w-md mx-auto border-t-8 border-t-primary shadow-lg border-x-border border-b-border rounded-2xl">
           <CardHeader className="text-center pb-2">
-            <CardTitle className="text-2xl font-serif text-[#325566]">Welcome</CardTitle>
-            <CardDescription className="text-base">Please verify your email address to access your school's workshop form.</CardDescription>
+            <div className="mx-auto mb-4 h-14 w-14 rounded-full bg-primary/10 text-primary flex items-center justify-center border border-primary/20" aria-hidden="true">
+              <FileText className="h-6 w-6" />
+            </div>
+            <CardTitle className="text-2xl">Welcome</CardTitle>
+            <CardDescription className="text-base mt-2">Please verify your email address to access your school's workshop form.</CardDescription>
           </CardHeader>
-          <CardContent>
-            <form onSubmit={handleIdentify} className="space-y-4 pt-4">
+          <CardContent className="pt-4">
+            <form onSubmit={handleIdentify} className="space-y-5">
               {error && (
-                <div className="bg-destructive/10 text-destructive p-3 rounded flex gap-2 items-start text-sm">
+                <div role="alert" className="bg-destructive/10 text-destructive border border-destructive/20 p-4 rounded-xl flex gap-2 items-start text-sm font-medium">
                   <AlertCircle className="h-4 w-4 mt-0.5 flex-shrink-0" />
                   <p>{error}</p>
                 </div>
@@ -103,14 +106,15 @@ export function PortalEntry() {
                 <Input 
                   id="email" 
                   type="email" 
+                  autoComplete="email"
                   placeholder="name@school.edu" 
                   value={email} 
                   onChange={e => setEmail(e.target.value)} 
                   required 
-                  className="h-12 text-lg px-4 bg-[#fbfbf9]"
+                  className="h-12 text-base px-4 bg-muted/20"
                 />
               </div>
-              <Button type="submit" className="w-full h-12 text-base font-medium" disabled={identify.isPending || fetchAnswers.isPending}>
+              <Button type="submit" size="lg" className="w-full text-base font-bold shadow-md hover:shadow-lg transition-all" disabled={identify.isPending || fetchAnswers.isPending}>
                 {identify.isPending || fetchAnswers.isPending ? "Verifying..." : "Access Form"}
               </Button>
             </form>
@@ -124,20 +128,21 @@ export function PortalEntry() {
     <PortalLayout schoolName={answers?.school.name}>
       
       {pages && pages.length > 0 && (
-        <div className="mb-8 p-4 bg-white border rounded-lg shadow-sm no-print">
-          <h3 className="font-semibold mb-3 flex items-center gap-2 text-[#325566]">
-            <FileText className="h-4 w-4" /> Helpful Information
+        <section aria-labelledby="helpful-information-title" className="mb-8 p-6 bg-white border border-border rounded-xl shadow-sm no-print">
+          <h3 id="helpful-information-title" className="font-serif text-lg font-bold mb-4 flex items-center gap-3 text-foreground">
+            <span className="h-10 w-10 rounded-full bg-secondary/10 text-secondary flex items-center justify-center border border-secondary/20" aria-hidden="true"><FileText className="h-5 w-5" /></span>
+            Helpful Information
           </h3>
-          <div className="flex flex-wrap gap-2">
+          <div className="flex flex-wrap gap-3">
             {pages.map(page => (
               <Link key={page.id} href={`/s/${code}/pages/${page.slug}`}>
-                <Button variant="outline" size="sm" className="bg-[#fbfbf9]">
+                <Button variant="outline" className="rounded-full bg-white hover:bg-secondary/5 hover:text-secondary hover:border-secondary/30 transition-colors shadow-sm">
                   {page.title}
                 </Button>
               </Link>
             ))}
           </div>
-        </div>
+        </section>
       )}
 
       {answers && (

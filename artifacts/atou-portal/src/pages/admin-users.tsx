@@ -62,7 +62,8 @@ export function AdminUsers() {
     <AdminLayout>
       <div className="space-y-6 max-w-4xl">
         <div>
-          <h1 className="text-2xl font-serif font-semibold text-foreground">Admin Accounts</h1>
+          <p className="text-xs font-bold uppercase tracking-[0.16em] text-primary mb-1">Access Control</p>
+          <h1 className="text-3xl font-serif font-bold text-foreground">Admin Accounts</h1>
           <p className="text-muted-foreground mt-1">Manage who can access this dashboard.</p>
         </div>
 
@@ -75,11 +76,11 @@ export function AdminUsers() {
             <form onSubmit={handleCreate} className="flex flex-col sm:flex-row gap-4 items-end">
               <div className="space-y-2 flex-1 w-full">
                 <Label htmlFor="email">Email</Label>
-                <Input id="email" type="email" value={email} onChange={e => setEmail(e.target.value)} required />
+                <Input id="email" type="email" autoComplete="email" value={email} onChange={e => setEmail(e.target.value)} required />
               </div>
               <div className="space-y-2 flex-1 w-full">
                 <Label htmlFor="password">Password (min 8 chars)</Label>
-                <Input id="password" type="password" value={password} onChange={e => setPassword(e.target.value)} required minLength={8} />
+                <Input id="password" type="password" autoComplete="new-password" value={password} onChange={e => setPassword(e.target.value)} required minLength={8} />
               </div>
               <Button type="submit" disabled={createUser.isPending} className="w-full sm:w-auto">
                 <UserPlus className="h-4 w-4 mr-2" />
@@ -100,22 +101,22 @@ export function AdminUsers() {
             </TableHeader>
             <TableBody>
               {users?.map(user => (
-                <TableRow key={user.id}>
-                  <TableCell className="font-medium">
-                    {user.email} {user.id === me?.id && <span className="text-xs ml-2 bg-primary/10 text-primary px-2 py-0.5 rounded-full">You</span>}
+                <TableRow key={user.id} className="group hover:bg-muted/30 transition-colors">
+                  <TableCell className="font-bold text-foreground">
+                    {user.email} {user.id === me?.id && <span className="text-xs font-bold uppercase tracking-wider ml-2 bg-secondary/10 text-secondary border border-secondary/15 px-2 py-0.5 rounded-full">You</span>}
                   </TableCell>
-                  <TableCell className="text-muted-foreground text-sm">
+                  <TableCell className="text-muted-foreground text-sm font-medium">
                     {formatPacificTime(user.createdAt)}
                   </TableCell>
                   <TableCell className="text-right">
                     {user.id !== me?.id && (
                       <AlertDialog>
                         <AlertDialogTrigger asChild>
-                          <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive hover:bg-destructive/10">
+                          <Button variant="ghost" size="icon" className="rounded-full h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10 opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity">
                             <Trash2 className="h-4 w-4" />
                           </Button>
                         </AlertDialogTrigger>
-                        <AlertDialogContent>
+                        <AlertDialogContent className="rounded-2xl">
                           <AlertDialogHeader>
                             <AlertDialogTitle>Remove Admin User</AlertDialogTitle>
                             <AlertDialogDescription>
@@ -123,8 +124,8 @@ export function AdminUsers() {
                             </AlertDialogDescription>
                           </AlertDialogHeader>
                           <AlertDialogFooter>
-                            <AlertDialogCancel>Cancel</AlertDialogCancel>
-                            <AlertDialogAction onClick={() => handleDelete(user.id)} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+                            <AlertDialogCancel className="rounded-full">Cancel</AlertDialogCancel>
+                            <AlertDialogAction onClick={() => handleDelete(user.id)} className="rounded-full bg-destructive text-destructive-foreground hover:bg-destructive/90">
                               Remove User
                             </AlertDialogAction>
                           </AlertDialogFooter>

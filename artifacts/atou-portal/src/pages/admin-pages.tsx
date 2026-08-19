@@ -47,7 +47,7 @@ function RichTextEditor({ value, onChange }: { value: string, onChange: (val: st
   }
 
   return (
-    <div className="border rounded-md overflow-hidden bg-background">
+    <div className="border rounded-xl overflow-hidden bg-card focus-within:ring-2 focus-within:ring-ring/35">
       <div className="bg-muted/50 border-b p-2 flex gap-2 flex-wrap">
         <Button type="button" variant="outline" size="sm" onClick={() => exec('bold')} className="h-8 w-8 p-0 font-bold">B</Button>
         <Button type="button" variant="outline" size="sm" onClick={() => exec('underline')} className="h-8 w-8 p-0 underline">U</Button>
@@ -55,7 +55,7 @@ function RichTextEditor({ value, onChange }: { value: string, onChange: (val: st
         <Button type="button" variant="outline" size="sm" onClick={() => exec('insertUnorderedList')} className="h-8 px-2 text-xs">Bullet</Button>
         <Button type="button" variant="outline" size="sm" onClick={() => exec('insertOrderedList')} className="h-8 px-2 text-xs">Num</Button>
         <div className="w-px h-8 bg-border mx-1" />
-        <select className="text-sm border rounded px-2 h-8 bg-background" onChange={(e) => exec('fontSize', e.target.value)} defaultValue="">
+        <select className="text-sm border rounded-lg px-2 h-8 bg-card focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" onChange={(e) => exec('fontSize', e.target.value)} defaultValue="">
           <option value="" disabled>Size</option>
           <option value="3">Normal</option>
           <option value="5">Large</option>
@@ -175,10 +175,11 @@ export function AdminPages() {
       <div className="space-y-6">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div>
-            <h1 className="text-2xl font-serif font-semibold text-foreground">Info Pages</h1>
+            <p className="text-xs font-bold uppercase tracking-[0.16em] text-primary mb-1">Portal Content</p>
+            <h1 className="text-3xl font-serif font-bold text-foreground">Info Pages</h1>
             <p className="text-muted-foreground mt-1">Manage content accessible via the school portal.</p>
           </div>
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-2">
             <Button variant="outline" onClick={handleExport}>
               <Download className="h-4 w-4 mr-2" />
               Export All
@@ -204,13 +205,21 @@ export function AdminPages() {
             <TableBody>
               {pages?.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
-                    No pages created yet.
+                  <TableCell colSpan={5} className="text-center py-12">
+                    <div className="flex flex-col items-center justify-center space-y-3">
+                      <div className="h-12 w-12 rounded-full bg-muted flex items-center justify-center">
+                        <FileText className="h-6 w-6 text-muted-foreground/60" />
+                      </div>
+                      <p className="text-muted-foreground font-medium">No pages created yet.</p>
+                      <Button variant="outline" size="sm" onClick={handleOpenNew}>
+                        Create your first page
+                      </Button>
+                    </div>
                   </TableCell>
                 </TableRow>
               ) : pages?.map(page => (
-                <TableRow key={page.id}>
-                  <TableCell className="font-medium">{page.title}</TableCell>
+                <TableRow key={page.id} className="group hover:bg-muted/30 transition-colors">
+                  <TableCell className="font-bold text-foreground">{page.title}</TableCell>
                   <TableCell className="text-muted-foreground font-mono text-xs">/s/CODE/pages/{page.slug}</TableCell>
                   <TableCell>
                     <div className="flex items-center gap-2">
@@ -219,20 +228,22 @@ export function AdminPages() {
                         onCheckedChange={() => handleTogglePublish(page.id, page.published)} 
                       />
                       {page.published ? (
-                        <span className="text-xs font-medium flex items-center text-primary"><Globe className="h-3 w-3 mr-1"/> Published</span>
+                        <span className="text-xs font-bold uppercase tracking-wider flex items-center text-primary"><Globe className="h-3.5 w-3.5 mr-1"/> Published</span>
                       ) : (
-                        <span className="text-xs text-muted-foreground flex items-center"><EyeOff className="h-3 w-3 mr-1"/> Draft</span>
+                        <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center"><EyeOff className="h-3.5 w-3.5 mr-1"/> Draft</span>
                       )}
                     </div>
                   </TableCell>
-                  <TableCell className="text-sm text-muted-foreground">{formatPacificTime(page.updatedAt)}</TableCell>
+                  <TableCell className="text-sm text-muted-foreground font-medium">{formatPacificTime(page.updatedAt)}</TableCell>
                   <TableCell className="text-right">
-                    <Button variant="ghost" size="icon" onClick={() => handleOpenEdit(page)}>
-                      <Edit2 className="h-4 w-4 text-primary" />
-                    </Button>
-                    <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive hover:bg-destructive/10" onClick={() => handleDelete(page.id)}>
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
+                    <div className="flex justify-end gap-1 opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity">
+                      <Button variant="ghost" size="icon" className="rounded-full h-8 w-8 hover:bg-primary/10" onClick={() => handleOpenEdit(page)}>
+                        <Edit2 className="h-4 w-4 text-primary" />
+                      </Button>
+                      <Button variant="ghost" size="icon" className="rounded-full h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10" onClick={() => handleDelete(page.id)}>
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
                   </TableCell>
                 </TableRow>
               ))}
@@ -249,7 +260,7 @@ export function AdminPages() {
             </DialogHeader>
             
             <div className="flex-1 overflow-y-auto py-4 space-y-4 pr-2">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label>Page Title</Label>
                   <Input 

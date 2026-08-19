@@ -44,7 +44,8 @@ export function AdminSettings() {
     <AdminLayout>
       <div className="space-y-6 max-w-2xl">
         <div>
-          <h1 className="text-2xl font-serif font-semibold text-foreground">Settings</h1>
+          <p className="text-xs font-bold uppercase tracking-[0.16em] text-primary mb-1">Configuration</p>
+          <h1 className="text-3xl font-serif font-bold text-foreground">Settings</h1>
           <p className="text-muted-foreground mt-1">Configure integrations and app behavior.</p>
         </div>
 
@@ -68,7 +69,7 @@ export function AdminSettings() {
             </div>
           </CardHeader>
           <CardContent>
-            <div className="bg-muted/50 p-4 rounded-md mb-6 border border-dashed flex items-start gap-3">
+            <div className="bg-muted/50 p-4 rounded-xl mb-6 border border-dashed flex items-start gap-3">
               <AlertCircle className="h-5 w-5 text-muted-foreground mt-0.5 flex-shrink-0" />
               <p className="text-sm text-muted-foreground">
                 This integration is currently disabled in the prototype phase. You can save your credentials below, but no data will be synced to Airtable yet.
@@ -86,7 +87,7 @@ export function AdminSettings() {
                   onChange={e => setApiKey(e.target.value)}
                 />
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="baseId">Base ID</Label>
                   <Input 

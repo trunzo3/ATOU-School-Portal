@@ -2,6 +2,7 @@ import { Link, useLocation } from "wouter"
 import { useGetAdminMe, useAdminLogout, getGetAdminMeQueryKey } from "@workspace/api-client-react"
 import { Users, FileText, Settings, LogOut, Send, LayoutDashboard, Menu } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { AtouLogo } from "@/components/shared/atou-logo"
 import { useState } from "react"
 import { cn } from "@/lib/utils"
 
@@ -37,31 +38,48 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-[100dvh] flex flex-col md:flex-row bg-background print:bg-white print:block">
       {/* Mobile Header */}
-      <div className="md:hidden flex items-center justify-between p-4 border-b bg-card no-print">
-        <div className="font-serif font-semibold text-lg text-primary">ATOU Logistics</div>
-        <Button variant="ghost" size="icon" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
-          <Menu className="h-6 w-6" />
+      <div className="md:hidden flex items-center justify-between p-4 border-b bg-card no-print shadow-sm z-50 relative">
+        <div className="flex items-center gap-2">
+          <AtouLogo className="h-10 w-10 flex-shrink-0 drop-shadow-sm" />
+          <div>
+            <div className="font-serif font-bold text-lg text-foreground tracking-tight leading-none">ATOU Logistics</div>
+            <div className="text-[10px] text-primary font-bold uppercase tracking-[0.16em] mt-1">Admin Portal</div>
+          </div>
+        </div>
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+          className="rounded-full"
+          aria-label={mobileMenuOpen ? "Close admin navigation" : "Open admin navigation"}
+          aria-expanded={mobileMenuOpen}
+          aria-controls="admin-navigation"
+        >
+          <Menu className="h-5 w-5" />
         </Button>
       </div>
 
       {/* Sidebar */}
       <div className={cn(
-        "fixed inset-y-0 left-0 z-40 w-64 bg-card border-r flex flex-col shadow-sm transition-transform duration-200 ease-in-out md:sticky md:top-0 md:h-[100dvh] md:translate-x-0 no-print",
+        "fixed top-[65px] bottom-0 left-0 z-40 w-64 bg-sidebar text-sidebar-foreground border-r border-sidebar-border flex flex-col shadow-xl transition-transform duration-200 ease-in-out md:sticky md:inset-y-0 md:h-[100dvh] md:translate-x-0 no-print",
         mobileMenuOpen ? "translate-x-0" : "-translate-x-full"
-      )}>
-        <div className="p-6 border-b hidden md:block">
-          <h1 className="font-serif text-xl font-semibold text-primary">ATOU Logistics</h1>
-          <p className="text-xs text-muted-foreground mt-1">A Touch of Understanding</p>
+      )} id="admin-navigation">
+        <div className="p-6 border-b border-sidebar-border hidden md:block">
+          <div className="flex items-center gap-3 mb-2">
+            <AtouLogo className="h-12 w-12 flex-shrink-0 drop-shadow-md" />
+            <h1 className="font-serif text-xl font-bold text-sidebar-foreground tracking-tight">ATOU Logistics</h1>
+          </div>
+          <p className="text-[10px] text-primary font-bold uppercase tracking-[0.16em]">A Touch of Understanding</p>
         </div>
-        <div className="p-4 flex-1 flex flex-col gap-1 overflow-y-auto">
+        <div className="p-4 flex-1 flex flex-col gap-1.5 overflow-y-auto">
           {navLinks.map((link) => {
             const Icon = link.icon
             const active = location === link.href || (link.href !== "/admin" && location.startsWith(link.href))
             return (
               <Link key={link.href} href={link.href} onClick={() => setMobileMenuOpen(false)}>
                 <span className={cn(
-                  "flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-colors cursor-pointer",
-                  active ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-secondary hover:text-foreground"
+                  "flex items-center gap-3 px-3 py-2.5 rounded-full text-sm font-medium transition-all cursor-pointer",
+                  active ? "bg-primary text-primary-foreground shadow-sm" : "text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
                 )}>
                   <Icon className="h-4 w-4" />
                   {link.label}
@@ -70,9 +88,9 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
             )
           })}
         </div>
-        <div className="p-4 border-t">
-          <p className="text-xs text-muted-foreground mb-3 px-2 break-all">{user.email}</p>
-          <Button variant="outline" className="w-full justify-start gap-2" onClick={handleLogout}>
+        <div className="p-4 border-t border-sidebar-border bg-black/10">
+          <p className="text-xs text-sidebar-foreground/65 mb-3 px-2 break-all font-medium">{user.email}</p>
+          <Button variant="outline" className="w-full justify-start gap-2 border-white/20 bg-transparent text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground" onClick={handleLogout}>
             <LogOut className="h-4 w-4" />
             Sign Out
           </Button>
@@ -81,11 +99,11 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
       
       {/* Overlay for mobile */}
       {mobileMenuOpen && (
-        <div className="fixed inset-0 bg-black/20 z-30 md:hidden no-print" onClick={() => setMobileMenuOpen(false)} />
+        <div className="fixed inset-0 bg-brand-navy/45 backdrop-blur-[1px] z-30 md:hidden no-print" onClick={() => setMobileMenuOpen(false)} />
       )}
 
       {/* Main Content */}
-      <main className="flex-1 flex flex-col min-w-0 print:block">
+      <main className="flex-1 flex flex-col min-w-0 bg-background print:block">
         <div className="flex-1 p-4 md:p-8 max-w-6xl mx-auto w-full print:p-0 print:m-0 print:max-w-none">
           {children}
         </div>

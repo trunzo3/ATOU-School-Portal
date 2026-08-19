@@ -328,10 +328,10 @@ export function SchoolForm({ code, email, initialAnswers, onSaveAnswer, onSaveTe
     <div className="space-y-8 print:space-y-6 w-full max-w-3xl mx-auto pb-12">
       
       {/* Header Info */}
-      <div className="bg-primary/5 border border-primary/10 rounded-lg p-6 print:border-none print:p-0 print:bg-transparent flex justify-between items-start">
+      <div className="bg-primary/5 border border-primary/20 rounded-xl p-6 sm:p-8 print:border-none print:p-0 print:bg-transparent flex flex-col sm:flex-row justify-between items-start gap-4">
         <div>
-          <h2 className="text-2xl font-serif font-semibold text-primary">{initialAnswers.school.name}</h2>
-          <p className="text-primary/80 mt-1 flex items-center gap-2">
+          <h2 className="text-2xl sm:text-3xl font-serif font-bold text-foreground tracking-tight">{initialAnswers.school.name}</h2>
+          <p className="text-primary font-medium mt-2 flex items-center gap-2 text-sm sm:text-base">
             <Clock className="h-4 w-4" /> 
             {initialAnswers.school.workshopDate ? formatPacificTime(initialAnswers.school.workshopDate).split(',')[0] : "Date TBD"}
           </p>
@@ -341,13 +341,15 @@ export function SchoolForm({ code, email, initialAnswers, onSaveAnswer, onSaveTe
         )}
       </div>
 
-      <div className="text-sm bg-muted p-4 rounded-md flex gap-3 no-print">
-        <Info className="h-5 w-5 text-muted-foreground flex-shrink-0" />
-        <p>Answers save automatically as you enter them. Answers can be changed any time before the workshop. <br/>You are logged in as <strong>{email}</strong>.</p>
+      <div className="text-sm bg-accent/50 text-accent-foreground p-5 rounded-xl border border-accent flex gap-3 no-print items-start">
+        <span aria-hidden="true" className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full bg-secondary text-secondary-foreground shadow-sm">
+          <Info className="h-4 w-4" />
+        </span>
+        <p className="leading-relaxed">Answers save automatically as you enter them. Answers can be changed any time before the workshop. <br/><span className="inline-block mt-1">You are logged in as <strong className="font-semibold">{email}</strong>.</span></p>
       </div>
 
       {/* Teachers Section */}
-      <Card className="print:shadow-none print:border-b-2 print:border-black print:rounded-none">
+      <Card className="border-l-4 border-l-primary print:shadow-none print:border-b-2 print:border-l-0 print:border-black print:rounded-none">
         <CardHeader className="print:px-0">
           <div className="flex justify-between items-start">
             <div>
@@ -371,21 +373,21 @@ export function SchoolForm({ code, email, initialAnswers, onSaveAnswer, onSaveTe
             </div>
             
             {teacherRows.map((row, i) => (
-              <div key={i} className="grid grid-cols-1 md:grid-cols-12 gap-2 items-start md:items-center p-3 md:p-0 border rounded-md md:border-none md:bg-transparent bg-muted/5 print:border-b print:rounded-none print:py-2">
-                <div className="md:hidden text-xs font-medium uppercase text-muted-foreground mb-1">Teacher {i+1}</div>
+              <div key={i} className="grid grid-cols-1 md:grid-cols-12 gap-3 items-start md:items-center p-4 md:p-0 border border-border rounded-xl md:border-none md:bg-transparent bg-muted/25 shadow-sm md:shadow-none print:border-b print:rounded-none print:py-2">
+                <div className="md:hidden text-xs font-bold uppercase tracking-wider text-muted-foreground mb-1">Teacher {i+1}</div>
                 <div className="col-span-3">
-                  <Input placeholder="First Name" value={row.firstName} onChange={(e) => handleTeacherChange(i, "firstName", e.target.value)} disabled={isReadOnly || initialAnswers.school.locked} className="print:border-none print:p-0 print:h-auto" />
+                   <Input placeholder="First Name" value={row.firstName} onChange={(e) => handleTeacherChange(i, "firstName", e.target.value)} disabled={isReadOnly || initialAnswers.school.locked} className="print:border-none print:p-0 print:h-auto" />
                 </div>
                 <div className="col-span-3">
-                  <Input placeholder="Last Name" value={row.lastName} onChange={(e) => handleTeacherChange(i, "lastName", e.target.value)} disabled={isReadOnly || initialAnswers.school.locked} className="print:border-none print:p-0 print:h-auto" />
+                   <Input placeholder="Last Name" value={row.lastName} onChange={(e) => handleTeacherChange(i, "lastName", e.target.value)} disabled={isReadOnly || initialAnswers.school.locked} className="print:border-none print:p-0 print:h-auto" />
                 </div>
                 <div className="col-span-4">
-                  <Input type="email" placeholder="Email Address" value={row.email} onChange={(e) => handleTeacherChange(i, "email", e.target.value)} disabled={isReadOnly || initialAnswers.school.locked} className="print:border-none print:p-0 print:h-auto" />
+                   <Input type="email" placeholder="Email Address" value={row.email} onChange={(e) => handleTeacherChange(i, "email", e.target.value)} disabled={isReadOnly || initialAnswers.school.locked} className="print:border-none print:p-0 print:h-auto" />
                 </div>
                 <div className="col-span-2 flex gap-2 items-center">
-                  <Input type="number" min="0" placeholder="Count" value={row.studentCount || ""} onChange={(e) => handleTeacherChange(i, "studentCount", parseInt(e.target.value)||0)} disabled={isReadOnly || initialAnswers.school.locked} className="print:border-none print:p-0 print:h-auto" />
+                   <Input type="number" min="0" placeholder="Count" value={row.studentCount || ""} onChange={(e) => handleTeacherChange(i, "studentCount", parseInt(e.target.value)||0)} disabled={isReadOnly || initialAnswers.school.locked} className="print:border-none print:p-0 print:h-auto" />
                   {!isReadOnly && !initialAnswers.school.locked && (
-                    <Button variant="ghost" size="icon" className="text-destructive h-10 w-10 flex-shrink-0 no-print" onClick={() => removeTeacher(i)}>
+                    <Button variant="ghost" size="icon" className="text-destructive h-10 w-10 flex-shrink-0 no-print rounded-full hover:bg-destructive/10" onClick={() => removeTeacher(i)}>
                       <Trash2 className="h-4 w-4" />
                     </Button>
                   )}
@@ -437,7 +439,7 @@ export function SchoolForm({ code, email, initialAnswers, onSaveAnswer, onSaveTe
       </Card>
 
       {/* Workshop Time */}
-      <Card className="print:shadow-none print:border-b-2 print:border-black print:rounded-none">
+      <Card className="border-l-4 border-l-primary print:shadow-none print:border-b-2 print:border-l-0 print:border-black print:rounded-none">
         <CardHeader className="print:px-0">
           <div className="flex justify-between items-start">
             <div>
@@ -510,7 +512,7 @@ export function SchoolForm({ code, email, initialAnswers, onSaveAnswer, onSaveTe
       </Card>
 
       {/* Activity Area */}
-      <Card className="print:shadow-none print:border-b-2 print:border-black print:rounded-none">
+      <Card className="border-l-4 border-l-primary print:shadow-none print:border-b-2 print:border-l-0 print:border-black print:rounded-none">
         <CardHeader className="print:px-0">
           <div className="flex justify-between items-start">
             <div>
@@ -544,7 +546,7 @@ export function SchoolForm({ code, email, initialAnswers, onSaveAnswer, onSaveTe
       </Card>
 
       {/* Speaker Area */}
-      <Card className="print:shadow-none print:border-b-2 print:border-black print:rounded-none">
+      <Card className="border-l-4 border-l-primary print:shadow-none print:border-b-2 print:border-l-0 print:border-black print:rounded-none">
         <CardHeader className="print:px-0">
           <div className="flex justify-between items-start">
             <div>
@@ -578,7 +580,7 @@ export function SchoolForm({ code, email, initialAnswers, onSaveAnswer, onSaveTe
       </Card>
 
       {/* Notes */}
-      <Card className="print:shadow-none print:border-b-2 print:border-black print:rounded-none">
+      <Card className="border-l-4 border-l-secondary print:shadow-none print:border-b-2 print:border-l-0 print:border-black print:rounded-none">
         <CardHeader className="print:px-0">
           <div>
             <CardTitle>Anything else we should know?</CardTitle>

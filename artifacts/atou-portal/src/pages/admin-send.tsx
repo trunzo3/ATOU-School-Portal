@@ -15,6 +15,7 @@ import { Button } from "@/components/ui/button"
 import { Input, Textarea } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Badge } from "@/components/ui/badge"
+import { AtouLogo } from "@/components/shared/atou-logo"
 import { formatPacificTime } from "@/lib/utils"
 import { ChevronLeft, Eye, EyeOff, Mail, Save, Search, Send, X, AlertCircle, CheckCircle2 } from "lucide-react"
 import { useEffect, useMemo, useRef, useState } from "react"
@@ -177,18 +178,19 @@ export function AdminSend() {
 
   return (
     <AdminLayout>
-      <div className="space-y-6 max-w-4xl pb-12">
+      <div className="space-y-6 max-w-5xl pb-12">
         <div>
           <Link href="/admin">
             <Button variant="ghost" size="sm" className="mb-2 -ml-2 text-muted-foreground">
               <ChevronLeft className="h-4 w-4 mr-1" /> Back to schools
             </Button>
           </Link>
-          <h1 className="text-2xl font-serif font-semibold text-foreground">Send Emails</h1>
+          <p className="text-xs font-bold uppercase tracking-[0.16em] text-primary mb-1">School Communications</p>
+          <h1 className="text-3xl font-serif font-bold text-foreground">Send Emails</h1>
         </div>
 
         {emailStatus && !emailStatus.configured && (
-          <div className="bg-amber-50 border-amber-200 border text-amber-900 p-4 rounded-lg flex items-start gap-3 no-print">
+          <div role="status" className="bg-amber-50 border-amber-200 border text-amber-950 p-4 rounded-xl flex items-start gap-3 no-print">
             <AlertCircle className="h-5 w-5 mt-0.5 flex-shrink-0" />
             <div className="text-sm">
               <p className="font-semibold mb-1">Email sending isn't connected yet.</p>
@@ -198,21 +200,24 @@ export function AdminSend() {
         )}
 
         {confirmation && (
-          <div className="bg-green-50 border-green-200 border text-green-900 p-4 rounded-lg flex items-start gap-3">
+          <div role="status" className="bg-primary/10 border-primary/20 border text-foreground p-4 rounded-xl flex items-start gap-3">
             <CheckCircle2 className="h-5 w-5 mt-0.5 flex-shrink-0" />
             <p className="text-sm font-medium">{confirmation}</p>
           </div>
         )}
 
         {/* Compose */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Compose</CardTitle>
+        <Card className="border-t-4 border-t-primary shadow-[0_10px_30px_-24px_rgba(24,48,89,0.55)]">
+          <CardHeader className="flex-row items-start justify-between gap-4 space-y-0">
+            <div>
+              <CardTitle>Compose</CardTitle>
             {!hasSelection && (
               <CardDescription>
                 No schools are selected yet. Add schools by name below, or pick them on the dashboard and click Compose email.
               </CardDescription>
             )}
+            </div>
+            <AtouLogo className="h-14 w-14 flex-shrink-0" />
           </CardHeader>
           <CardContent className="space-y-5">
             {/* Type-ahead to add schools */}
@@ -225,12 +230,12 @@ export function AdminSend() {
                 onChange={e => setAddQuery(e.target.value)}
               />
               {matches.length > 0 && (
-                <div className="absolute z-20 mt-1 w-full bg-popover border rounded-md shadow-md overflow-hidden">
+                <div className="absolute z-20 mt-1 w-full bg-popover border rounded-lg shadow-xl overflow-hidden">
                   {matches.map(m => (
                     <button
                       key={m.id}
                       type="button"
-                      className="w-full text-left px-3 py-2 text-sm hover:bg-muted"
+                      className="w-full text-left px-3 py-2.5 text-sm hover:bg-accent focus-visible:bg-accent focus-visible:outline-none"
                       onClick={() => addSchool(m.id)}
                     >
                       {m.name}
@@ -247,7 +252,7 @@ export function AdminSend() {
             {hasSelection && (
               <div className="space-y-3">
                 {selectedSchools.map(school => (
-                  <div key={school.id} className="border rounded-md p-3">
+                  <div key={school.id} className="border rounded-xl p-4 bg-muted/20">
                     <div className="flex justify-between items-start gap-2">
                       <div>
                         <span className="font-medium">{school.name}</span>
@@ -305,6 +310,7 @@ export function AdminSend() {
               <Button
                 onClick={handleSend}
                 disabled={!hasSelection || recipientCount === 0 || sendEmails.isPending || !subject.trim() || !message.trim()}
+                className="shadow-sm"
               >
                 <Send className="h-4 w-4 mr-2" />
                 {sendEmails.isPending
@@ -324,7 +330,7 @@ export function AdminSend() {
             </div>
 
             {showPreview && previewSchool && (
-              <div className="border rounded-md p-4 bg-muted/20 space-y-3">
+              <div className="border border-secondary/20 rounded-xl p-5 bg-secondary/5 space-y-3">
                 <p className="text-xs uppercase tracking-wider text-muted-foreground font-medium">
                   Preview for {previewSchool.name}
                 </p>
@@ -342,14 +348,14 @@ export function AdminSend() {
         </Card>
 
         {/* Sent log */}
-        <Card>
+        <Card className="border-t-4 border-t-secondary">
           <CardHeader>
             <CardTitle>Sent Log</CardTitle>
             <CardDescription>Past sends, newest first.</CardDescription>
           </CardHeader>
           <CardContent>
             {!sends || sends.length === 0 ? (
-              <p className="text-muted-foreground bg-muted/30 p-8 rounded-lg text-center border">
+              <p className="text-muted-foreground bg-muted/20 p-12 rounded-xl text-center border border-dashed border-border/60">
                 Nothing has been sent yet.
               </p>
             ) : (
@@ -375,7 +381,7 @@ export function AdminSend() {
                         {formatPacificTime(send.sentAt)} · by {send.sentBy}
                       </p>
                     </div>
-                    <Button variant="outline" size="sm" onClick={() => resend(send.schoolId, send.recipients)}>
+                    <Button variant="outline" size="sm" className="border-secondary/35 text-secondary hover:bg-secondary hover:text-secondary-foreground" onClick={() => resend(send.schoolId, send.recipients)}>
                       <Mail className="h-4 w-4 mr-2" /> Resend
                     </Button>
                   </div>

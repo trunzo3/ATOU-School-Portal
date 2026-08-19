@@ -8,8 +8,8 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { StatusBadge } from "@/components/ui/status-badge"
-import { formatPacificTime } from "@/lib/utils"
-import { Copy, Search, ExternalLink, Lock, Mail, X } from "lucide-react"
+import { formatPacificTime, cn } from "@/lib/utils"
+import { Copy, Search, ExternalLink, Lock, Mail, X, CalendarDays } from "lucide-react"
 import { useEffect, useMemo, useState } from "react"
 import { Link, useLocation } from "wouter"
 import { useToast } from "@/hooks/use-toast"
@@ -55,6 +55,29 @@ const SEND_STATUS_LABEL: Record<string, string> = {
   answered: "Answered",
 }
 
+function DateFilterPicker({
+  value,
+  onChange,
+  label,
+}: {
+  value: string
+  onChange: (value: string) => void
+  label: string
+}) {
+  return (
+    <div className="relative w-full sm:w-[175px]">
+      <CalendarDays aria-hidden="true" className="pointer-events-none absolute left-3 top-3 h-4 w-4 text-primary" />
+      <Input
+        type="date"
+        aria-label={label}
+        title={label}
+        className="w-full pl-9"
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+      />
+    </div>
+  )
+}
 export function AdminDashboard() {
   const { data: summary } = useGetAdminSummary()
   const { data: schools } = useGetAdminSchools()
@@ -146,7 +169,10 @@ export function AdminDashboard() {
     <AdminLayout>
       <div className="space-y-6 pb-20">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-          <h1 className="text-2xl font-serif font-semibold text-foreground">Workshop Dashboard</h1>
+          <div>
+            <p className="text-xs font-bold uppercase tracking-[0.16em] text-primary mb-1">Program Operations</p>
+            <h1 className="text-3xl font-serif font-bold text-foreground">Workshop Dashboard</h1>
+          </div>
         </div>
 
         {summary && (
@@ -156,28 +182,32 @@ export function AdminDashboard() {
             aria-label="Filter schools by dashboard summary"
           >
             {[
-              { filter: "all", label: "Total Days", total: summary.totalSchools, valueClass: "text-primary", labelClass: "text-primary/80", cardClass: "bg-primary/5 border-primary/10" },
-              { filter: "complete", label: "Complete", total: summary.complete },
-              { filter: "partial", label: "Partial", total: summary.partial, valueClass: "text-amber-600" },
-              { filter: "untouched", label: "Untouched", total: summary.untouched, valueClass: "text-destructive" },
-              { filter: "locked", label: "Locked", total: summary.locked },
+              { filter: "all", label: "Total Days", total: summary.totalSchools, valueClass: "text-primary", labelClass: "text-primary/80", cardClass: "bg-primary/5 border-primary/20" },
+              { filter: "complete", label: "Complete", total: summary.complete, valueClass: "text-foreground", cardClass: "border-border hover:border-primary/20" },
+              { filter: "partial", label: "Partial", total: summary.partial, valueClass: "text-amber-600", cardClass: "border-border hover:border-amber-500/20" },
+              { filter: "untouched", label: "Untouched", total: summary.untouched, valueClass: "text-destructive", cardClass: "border-border hover:border-destructive/20" },
+              { filter: "locked", label: "Locked", total: summary.locked, valueClass: "text-secondary", labelClass: "text-secondary/80", cardClass: "bg-secondary/5 border-secondary/15 hover:border-secondary/30" },
             ].map(({ filter, label, total, valueClass = "", labelClass = "text-muted-foreground", cardClass = "" }) => {
               const active = state.summaryFilter === filter
               return (
                 <Card
                   key={filter}
-                  className={`${cardClass} ${active ? "border-primary bg-primary/10 ring-2 ring-primary ring-offset-2" : ""}`}
+                  className={cn(
+                    "shadow-sm transition-all hover:shadow-md",
+                    cardClass,
+                    active && "border-primary bg-primary/10 ring-2 ring-primary ring-offset-2",
+                  )}
                 >
                   <button
                     type="button"
-                    className="w-full rounded-lg text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+                    className="w-full h-full rounded-xl text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
                     onClick={() => toggleSummaryFilter(filter as SummaryFilter)}
                     aria-pressed={active}
                     aria-label={`${active ? "Clear" : "Filter by"} ${label} schools (${total})`}
                   >
-                    <CardContent className="p-4 flex flex-col justify-center items-center text-center">
-                      <span className={`text-3xl font-serif font-semibold ${valueClass}`}>{total}</span>
-                      <span className={`text-xs font-medium uppercase tracking-wider mt-1 ${labelClass}`}>{label}</span>
+                    <CardContent className="p-5 flex flex-col justify-center items-center text-center h-full">
+                      <span className={`text-4xl font-serif font-bold ${valueClass}`}>{total}</span>
+                      <span className={`text-xs font-bold uppercase tracking-widest mt-2 ${labelClass}`}>{label}</span>
                     </CardContent>
                   </button>
                 </Card>
@@ -186,7 +216,7 @@ export function AdminDashboard() {
           </div>
         )}
 
-        <div className="bg-card p-4 rounded-lg border space-y-3">
+        <div className="bg-white p-5 rounded-xl border border-border space-y-4 shadow-[0_8px_28px_-22px_rgba(24,48,89,0.45)]">
           <div className="flex flex-col lg:flex-row gap-3 lg:items-center">
             <div className="relative w-full lg:w-72">
               <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
@@ -211,24 +241,24 @@ export function AdminDashboard() {
             </div>
           </div>
           <div className="flex flex-col lg:flex-row gap-3 lg:items-center">
-            <div className="flex items-center gap-2">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-2 w-full lg:w-auto">
               <span className="text-sm text-muted-foreground whitespace-nowrap">Workshop between</span>
-              <Input
-                type="date"
-                className="w-[150px]"
-                value={state.dateFrom}
-                onChange={(e) => set({ dateFrom: e.target.value })}
-              />
-              <span className="text-sm text-muted-foreground">and</span>
-              <Input
-                type="date"
-                className="w-[150px]"
-                value={state.dateTo}
-                onChange={(e) => set({ dateTo: e.target.value })}
-              />
+              <div className="grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] sm:flex items-center gap-2 w-full sm:w-auto">
+                <DateFilterPicker
+                  label="Earliest workshop date"
+                  value={state.dateFrom}
+                  onChange={(dateFrom) => set({ dateFrom })}
+                />
+                <span className="text-sm text-muted-foreground">and</span>
+                <DateFilterPicker
+                  label="Latest workshop date"
+                  value={state.dateTo}
+                  onChange={(dateTo) => set({ dateTo })}
+                />
+              </div>
             </div>
             <Select value={state.sendStatus} onValueChange={(v) => set({ sendStatus: v })}>
-              <SelectTrigger className="w-[180px]"><SelectValue /></SelectTrigger>
+              <SelectTrigger className="w-full sm:w-[180px]"><SelectValue /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Any send status</SelectItem>
                 <SelectItem value="never_sent">Never sent</SelectItem>
@@ -237,7 +267,7 @@ export function AdminDashboard() {
               </SelectContent>
             </Select>
             <Select value={state.completeness} onValueChange={(v) => set({ completeness: v })}>
-              <SelectTrigger className="w-[190px]"><SelectValue /></SelectTrigger>
+              <SelectTrigger className="w-full sm:w-[190px]"><SelectValue /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Any answer status</SelectItem>
                 <SelectItem value="complete">All answers in</SelectItem>
@@ -255,7 +285,7 @@ export function AdminDashboard() {
         <TooltipProvider>
         <Card className="overflow-hidden">
           <Table>
-            <TableHeader className="bg-muted/30">
+            <TableHeader>
               <TableRow>
                 <TableHead className="w-[40px]">
                   <Checkbox
@@ -278,12 +308,22 @@ export function AdminDashboard() {
             <TableBody>
               {filteredSchools?.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={11} className="text-center py-8 text-muted-foreground">
-                    No schools match your search and filters.
+                  <TableCell colSpan={11} className="text-center py-16">
+                    <div className="flex flex-col items-center justify-center space-y-3">
+                      <div className="h-12 w-12 rounded-full bg-muted flex items-center justify-center">
+                        <Search className="h-6 w-6 text-muted-foreground/60" />
+                      </div>
+                      <p className="text-muted-foreground font-medium">No schools match your search and filters.</p>
+                      {(state.search || state.dateFrom || state.dateTo || state.sendStatus !== "all" || state.completeness !== "all" || state.summaryFilter !== "all" || state.sort !== "date") && (
+                        <Button variant="outline" size="sm" onClick={() => setState(DEFAULT_STATE)}>
+                          Clear filters
+                        </Button>
+                      )}
+                    </div>
                   </TableCell>
                 </TableRow>
               ) : filteredSchools?.map((school) => (
-                <TableRow key={school.id} className={school.locked ? "bg-muted/10" : ""}>
+                <TableRow key={school.id} className={cn("group transition-colors", school.locked ? "bg-muted/10" : "hover:bg-muted/30")}>
                   <TableCell>
                     {school.locked ? (
                       <Tooltip>
@@ -345,12 +385,12 @@ export function AdminDashboard() {
                   })}
 
                   <TableCell className="text-right">
-                    <div className="flex justify-end gap-1">
-                      <Button variant="ghost" size="icon" onClick={() => copyLink(school.link)} title="Copy Portal Link">
+                    <div className="flex justify-end gap-1 opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity">
+                      <Button variant="ghost" size="icon" className="rounded-full h-8 w-8 hover:bg-muted" onClick={() => copyLink(school.link)} title="Copy Portal Link">
                         <Copy className="h-4 w-4 text-muted-foreground" />
                       </Button>
                       <Link href={`/admin/schools/${school.id}`}>
-                        <Button variant="ghost" size="icon" title="View Form">
+                        <Button variant="ghost" size="icon" className="rounded-full h-8 w-8 hover:bg-primary/10" title="View Form">
                           <ExternalLink className="h-4 w-4 text-primary" />
                         </Button>
                       </Link>
@@ -364,13 +404,13 @@ export function AdminDashboard() {
         </TooltipProvider>
 
         {selected.length > 0 && (
-          <div className="fixed bottom-0 left-0 right-0 z-40 border-t bg-background/95 backdrop-blur px-4 py-3 no-print">
+          <div className="fixed bottom-0 left-0 right-0 z-40 border-t border-brand-navy/20 bg-brand-navy/95 text-white backdrop-blur px-4 py-3 no-print shadow-2xl">
             <div className="max-w-5xl mx-auto flex items-center justify-between gap-4">
               <div className="text-sm font-medium">
                 {selected.length} school{selected.length === 1 ? "" : "s"} selected
               </div>
               <div className="flex items-center gap-2">
-                <Button variant="ghost" size="sm" onClick={() => setSelected([])}>Clear</Button>
+                <Button variant="ghost" size="sm" className="text-white hover:bg-white/10 hover:text-white" onClick={() => setSelected([])}>Clear</Button>
                 <Button size="sm" onClick={composeEmail}>
                   <Mail className="h-4 w-4 mr-2" /> Compose email
                 </Button>

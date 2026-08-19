@@ -579,7 +579,7 @@ export function SchoolForm({ code, email, initialAnswers, onSaveAnswer, onSaveTe
             </div>
             
             {needsThreeSessions && (
-              <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-4 print:grid print:grid-cols-2 print:gap-3 print:space-y-0">
                 <div className="space-y-2">
                   <Label>School Lunch Starts</Label>
                   <TimePicker

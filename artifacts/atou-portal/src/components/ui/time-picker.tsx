@@ -93,7 +93,7 @@ export function TimePicker({ value, onChange, onBlurCommit, disabled, className,
         onBlur={maybeCommit}
         role="group"
         aria-label={ariaLabel}
-        className="flex items-center gap-2 print:hidden"
+        className="flex flex-wrap items-center gap-2 print:hidden"
       >
         <Select
           value={parsed ? String(parsed.hour12) : ""}

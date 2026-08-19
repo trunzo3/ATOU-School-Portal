@@ -5,6 +5,7 @@ import { Input, Textarea } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Button } from "@/components/ui/button"
 import { StatusBadge } from "@/components/ui/status-badge"
+import { TimePicker } from "@/components/ui/time-picker"
 import { AtouLogo } from "@/components/shared/atou-logo"
 import { formatPacificTime } from "@/lib/utils"
 import { Clock, Plus, Trash2, Info, Users, Save, CheckCircle2, ChevronRight, Printer } from "lucide-react"
@@ -562,14 +563,12 @@ export function SchoolForm({ code, email, initialAnswers, onSaveAnswer, onSaveTe
             )}
             <div className="space-y-2">
               <Label>Start Time</Label>
-              <Input 
-                type="time" 
-                step={300}
-                value={timeValue} 
-                onChange={e => { setTimeValue(e.target.value); markEdited("workshop_time", e.target.value, isClockTime ? rawTimeValue.trim() : "") }} 
-                onBlur={() => handleSave("workshop_time", timeValue, qTime?.current?.value)}
+              <TimePicker
+                aria-label="Start Time"
+                value={timeValue}
+                onChange={v => { setTimeValue(v); markEdited("workshop_time", v, isClockTime ? rawTimeValue.trim() : "") }}
+                onBlurCommit={v => handleSave("workshop_time", v, qTime?.current?.value)}
                 disabled={isReadOnly || initialAnswers.school.locked}
-                className="print:border-none print:p-0 print:h-auto"
               />
             </div>
             
@@ -577,26 +576,22 @@ export function SchoolForm({ code, email, initialAnswers, onSaveAnswer, onSaveTe
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-2">
                   <Label>School Lunch Starts</Label>
-                  <Input
-                    type="time"
-                    step={300}
+                  <TimePicker
+                    aria-label="School Lunch Starts"
                     value={lunchStart}
-                    onChange={e => { setLunchStart(e.target.value); markEdited("lunch_start", e.target.value, cleanTime(getQ("lunch_start")?.current?.value)) }}
-                    onBlur={() => handleSave("lunch_start", lunchStart, cleanTime(getQ("lunch_start")?.current?.value))}
+                    onChange={v => { setLunchStart(v); markEdited("lunch_start", v, cleanTime(getQ("lunch_start")?.current?.value)) }}
+                    onBlurCommit={v => handleSave("lunch_start", v, cleanTime(getQ("lunch_start")?.current?.value))}
                     disabled={isReadOnly || initialAnswers.school.locked}
-                    className="print:border-none print:p-0 print:h-auto"
                   />
                 </div>
                 <div className="space-y-2">
                   <Label>School Lunch Ends</Label>
-                  <Input
-                    type="time"
-                    step={300}
+                  <TimePicker
+                    aria-label="School Lunch Ends"
                     value={lunchEnd}
-                    onChange={e => { setLunchEnd(e.target.value); markEdited("lunch_end", e.target.value, cleanTime(getQ("lunch_end")?.current?.value)) }}
-                    onBlur={() => handleSave("lunch_end", lunchEnd, cleanTime(getQ("lunch_end")?.current?.value))}
+                    onChange={v => { setLunchEnd(v); markEdited("lunch_end", v, cleanTime(getQ("lunch_end")?.current?.value)) }}
+                    onBlurCommit={v => handleSave("lunch_end", v, cleanTime(getQ("lunch_end")?.current?.value))}
                     disabled={isReadOnly || initialAnswers.school.locked}
-                    className="print:border-none print:p-0 print:h-auto"
                   />
                 </div>
               </div>

@@ -26,7 +26,10 @@ type DashState = {
   dateTo: string
   sendStatus: string
   completeness: string
+  summaryFilter: SummaryFilter
 }
+
+type SummaryFilter = "all" | "complete" | "partial" | "untouched" | "locked"
 
 const DEFAULT_STATE: DashState = {
   search: "",
@@ -35,6 +38,7 @@ const DEFAULT_STATE: DashState = {
   dateTo: "",
   sendStatus: "all",
   completeness: "all",
+  summaryFilter: "all",
 }
 
 function loadDashState(): DashState {
@@ -65,6 +69,13 @@ export function AdminDashboard() {
 
   const set = (patch: Partial<DashState>) => setState(prev => ({ ...prev, ...patch }))
 
+  const toggleSummaryFilter = (filter: SummaryFilter) => {
+    setState(prev => ({
+      ...prev,
+      summaryFilter: filter === "all" || prev.summaryFilter === filter ? "all" : filter,
+    }))
+  }
+
   const copyLink = (link: string) => {
     navigator.clipboard.writeText(link)
     toast({ title: "Link copied to clipboard" })
@@ -79,6 +90,11 @@ export function AdminDashboard() {
       if (state.sendStatus !== "all" && s.sendStatus !== state.sendStatus) return false
       if (state.completeness === "complete" && s.missingCount > 0) return false
       if (state.completeness === "incomplete" && s.missingCount === 0) return false
+      const answeredAny = s.questionStates.some(question => question.answered)
+      if (state.summaryFilter === "complete" && s.missingCount > 0) return false
+      if (state.summaryFilter === "partial" && (s.missingCount === 0 || !answeredAny)) return false
+      if (state.summaryFilter === "untouched" && (s.missingCount === 0 || answeredAny)) return false
+      if (state.summaryFilter === "locked" && !s.locked) return false
       return true
     })
     const sendOrder: Record<string, number> = { never_sent: 0, sent_waiting: 1, answered: 2 }
@@ -134,37 +150,39 @@ export function AdminDashboard() {
         </div>
 
         {summary && (
-          <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-            <Card className="bg-primary/5 border-primary/10">
-              <CardContent className="p-4 flex flex-col justify-center items-center text-center">
-                <span className="text-3xl font-serif font-semibold text-primary">{summary.totalSchools}</span>
-                <span className="text-xs font-medium text-primary/80 uppercase tracking-wider mt-1">Total Days</span>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardContent className="p-4 flex flex-col justify-center items-center text-center">
-                <span className="text-3xl font-serif font-semibold">{summary.complete}</span>
-                <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider mt-1">Complete</span>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardContent className="p-4 flex flex-col justify-center items-center text-center">
-                <span className="text-3xl font-serif font-semibold text-amber-600">{summary.partial}</span>
-                <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider mt-1">Partial</span>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardContent className="p-4 flex flex-col justify-center items-center text-center">
-                <span className="text-3xl font-serif font-semibold text-destructive">{summary.untouched}</span>
-                <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider mt-1">Untouched</span>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardContent className="p-4 flex flex-col justify-center items-center text-center">
-                <span className="text-3xl font-serif font-semibold">{summary.locked}</span>
-                <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider mt-1">Locked</span>
-              </CardContent>
-            </Card>
+          <div
+            className="grid grid-cols-2 md:grid-cols-5 gap-4"
+            role="group"
+            aria-label="Filter schools by dashboard summary"
+          >
+            {[
+              { filter: "all", label: "Total Days", total: summary.totalSchools, valueClass: "text-primary", labelClass: "text-primary/80", cardClass: "bg-primary/5 border-primary/10" },
+              { filter: "complete", label: "Complete", total: summary.complete },
+              { filter: "partial", label: "Partial", total: summary.partial, valueClass: "text-amber-600" },
+              { filter: "untouched", label: "Untouched", total: summary.untouched, valueClass: "text-destructive" },
+              { filter: "locked", label: "Locked", total: summary.locked },
+            ].map(({ filter, label, total, valueClass = "", labelClass = "text-muted-foreground", cardClass = "" }) => {
+              const active = state.summaryFilter === filter
+              return (
+                <Card
+                  key={filter}
+                  className={`${cardClass} ${active ? "border-primary bg-primary/10 ring-2 ring-primary ring-offset-2" : ""}`}
+                >
+                  <button
+                    type="button"
+                    className="w-full rounded-lg text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+                    onClick={() => toggleSummaryFilter(filter as SummaryFilter)}
+                    aria-pressed={active}
+                    aria-label={`${active ? "Clear" : "Filter by"} ${label} schools (${total})`}
+                  >
+                    <CardContent className="p-4 flex flex-col justify-center items-center text-center">
+                      <span className={`text-3xl font-serif font-semibold ${valueClass}`}>{total}</span>
+                      <span className={`text-xs font-medium uppercase tracking-wider mt-1 ${labelClass}`}>{label}</span>
+                    </CardContent>
+                  </button>
+                </Card>
+              )
+            })}
           </div>
         )}
 
@@ -226,7 +244,7 @@ export function AdminDashboard() {
                 <SelectItem value="incomplete">Missing answers</SelectItem>
               </SelectContent>
             </Select>
-            {(state.search || state.dateFrom || state.dateTo || state.sendStatus !== "all" || state.completeness !== "all" || state.sort !== "date") && (
+            {(state.search || state.dateFrom || state.dateTo || state.sendStatus !== "all" || state.completeness !== "all" || state.summaryFilter !== "all" || state.sort !== "date") && (
               <Button variant="ghost" size="sm" onClick={() => setState(DEFAULT_STATE)}>
                 <X className="h-4 w-4 mr-1" /> Reset
               </Button>

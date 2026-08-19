@@ -483,7 +483,7 @@ export function SchoolForm({ code, email, initialAnswers, onSaveAnswer, onSaveTe
                    <Input type="email" placeholder="Email Address" value={row.email} onChange={(e) => handleTeacherChange(i, "email", e.target.value)} disabled={isReadOnly || initialAnswers.school.locked} className="print:border-none print:p-0 print:h-auto" />
                 </div>
                 <div className="col-span-2 flex gap-2 items-center">
-                   <Input type="number" min="0" placeholder="Count" value={row.studentCount || ""} onChange={(e) => handleTeacherChange(i, "studentCount", parseInt(e.target.value)||0)} disabled={isReadOnly || initialAnswers.school.locked} className="print:border-none print:p-0 print:h-auto" />
+                   <Input type="number" min="0" step="1" inputMode="numeric" placeholder="Count" value={row.studentCount || ""} onChange={(e) => handleTeacherChange(i, "studentCount", parseInt(e.target.value)||0)} disabled={isReadOnly || initialAnswers.school.locked} className="[-moz-appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none print:border-none print:p-0 print:h-auto" />
                   {!isReadOnly && !initialAnswers.school.locked && (
                     <Button variant="ghost" size="icon" className="text-destructive h-10 w-10 flex-shrink-0 no-print rounded-full hover:bg-destructive/10" onClick={() => removeTeacher(i)}>
                       <Trash2 className="h-4 w-4" />

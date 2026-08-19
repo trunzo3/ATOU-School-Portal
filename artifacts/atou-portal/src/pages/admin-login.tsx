@@ -50,7 +50,15 @@ export function AdminLogin() {
       <div className="absolute -bottom-44 -left-28 h-96 w-96 rounded-full bg-secondary/10 blur-3xl" aria-hidden="true" />
       <div className="w-full max-w-md space-y-8 relative">
         <div className="text-center space-y-2">
-          <AtouLogo className="mx-auto h-24 w-24 mb-5 drop-shadow-md" />
+          <a
+            href="https://touchofunderstanding.org/"
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="Visit A Touch of Understanding website"
+            className="block"
+          >
+            <AtouLogo className="mx-auto h-24 w-24 mb-5 drop-shadow-md" />
+          </a>
           <h1 className="text-3xl sm:text-4xl font-serif font-bold text-foreground">A Touch of Understanding</h1>
           <p className="text-primary font-bold uppercase tracking-[0.16em] text-xs mt-2">Workshop Logistics Admin</p>
         </div>

@@ -39,13 +39,19 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
     <div className="min-h-[100dvh] flex flex-col md:flex-row bg-background print:bg-white print:block">
       {/* Mobile Header */}
       <div className="md:hidden flex items-center justify-between p-4 border-b bg-card no-print shadow-sm z-50 relative">
-        <div className="flex items-center gap-2">
+        <a
+          href="https://touchofunderstanding.org/"
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label="Visit A Touch of Understanding website"
+          className="flex items-center gap-2"
+        >
           <AtouLogo className="h-10 w-10 flex-shrink-0 drop-shadow-sm" />
           <div>
             <div className="font-serif font-bold text-lg text-foreground tracking-tight leading-none">ATOU Logistics</div>
             <div className="text-[10px] text-primary font-bold uppercase tracking-[0.16em] mt-1">Admin Portal</div>
           </div>
-        </div>
+        </a>
         <Button
           variant="ghost"
           size="icon"
@@ -65,10 +71,16 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
         mobileMenuOpen ? "translate-x-0" : "-translate-x-full"
       )} id="admin-navigation">
         <div className="p-6 border-b border-sidebar-border hidden md:block">
-          <div className="flex items-center gap-3 mb-2">
+          <a
+            href="https://touchofunderstanding.org/"
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="Visit A Touch of Understanding website"
+            className="flex items-center gap-3 mb-2"
+          >
             <AtouLogo className="h-12 w-12 flex-shrink-0 drop-shadow-md" />
             <h1 className="font-serif text-xl font-bold text-sidebar-foreground tracking-tight">ATOU Logistics</h1>
-          </div>
+          </a>
           <p className="text-[10px] text-primary font-bold uppercase tracking-[0.16em]">A Touch of Understanding</p>
         </div>
         <div className="p-4 flex-1 flex flex-col gap-1.5 overflow-y-auto">

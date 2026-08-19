@@ -9,6 +9,7 @@ import type { EmailSendRecord } from './emailSendRecord';
 
 export interface SendEmailsResult {
   configured: boolean;
+  enabled: boolean;
   sends: EmailSendRecord[];
   errors: string[];
 }

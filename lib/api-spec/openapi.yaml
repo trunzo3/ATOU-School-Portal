@@ -290,7 +290,7 @@ paths:
     get:
       operationId: getEmailStatus
       tags: [admin]
-      summary: Whether an email service is connected for real delivery
+      summary: Resend connection and live email delivery status
       responses:
         "200":
           description: Status
@@ -298,6 +298,60 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/EmailStatus"
+  /admin/email-settings:
+    put:
+      operationId: updateEmailSettings
+      tags: [admin]
+      summary: Turn live school email delivery on or off
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/EmailSettingsInput"
+      responses:
+        "200":
+          description: Updated status
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EmailStatus"
+        "400":
+          description: Invalid setting
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorMessage"
+  /admin/email/test:
+    post:
+      operationId: sendTestEmail
+      tags: [admin]
+      summary: Send one Resend test email without changing live delivery
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TestEmailInput"
+      responses:
+        "200":
+          description: Test email accepted by Resend
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TestEmailResult"
+        "400":
+          description: Invalid email address
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorMessage"
+        "503":
+          description: Resend is not configured or rejected the email
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorMessage"
   /admin/sends:
     get:
       operationId: getEmailSends
@@ -772,7 +826,26 @@ components:
       type: object
       properties:
         configured: { type: boolean }
-      required: [configured]
+        enabled: { type: boolean }
+        from: { type: string }
+      required: [configured, enabled, from]
+    EmailSettingsInput:
+      type: object
+      properties:
+        enabled: { type: boolean }
+      required: [enabled]
+    TestEmailInput:
+      type: object
+      properties:
+        email: { type: string, minLength: 3 }
+      required: [email]
+    TestEmailResult:
+      type: object
+      properties:
+        delivered: { type: boolean }
+        message: { type: string }
+        providerId: { type: ["string", "null"] }
+      required: [delivered, message, providerId]
     EmailSendRecord:
       type: object
       properties:
@@ -812,6 +885,7 @@ components:
       type: object
       properties:
         configured: { type: boolean }
+        enabled: { type: boolean }
         sends:
           type: array
           items:
@@ -819,7 +893,7 @@ components:
         errors:
           type: array
           items: { type: string }
-      required: [configured, sends, errors]
+      required: [configured, enabled, sends, errors]
     EmailTemplate:
       type: object
       properties:

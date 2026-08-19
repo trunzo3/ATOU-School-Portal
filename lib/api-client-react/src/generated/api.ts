@@ -30,6 +30,7 @@ import type {
   AnswerInput,
   AnswerVersion,
   EmailSendRecord,
+  EmailSettingsInput,
   EmailStatus,
   EmailTemplate,
   EmailTemplateInput,
@@ -49,7 +50,9 @@ import type {
   SendEmailsInput,
   SendEmailsResult,
   TeachersInput,
-  TeachersSnapshot
+  TeachersSnapshot,
+  TestEmailInput,
+  TestEmailResult
 } from './api.schemas';
 
 import { customFetch } from '../custom-fetch';
@@ -1125,7 +1128,7 @@ export const getGetEmailStatusUrl = () => {
 }
 
 /**
- * @summary Whether an email service is connected for real delivery
+ * @summary Resend connection and live email delivery status
  */
 export const getEmailStatus = async ( options?: Parameters<typeof customFetch>[1]): Promise<EmailStatus> => {
 
@@ -1172,7 +1175,7 @@ export type GetEmailStatusQueryError = ErrorType<unknown>
 
 
 /**
- * @summary Whether an email service is connected for real delivery
+ * @summary Resend connection and live email delivery status
  */
 
 export function useGetEmailStatus<TData = Awaited<ReturnType<typeof getEmailStatus>>, TError = ErrorType<unknown>>(
@@ -1192,6 +1195,148 @@ export function useGetEmailStatus<TData = Awaited<ReturnType<typeof getEmailStat
 
 
 
+
+export const getUpdateEmailSettingsUrl = () => {
+
+
+
+
+  return `/api/admin/email-settings`
+}
+
+/**
+ * @summary Turn live school email delivery on or off
+ */
+export const updateEmailSettings = async (emailSettingsInput: EmailSettingsInput, options?: Parameters<typeof customFetch>[1]): Promise<EmailStatus> => {
+
+  return customFetch<EmailStatus>(getUpdateEmailSettingsUrl(),
+  {
+    ...options,
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(emailSettingsInput)
+  }
+);}
+
+
+
+
+
+export const getUpdateEmailSettingsMutationOptions = <TError = ErrorType<ErrorMessage>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateEmailSettings>>, TError,{data: BodyType<EmailSettingsInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof updateEmailSettings>>, TError,{data: BodyType<EmailSettingsInput>}, TContext> => {
+
+const mutationKey = ['updateEmailSettings'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof updateEmailSettings>>, {data: BodyType<EmailSettingsInput>}> = (props) => {
+          const {data} = props ?? {};
+
+          return  updateEmailSettings(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type UpdateEmailSettingsMutationResult = NonNullable<Awaited<ReturnType<typeof updateEmailSettings>>>
+    export type UpdateEmailSettingsMutationBody = BodyType<EmailSettingsInput>
+    export type UpdateEmailSettingsMutationError = ErrorType<ErrorMessage>
+
+    /**
+ * @summary Turn live school email delivery on or off
+ */
+export const useUpdateEmailSettings = <TError = ErrorType<ErrorMessage>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateEmailSettings>>, TError,{data: BodyType<EmailSettingsInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof updateEmailSettings>>,
+        TError,
+        {data: BodyType<EmailSettingsInput>},
+        TContext
+      > => {
+      return useMutation(getUpdateEmailSettingsMutationOptions(options));
+    }
+
+export const getSendTestEmailUrl = () => {
+
+
+
+
+  return `/api/admin/email/test`
+}
+
+/**
+ * @summary Send one Resend test email without changing live delivery
+ */
+export const sendTestEmail = async (testEmailInput: TestEmailInput, options?: Parameters<typeof customFetch>[1]): Promise<TestEmailResult> => {
+
+  return customFetch<TestEmailResult>(getSendTestEmailUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(testEmailInput)
+  }
+);}
+
+
+
+
+
+export const getSendTestEmailMutationOptions = <TError = ErrorType<ErrorMessage>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof sendTestEmail>>, TError,{data: BodyType<TestEmailInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof sendTestEmail>>, TError,{data: BodyType<TestEmailInput>}, TContext> => {
+
+const mutationKey = ['sendTestEmail'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof sendTestEmail>>, {data: BodyType<TestEmailInput>}> = (props) => {
+          const {data} = props ?? {};
+
+          return  sendTestEmail(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type SendTestEmailMutationResult = NonNullable<Awaited<ReturnType<typeof sendTestEmail>>>
+    export type SendTestEmailMutationBody = BodyType<TestEmailInput>
+    export type SendTestEmailMutationError = ErrorType<ErrorMessage>
+
+    /**
+ * @summary Send one Resend test email without changing live delivery
+ */
+export const useSendTestEmail = <TError = ErrorType<ErrorMessage>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof sendTestEmail>>, TError,{data: BodyType<TestEmailInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof sendTestEmail>>,
+        TError,
+        {data: BodyType<TestEmailInput>},
+        TContext
+      > => {
+      return useMutation(getSendTestEmailMutationOptions(options));
+    }
 
 export const getGetEmailSendsUrl = () => {
 

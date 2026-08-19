@@ -1,2 +1,2 @@
-- [Orval codegen quirks](orval-codegen-quirks.md) — no `type: integer`, no path+query param mixes in openapi.yaml or codegen breaks.
+- [Orval codegen quirks](orval-codegen-quirks.md) — several OpenAPI constructs emit validators or types unsupported by this workspace.
 - [ATOU Airtable base](airtable-atou-base.md) — base/table ids, Workshops-only rule, contact-name lookup returns record ids.

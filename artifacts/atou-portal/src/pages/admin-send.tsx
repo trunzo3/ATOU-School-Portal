@@ -146,9 +146,9 @@ export function AdminSend() {
         const n = result.sends.length
         const m = result.sends.reduce((sum, s) => sum + s.recipients.length, 0)
         setConfirmation(
-          result.configured
+          result.configured && result.enabled
             ? `Sent to ${n} school${n === 1 ? "" : "s"} (${m} recipient${m === 1 ? "" : "s"}).`
-            : `Recorded ${n} send${n === 1 ? "" : "s"} (${m} recipient${m === 1 ? "" : "s"}) in the log. No emails were delivered because the email service isn't connected yet.`
+            : `Recorded ${n} send${n === 1 ? "" : "s"} (${m} recipient${m === 1 ? "" : "s"}) in the log. No emails were delivered because live email sending is off.`
         )
         if (result.errors.length > 0) {
           toast({ title: "Some sends had problems", description: result.errors.join(" "), variant: "destructive" })
@@ -195,6 +195,16 @@ export function AdminSend() {
             <div className="text-sm">
               <p className="font-semibold mb-1">Email sending isn't connected yet.</p>
               <p>Sends will be recorded in the log below, but no emails will actually be delivered until the Resend connection is set up.</p>
+            </div>
+          </div>
+        )}
+
+        {emailStatus?.configured && !emailStatus.enabled && (
+          <div role="status" className="bg-amber-50 border-amber-200 border text-amber-950 p-4 rounded-xl flex items-start gap-3 no-print">
+            <AlertCircle className="h-5 w-5 mt-0.5 flex-shrink-0" />
+            <div className="text-sm">
+              <p className="font-semibold mb-1">Live email sending is off.</p>
+              <p>Resend is connected, but the Settings switch is off. Sends will be recorded below without delivering email.</p>
             </div>
           </div>
         )}

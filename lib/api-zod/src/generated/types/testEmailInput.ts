@@ -6,8 +6,7 @@
  * OpenAPI spec version: 0.1.0
  */
 
-export interface EmailStatus {
-  configured: boolean;
-  enabled: boolean;
-  from: string;
+export interface TestEmailInput {
+  /** @minLength 3 */
+  email: string;
 }

@@ -1,12 +1,18 @@
-// Email sending layer. Resend is the planned provider but is not connected
-// yet: until RESEND_API_KEY is set, sends are recorded in the log with
-// delivered=false and no email actually goes out. The UI surfaces this.
+// Email sending layer. The RESEND_API_KEY is held in Replit Secrets and is
+// never exposed through the API.
+
+export const EMAIL_FROM =
+  "A Touch of Understanding <workshops@send.touchofunderstanding.org>";
 
 export function emailConfigured(): boolean {
   return Boolean(process.env.RESEND_API_KEY);
 }
 
-export type SendResult = { delivered: boolean; error?: string };
+export type SendResult = {
+  delivered: boolean;
+  providerId?: string;
+  error?: string;
+};
 
 export async function sendEmail(args: {
   to: string[];
@@ -16,20 +22,41 @@ export async function sendEmail(args: {
   if (!emailConfigured()) {
     return { delivered: false };
   }
-  const from = process.env.RESEND_FROM_EMAIL || "onboarding@resend.dev";
-  const resp = await fetch("https://api.resend.com/emails", {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${process.env.RESEND_API_KEY}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({ from, to: args.to, subject: args.subject, text: args.text }),
-  });
-  if (!resp.ok) {
-    const detail = await resp.text().catch(() => "");
-    return { delivered: false, error: `Email service error (${resp.status}): ${detail.slice(0, 300)}` };
+  try {
+    const resp = await fetch("https://api.resend.com/emails", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${process.env.RESEND_API_KEY}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        from: EMAIL_FROM,
+        to: args.to,
+        subject: args.subject,
+        text: args.text,
+      }),
+    });
+    if (!resp.ok) {
+      const detail = await resp.text().catch(() => "");
+      return {
+        delivered: false,
+        error: `Resend error (${resp.status}): ${detail.slice(0, 300)}`,
+      };
+    }
+    const payload = (await resp.json().catch(() => null)) as
+      | { id?: unknown }
+      | null;
+    return {
+      delivered: true,
+      providerId:
+        typeof payload?.id === "string" ? payload.id : undefined,
+    };
+  } catch {
+    return {
+      delivered: false,
+      error: "Could not reach Resend. Please try again.",
+    };
   }
-  return { delivered: true };
 }
 
 // Merge fields available in the subject and message templates.

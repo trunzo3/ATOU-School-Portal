@@ -6,8 +6,9 @@
  * OpenAPI spec version: 0.1.0
  */
 
-export interface EmailStatus {
-  configured: boolean;
-  enabled: boolean;
-  from: string;
+export interface TestEmailResult {
+  delivered: boolean;
+  message: string;
+  /** @nullable */
+  providerId: string | null;
 }

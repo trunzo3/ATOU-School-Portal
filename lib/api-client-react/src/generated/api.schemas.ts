@@ -188,6 +188,24 @@ export interface SchoolLockUpdate {
 
 export interface EmailStatus {
   configured: boolean;
+  enabled: boolean;
+  from: string;
+}
+
+export interface EmailSettingsInput {
+  enabled: boolean;
+}
+
+export interface TestEmailInput {
+  /** @minLength 3 */
+  email: string;
+}
+
+export interface TestEmailResult {
+  delivered: boolean;
+  message: string;
+  /** @nullable */
+  providerId: string | null;
 }
 
 export interface EmailSendRecord {
@@ -219,6 +237,7 @@ export interface SendEmailsInput {
 
 export interface SendEmailsResult {
   configured: boolean;
+  enabled: boolean;
   sends: EmailSendRecord[];
   errors: string[];
 }

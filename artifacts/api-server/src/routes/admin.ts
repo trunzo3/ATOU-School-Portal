@@ -21,6 +21,8 @@ import {
   CreatePageBody,
   UpdatePageBody,
   UpdateSettingsBody,
+  UpdateEmailSettingsBody,
+  SendTestEmailBody,
 } from "@workspace/api-zod";
 import {
   PAM_EMAIL,
@@ -33,7 +35,12 @@ import {
 } from "../lib/auth";
 import { schoolLink } from "../lib/appUrl";
 import { getQuestionStates, missingCount, normalizeEmail } from "../lib/answers";
-import { emailConfigured, fillMergeFields, sendEmail } from "../lib/email";
+import {
+  EMAIL_FROM,
+  emailConfigured,
+  fillMergeFields,
+  sendEmail,
+} from "../lib/email";
 
 const router: IRouter = Router();
 
@@ -86,6 +93,10 @@ router.post("/admin/login", async (req, res): Promise<void> => {
 
 // Temporary development-only login. Remove before going live.
 router.post("/admin/dev-login", async (_req, res): Promise<void> => {
+  if (process.env.NODE_ENV === "production") {
+    res.status(404).json({ error: "Not found." });
+    return;
+  }
   const [pam] = await db.select().from(adminUsersTable).where(eq(adminUsersTable.email, PAM_EMAIL));
   if (!pam) {
     res.status(500).json({ error: "Pam's account is missing." });
@@ -250,6 +261,8 @@ Thank you,
 Pam
 A Touch of Understanding`;
 
+const EMAIL_SENDING_ENABLED_KEY = "email_sending_enabled";
+
 async function settingValue(key: string): Promise<string | null> {
   const [row] = await db.select().from(appSettingsTable).where(eq(appSettingsTable.key, key));
   return row ? row.value : null;
@@ -263,6 +276,10 @@ async function saveSetting(key: string, value: string): Promise<void> {
       target: appSettingsTable.key,
       set: { value, updatedAt: new Date() },
     });
+}
+
+async function emailSendingEnabled(): Promise<boolean> {
+  return (await settingValue(EMAIL_SENDING_ENABLED_KEY)) === "true";
 }
 
 router.get("/admin/template", requireAdmin, async (_req, res): Promise<void> => {
@@ -298,7 +315,68 @@ router.put("/admin/template", requireAdmin, async (req, res): Promise<void> => {
 });
 
 router.get("/admin/email-status", requireAdmin, async (_req, res): Promise<void> => {
-  res.json({ configured: emailConfigured() });
+  res.json({
+    configured: emailConfigured(),
+    enabled: await emailSendingEnabled(),
+    from: EMAIL_FROM,
+  });
+});
+
+router.put("/admin/email-settings", requireAdmin, async (req, res): Promise<void> => {
+  const parsed = UpdateEmailSettingsBody.safeParse(req.body);
+  if (!parsed.success) {
+    res.status(400).json({ error: "Email sending must be set to on or off." });
+    return;
+  }
+  if (parsed.data.enabled && !emailConfigured()) {
+    res.status(400).json({
+      error: "Resend is not connected, so live email sending cannot be turned on.",
+    });
+    return;
+  }
+  await saveSetting(EMAIL_SENDING_ENABLED_KEY, String(parsed.data.enabled));
+  res.json({
+    configured: emailConfigured(),
+    enabled: parsed.data.enabled,
+    from: EMAIL_FROM,
+  });
+});
+
+router.post("/admin/email/test", requireAdmin, async (req, res): Promise<void> => {
+  const parsed = SendTestEmailBody.safeParse(req.body);
+  const recipient = parsed.success ? parsed.data.email.trim() : "";
+  const validEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(recipient);
+  if (!parsed.success || !validEmail) {
+    res.status(400).json({ error: "Enter a valid email address." });
+    return;
+  }
+  if (!emailConfigured()) {
+    res.status(503).json({
+      error: "Resend is not connected. Add the RESEND_API_KEY secret and try again.",
+    });
+    return;
+  }
+  const result = await sendEmail({
+    to: [recipient],
+    subject: "A Touch of Understanding email test",
+    text: `This is a test email from the A Touch of Understanding workshop logistics app.
+
+If you received it, Resend is connected and the sender address is working.
+
+This test does not change the live email sending switch.`,
+  });
+  if (!result.delivered) {
+    req.log.warn({ provider: "resend" }, "Test email was rejected");
+    res.status(503).json({
+      error: result.error ?? "Resend rejected the test email.",
+    });
+    return;
+  }
+  res.json({
+    delivered: true,
+    message: `Resend accepted a test email for ${recipient}.`,
+    providerId: result.providerId ?? null,
+  });
 });
 
 function sendOut(s: {
@@ -339,6 +417,9 @@ router.post("/admin/send", requireAdmin, async (req: AdminRequest, res): Promise
     res.status(400).json({ error: "Selected schools, a subject, and a message are required." });
     return;
   }
+  const configured = emailConfigured();
+  const enabled = await emailSendingEnabled();
+  const liveDelivery = configured && enabled;
   const sentBy = req.admin?.email ?? PAM_EMAIL;
   const sends = [];
   const errors: string[] = [];
@@ -368,8 +449,10 @@ router.post("/admin/send", requireAdmin, async (req: AdminRequest, res): Promise
     // Subjects are single-line: strip any line breaks merge fields could carry.
     const subject = fillMergeFields(parsed.data.subject, merge).replace(/[\r\n]+/g, " ").trim();
     const body = fillMergeFields(parsed.data.message, merge);
-    const result = await sendEmail({ to: recipients, subject, text: body });
-    if (emailConfigured() && !result.delivered) {
+    const result = liveDelivery
+      ? await sendEmail({ to: recipients, subject, text: body })
+      : { delivered: false };
+    if (liveDelivery && !result.delivered) {
       // A real delivery attempt failed: report it and don't log it as a send.
       errors.push(`${school.name}: ${result.error ?? "The email service rejected the send."}`);
       continue;
@@ -393,7 +476,7 @@ router.post("/admin/send", requireAdmin, async (req: AdminRequest, res): Promise
       .returning();
     sends.push(sendOut(row!, school.name));
   }
-  res.json({ configured: emailConfigured(), sends, errors });
+  res.json({ configured, enabled, sends, errors });
 });
 
 // --- admin accounts ---

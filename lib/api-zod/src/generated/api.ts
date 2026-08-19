@@ -359,10 +359,44 @@ export const SetSchoolLockResponse = zod.object({
 
 
 /**
- * @summary Whether an email service is connected for real delivery
+ * @summary Resend connection and live email delivery status
  */
 export const GetEmailStatusResponse = zod.object({
-  "configured": zod.boolean()
+  "configured": zod.boolean(),
+  "enabled": zod.boolean(),
+  "from": zod.string()
+})
+
+
+/**
+ * @summary Turn live school email delivery on or off
+ */
+export const UpdateEmailSettingsBody = zod.object({
+  "enabled": zod.boolean()
+})
+
+export const UpdateEmailSettingsResponse = zod.object({
+  "configured": zod.boolean(),
+  "enabled": zod.boolean(),
+  "from": zod.string()
+})
+
+
+/**
+ * @summary Send one Resend test email without changing live delivery
+ */
+export const sendTestEmailBodyEmailMin = 3;
+
+
+
+export const SendTestEmailBody = zod.object({
+  "email": zod.string().min(sendTestEmailBodyEmailMin)
+})
+
+export const SendTestEmailResponse = zod.object({
+  "delivered": zod.boolean(),
+  "message": zod.string(),
+  "providerId": zod.string().nullable()
 })
 
 
@@ -403,6 +437,7 @@ export const SendEmailsBody = zod.object({
 
 export const SendEmailsResponse = zod.object({
   "configured": zod.boolean(),
+  "enabled": zod.boolean(),
   "sends": zod.array(zod.object({
   "id": zod.number(),
   "schoolId": zod.number(),

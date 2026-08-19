@@ -330,6 +330,7 @@ export const GetAdminSchoolsResponseItem = zod.object({
   "questionStates": zod.array(zod.object({
   "questionKey": zod.string(),
   "answered": zod.boolean(),
+  "conflict": zod.boolean(),
   "summary": zod.string().nullable()
 })),
   "missingCount": zod.number(),

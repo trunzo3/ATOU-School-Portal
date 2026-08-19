@@ -6,6 +6,7 @@ import {
   useFetchPortalAnswers,
   useGetPortalPages,
 } from "@workspace/api-client-react"
+import { buildSchedule, describeConflict, effectiveStudentCount, needsThreeSessions } from "@workspace/schedule"
 import { PortalLayout } from "@/components/layout/portal-layout"
 import { PortalHelpfulInformation } from "@/components/shared/portal-helpful-information"
 import { Button } from "@/components/ui/button"
@@ -134,11 +135,8 @@ export function PortalDone() {
   const teachers = answers.teachers.current?.rows || []
   const teachersComplete = teachers.length > 0 && teachers.every(teacherIsComplete)
   const totalStudents = teachers.reduce((sum, teacher) => sum + (Number(teacher.studentCount) || 0), 0)
-  const approximateStudents = Number.parseInt(answers.school.approxStudents || "", 10)
-  const effectiveStudents = totalStudents > 0
-    ? totalStudents
-    : (Number.isNaN(approximateStudents) ? 0 : approximateStudents)
-  const needsLunchTimes = effectiveStudents >= 105
+  const effectiveStudents = effectiveStudentCount(totalStudents, answers.school.approxStudents)
+  const needsLunchTimes = needsThreeSessions(effectiveStudents)
 
   const workshopTime = getValue("workshop_time")
   const timingNote = getValue("timing_note")
@@ -148,9 +146,22 @@ export function PortalDone() {
   const speakerArea = getValue("speaker_area")
   const notes = getValue("notes")
 
+  // Same schedule/conflict verdict the form shows (shared library): a
+  // workshop time whose lunch conflicts with the calculated schedule is
+  // flagged like a missing answer, not shown as "Provided".
+  const schedule = workshopTime
+    ? buildSchedule({ workshopTime, lunchStart, lunchEnd, threeSessions: needsLunchTimes })
+    : null
+  const timeConflicts = schedule?.conflicts ?? []
+  const timeConflict = timeConflicts.length > 0
+  const conflictSummary = timeConflicts.map(describeConflict).join(", and ")
+
   const requiredItems = [
     { label: "Teachers and student counts", complete: teachersComplete },
-    { label: "Workshop time", complete: Boolean(workshopTime) },
+    {
+      label: timeConflict ? `Workshop time (${conflictSummary})` : "Workshop time",
+      complete: Boolean(workshopTime) && !timeConflict,
+    },
     { label: "Activity station area", complete: Boolean(activityArea) },
     { label: "Speaker area", complete: Boolean(speakerArea) },
   ]
@@ -241,9 +252,24 @@ export function PortalDone() {
         <Card className="rounded-2xl shadow-sm">
           <CardHeader className="border-b bg-muted/20 flex-row items-center justify-between gap-4">
             <CardTitle className="text-xl">Workshop Time</CardTitle>
-            <StatusBadge complete={Boolean(workshopTime)} text={workshopTime ? "Provided" : "Missing"} />
+            <StatusBadge
+              complete={Boolean(workshopTime) && !timeConflict}
+              text={!workshopTime ? "Missing" : timeConflict ? "Schedule conflict" : "Provided"}
+            />
           </CardHeader>
           <CardContent className="p-5 sm:p-6">
+            {timeConflict && (
+              <div className="mb-4 rounded-md border border-amber-200 bg-amber-50 p-3 text-sm font-medium text-amber-900 flex gap-2 items-start">
+                <AlertCircle className="h-4 w-4 mt-0.5 flex-shrink-0" />
+                <span>
+                  The workshop time you provided conflicts with the calculated schedule: {conflictSummary}.{" "}
+                  <Link href={`/s/${code}`} className="font-semibold underline underline-offset-4 hover:text-amber-700">
+                    Return to the form
+                  </Link>{" "}
+                  to adjust the times.
+                </span>
+              </div>
+            )}
             <dl className="grid sm:grid-cols-2 gap-4">
               <SummaryField label="Workshop start" value={workshopTime ? formatTime(workshopTime) : ""} />
               {needsLunchTimes && (

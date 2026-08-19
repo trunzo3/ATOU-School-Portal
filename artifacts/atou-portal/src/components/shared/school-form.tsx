@@ -8,6 +8,7 @@ import { StatusBadge } from "@/components/ui/status-badge"
 import { TimePicker } from "@/components/ui/time-picker"
 import { AtouLogo } from "@/components/shared/atou-logo"
 import { formatPacificTime, cn } from "@/lib/utils"
+import { buildSchedule as buildScheduleLib, computeBreakTimes, effectiveStudentCount, needsThreeSessions as needsThreeSessionsFor } from "@workspace/schedule"
 import { AlertCircle, CalendarDays, Plus, Trash2, Info, Users, Save, CheckCircle2, ChevronRight, Printer } from "lucide-react"
 
 interface SchoolFormProps {
@@ -219,61 +220,11 @@ export function SchoolForm({ code, email, initialAnswers, onSaveAnswer, onSaveTe
     )
   }
 
-  // Time helpers: "HH:MM" <-> minutes since midnight, formatted "h:mm AM/PM".
-  const parseHM = (s: string): number | null => {
-    const m = /^(\d{1,2}):(\d{2})$/.exec((s || "").trim());
-    if (!m) return null;
-    const h = Number(m[1]);
-    const mm = Number(m[2]);
-    if (h > 23 || mm > 59) return null;
-    return h * 60 + mm;
-  }
-  const fmtMin = (mins: number) => {
-    const d = new Date();
-    d.setHours(Math.floor(mins / 60) % 24, mins % 60, 0);
-    return d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
-  }
-
-  const computeBreakTimes = (startTimeStr: string) => {
-    const start = parseHM(startTimeStr);
-    if (start === null) return null;
-    const s1End = start + 90;
-    const s2Start = s1End + 15;
-    const s2End = s2Start + 90;
-    return `${fmtMin(start)} – ${fmtMin(s1End)}, break, ${fmtMin(s2Start)} – ${fmtMin(s2End)}`;
-  }
-
-  // The live schedule shown under the time fields.
-  // 104 students or fewer: two 1.5-hour sessions with a 15-minute break.
-  // 105 or more: two 1.5-hour morning sessions (15-minute break between
-  // them), then the school's lunch, then a third 1.5-hour session.
-  const buildSchedule = (threeSessions: boolean) => {
-    const start = parseHM(timeValue);
-    if (start === null) return null;
-    const s1End = start + 90;
-    const s2Start = s1End + 15;
-    const s2End = s2Start + 90;
-    const lines: { label: string; time: string }[] = [
-      { label: "Session 1", time: `${fmtMin(start)} – ${fmtMin(s1End)}` },
-      { label: "Break", time: `${fmtMin(s1End)} – ${fmtMin(s2Start)}` },
-      { label: "Session 2", time: `${fmtMin(s2Start)} – ${fmtMin(s2End)}` },
-    ];
-    const warnings: string[] = [];
-    let pending: string | null = null;
-    if (threeSessions) {
-      const ls = parseHM(lunchStart);
-      const le = parseHM(lunchEnd);
-      if (ls === null || le === null) {
-        pending = "Enter your school's lunch time to see the afternoon session.";
-      } else {
-        if (ls < s2End) warnings.push(`Lunch starts before the morning sessions end (${fmtMin(s2End)}). Please adjust the start time or check the lunch time.`);
-        if (le <= ls) warnings.push("Lunch end needs to be after lunch start.");
-        lines.push({ label: "Lunch", time: `${fmtMin(ls)} – ${fmtMin(le)}` });
-        if (le > ls) lines.push({ label: "Session 3", time: `${fmtMin(le)} – ${fmtMin(le + 90)}` });
-      }
-    }
-    return { lines, warnings, pending };
-  }
+  // The live schedule shown under the time fields — shared with the Done
+  // page and the API server via @workspace/schedule so the conflict verdict
+  // is the same everywhere.
+  const buildSchedule = (threeSessions: boolean) =>
+    buildScheduleLib({ workshopTime: timeValue, lunchStart, lunchEnd, threeSessions })
 
   // Bumped on every teacher edit; a save only marks the list "saved" if no
   // edit happened while its request was in flight (otherwise the newer edit
@@ -390,9 +341,8 @@ export function SchoolForm({ code, email, initialAnswers, onSaveAnswer, onSaveTe
 
   // Student count that drives the two- vs three-session schedule: the live
   // teacher list total when there is one, otherwise ATOU's approximate count.
-  const approxCount = parseInt(initialAnswers.school.approxStudents || "", 10);
-  const effectiveStudents = totalStudents > 0 ? totalStudents : (isNaN(approxCount) ? 0 : approxCount);
-  const needsThreeSessions = effectiveStudents >= 105;
+  const effectiveStudents = effectiveStudentCount(totalStudents, initialAnswers.school.approxStudents);
+  const needsThreeSessions = needsThreeSessionsFor(effectiveStudents);
 
   // Collapsed/expanded state per question's history. Expanding sticks until
   // the user collapses it or leaves the page — saves/refetches don't reset it.

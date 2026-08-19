@@ -149,6 +149,7 @@ export interface AdminSummary {
 export interface QuestionState {
   questionKey: string;
   answered: boolean;
+  conflict: boolean;
   /** @nullable */
   summary: string | null;
 }

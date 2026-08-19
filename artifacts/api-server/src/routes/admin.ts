@@ -258,7 +258,7 @@ router.get("/admin/summary", requireAdmin, async (_req, res): Promise<void> => {
   let partial = 0;
   let untouched = 0;
   for (const school of schools) {
-    const states = await getQuestionStates(school.id);
+    const states = await getQuestionStates(school);
     const missing = missingCount(states);
     const answeredAny = states.some((s) => s.answered);
     if (missing === 0) complete += 1;
@@ -308,7 +308,7 @@ router.get("/admin/schools", requireAdmin, async (_req, res): Promise<void> => {
   const schools = await db.select().from(schoolsTable).orderBy(asc(schoolsTable.workshopDate));
   const rows = [];
   for (const school of schools) {
-    const states = await getQuestionStates(school.id);
+    const states = await getQuestionStates(school);
     const contacts = await db
       .select()
       .from(contactsTable)

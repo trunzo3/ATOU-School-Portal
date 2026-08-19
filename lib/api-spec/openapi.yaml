@@ -864,8 +864,12 @@ components:
       properties:
         questionKey: { type: string }
         answered: { type: boolean }
+        # Answered, but the value conflicts with the calculated workshop
+        # schedule (only ever true for workshop_time). Distinct from
+        # unanswered: the school provided a time, but it doesn't work.
+        conflict: { type: boolean }
         summary: { type: ["string", "null"] }
-      required: [questionKey, answered, summary]
+      required: [questionKey, answered, conflict, summary]
     SchoolRow:
       type: object
       properties:

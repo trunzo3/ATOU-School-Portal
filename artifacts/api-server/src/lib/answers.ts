@@ -8,6 +8,11 @@ import {
   type School,
 } from "@workspace/db";
 import { PAM_EMAIL } from "./auth";
+import {
+  buildSchedule,
+  effectiveStudentCount,
+  needsThreeSessions,
+} from "@workspace/schedule";
 
 export const QUESTION_KEYS = [
   "workshop_time",
@@ -102,20 +107,40 @@ export async function getSchoolAnswers(schoolId: number) {
 export type QuestionStateOut = {
   questionKey: string;
   answered: boolean;
+  // Answered, but the value conflicts with the calculated workshop
+  // schedule (only ever true for workshop_time).
+  conflict: boolean;
   summary: string | null;
 };
 
 /** Per-question state for the admin grid: teachers + the simple questions. */
-export async function getQuestionStates(schoolId: number): Promise<QuestionStateOut[]> {
-  const { questions, teachers } = await getSchoolAnswers(schoolId);
+export async function getQuestionStates(school: School): Promise<QuestionStateOut[]> {
+  const { questions, teachers } = await getSchoolAnswers(school.id);
   const states: QuestionStateOut[] = [];
   states.push({
     questionKey: "teachers",
     answered: teachers.current !== null,
+    conflict: false,
     summary: teachers.current
       ? `${teachers.current.rows.length} teachers, ${teachers.current.totalStudents} students`
       : null,
   });
+
+  // Same schedule/conflict verdict the school form shows (shared library):
+  // for three-session schools, a lunch time that clashes with the
+  // calculated sessions makes the workshop time "answered but conflicting".
+  const currentValue = (key: string) =>
+    questions.find((q) => q.questionKey === key)?.current?.value ?? "";
+  const totalStudents = teachers.current?.totalStudents ?? 0;
+  const effectiveStudents = effectiveStudentCount(totalStudents, school.approxStudents);
+  const schedule = buildSchedule({
+    workshopTime: currentValue("workshop_time"),
+    lunchStart: currentValue("lunch_start"),
+    lunchEnd: currentValue("lunch_end"),
+    threeSessions: needsThreeSessions(effectiveStudents),
+  });
+  const timeConflict = schedule !== null && schedule.conflicts.length > 0;
+
   for (const q of questions) {
     // timing_note is optional; the lunch times feed the workshop-time
     // schedule and aren't tracked as their own grid columns.
@@ -123,14 +148,21 @@ export async function getQuestionStates(schoolId: number): Promise<QuestionState
     states.push({
       questionKey: q.questionKey,
       answered: q.current !== null,
+      conflict: q.questionKey === "workshop_time" && q.current !== null && timeConflict,
       summary: q.current ? q.current.value.slice(0, 80) : null,
     });
   }
   return states;
 }
 
+/**
+ * Required answers still outstanding. An answered-but-conflicting workshop
+ * time counts as outstanding: the school isn't complete until it works.
+ */
 export function missingCount(states: QuestionStateOut[]): number {
   return states.filter(
-    (s) => (REQUIRED_KEYS as readonly string[]).includes(s.questionKey) && !s.answered,
+    (s) =>
+      (REQUIRED_KEYS as readonly string[]).includes(s.questionKey) &&
+      (!s.answered || s.conflict),
   ).length;
 }

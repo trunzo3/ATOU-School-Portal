@@ -9,7 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { StatusBadge } from "@/components/ui/status-badge"
 import { formatPacificTime, cn } from "@/lib/utils"
-import { Copy, Search, ExternalLink, Lock, Mail, X, CalendarDays } from "lucide-react"
+import { Copy, Search, ExternalLink, Lock, Mail, X, CalendarDays, AlertTriangle } from "lucide-react"
 import { useEffect, useMemo, useState } from "react"
 import { Link, useLocation } from "wouter"
 import { useToast } from "@/hooks/use-toast"
@@ -376,7 +376,21 @@ export function AdminDashboard() {
                     const state = school.questionStates.find(s => s.questionKey === q.key)
                     return (
                       <TableCell key={q.key}>
-                        {state?.answered ? (
+                        {state?.conflict ? (
+                          // Answered, but the time conflicts with the calculated
+                          // schedule — visually distinct from Done and Missing.
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <span className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-bold uppercase tracking-wider border bg-amber-50 text-amber-700 border-amber-300">
+                                <AlertTriangle className="h-3.5 w-3.5" />
+                                Conflict
+                              </span>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              A workshop time was provided, but it conflicts with the calculated session schedule.
+                            </TooltipContent>
+                          </Tooltip>
+                        ) : state?.answered ? (
                           <div className="text-xs text-muted-foreground truncate max-w-[150px]" title={state.summary || ""}>
                             {state.summary || <StatusBadge complete={true} text="Done" />}
                           </div>

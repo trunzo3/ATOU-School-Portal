@@ -1,0 +1,32 @@
+Act as a technical writer and generate complete documentation for this project. Do the following, in order, and create real files in the repo (don't just describe them):
+
+1. CODE COMMENTS
+Go through every source file and add docstrings/JSDoc-style comments to all functions, classes, and modules. For each function, document: purpose, parameters (with types), return value, and any non-obvious logic or edge cases. Don't touch working logic — comments only.
+
+2. README.md
+Create a README.md at the project root with these sections:
+- Project overview: what this app does and who it's for
+- Tech stack
+- Setup instructions, including how to configure Replit Secrets / environment variables (list each one needed, what it's for, and where to get it — but never expose actual secret values)
+- How to run the project locally and in Replit
+- Folder/file structure with a short description of each major directory
+- Usage examples (sample commands, API calls, or screenshots-in-text as appropriate)
+- Known limitations or TODOs, if any
+
+3. AUTO-GENERATED API DOCS
+Detect the language/framework and set up the appropriate doc generator:
+- Python: configure Sphinx or pdoc to build docs from the docstrings
+- JavaScript/TypeScript: configure JSDoc or TypeDoc
+- REST API: generate an OpenAPI/Swagger spec (openapi.yaml or swagger.json) describing all endpoints, request/response schemas, and status codes
+Include the config file, an npm/pip script or command to regenerate the docs, and output the generated docs into a /docs folder.
+
+4. ENVIRONMENT & CONFIG REFERENCE
+Create a docs/ENVIRONMENT.md file listing every required Secret, environment variable, database connection, and third-party API key the project uses. For each one include: name, purpose, required vs optional, and where/how to obtain or set it. Do not include actual secret values.
+
+5. ARCHITECTURE NOTES
+Create a docs/ARCHITECTURE.md file explaining how the app is structured: main components/services, how data flows through a typical request (step by step), and any external dependencies (databases, APIs, queues, etc.). Include a simple text-based or Mermaid diagram if the architecture has more than one service or a non-trivial data flow.
+
+6. ORGANIZE FOR GIT
+Put README.md at the root, and everything else (API docs, ENVIRONMENT.md, ARCHITECTURE.md) inside a /docs folder so it's all version-controlled alongside the code, not just visible in Replit's UI.
+
+After generating everything, give me a summary of the files you created/modified so I can review and commit them to GitHub.

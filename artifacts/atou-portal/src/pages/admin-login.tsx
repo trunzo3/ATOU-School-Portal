@@ -1,6 +1,6 @@
 import { useState } from "react"
 import { Link, useLocation } from "wouter"
-import { useAdminLogin, useAdminDevLogin } from "@workspace/api-client-react"
+import { useAdminLogin } from "@workspace/api-client-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -16,7 +16,6 @@ export function AdminLogin() {
   const { toast } = useToast()
   
   const login = useAdminLogin()
-  const devLogin = useAdminDevLogin()
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault()
@@ -30,17 +29,6 @@ export function AdminLogin() {
           description: "Please check your email and password.",
           variant: "destructive"
         })
-      }
-    })
-  }
-
-  const handleDevLogin = () => {
-    devLogin.mutate(undefined, {
-      onSuccess: () => {
-        setLocation("/admin")
-      },
-      onError: () => {
-        toast({ title: "Dev login failed", variant: "destructive" })
       }
     })
   }
@@ -105,12 +93,6 @@ export function AdminLogin() {
             </form>
           </CardContent>
         </Card>
-        
-        <div className="border-t pt-6 text-center">
-          <Button variant="outline" className="text-xs rounded-full" onClick={handleDevLogin} disabled={devLogin.isPending}>
-            Developer Login (Pam)
-          </Button>
-        </div>
       </div>
     </div>
   )

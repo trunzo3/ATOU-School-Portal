@@ -1,0 +1,37 @@
+Rework the columns on the admin dashboard grid at /admin. The attached mockup shows the result.
+
+COLUMNS, in this order:
+
+Checkbox (lock icon instead, for locked schools) · School · Date · Send Status · Pending Send · Teachers · Time · Activity Area · Speaker Area · Notes
+
+Remove the "Approx # Students" column, and remove the copy-link and open-portal buttons from every row. The school name is how Pam opens a school, and the link lives on the school detail screen.
+
+HEADERS
+
+"Workshop Date" becomes just "Date". Let "SEND STATUS", "PENDING SEND", "ACTIVITY AREA" and "SPEAKER AREA" each wrap onto two lines. No header should end up wider than the widest value in its own column.
+
+TEACHERS
+
+Stack the two values on separate lines — "3 teachers" above "146 students" — and keep each line from wrapping. When any teacher is missing a student count, both lines turn red. No extra wording; the "Missing" note under the school name already signals it.
+
+ACTIVITY AREA AND SPEAKER AREA
+
+Icon only, no text and no pill. A green circled check when the answer is there, a red circled exclamation when it isn't. Give each a tooltip and an accessible label naming the question and its state.
+
+TIME
+
+Show the start time in 12-hour format with AM or PM — "4:00 PM", not "16:00". Show a red circled exclamation when there's no time, and a yellow warning triangle when there's a schedule conflict. Same tooltip and accessible label treatment. Keep conflict visually distinct from missing: a conflict means someone answered and the times don't work, which is a different problem from no answer at all.
+
+PENDING SEND
+
+Show the date the automatic logistics email is scheduled to reach that school. Show a dash when nothing is scheduled or the school has been skipped.
+
+NOTES
+
+Widest column, roughly double the others. Let the text wrap to two lines before truncating with an ellipsis.
+
+ALIGNMENT
+
+Pending Send, Time, Activity Area and Speaker Area are centered — their text, icons and dashes alike. Everything else stays left-aligned.
+
+The whole grid should fit on screen without scrolling sideways.

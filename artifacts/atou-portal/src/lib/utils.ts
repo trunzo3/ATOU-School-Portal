@@ -10,6 +10,15 @@ export function cn(...inputs: ClassValue[]) {
 export const missingCountWord = (n: number) =>
   ["one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten"][n - 1] ?? String(n)
 
+// "16:00" -> "4:00 PM" (plain HH:MM values, no timezone involved)
+export function formatTime12h(value: string): string {
+  const [h, m] = value.split(":").map(Number)
+  if (!Number.isFinite(h) || !Number.isFinite(m)) return value
+  const period = h >= 12 ? "PM" : "AM"
+  const hour12 = h % 12 || 12
+  return `${hour12}:${String(m).padStart(2, "0")} ${period}`
+}
+
 export function formatPacificTime(dateString: string | null | undefined): string {
   if (!dateString) return "N/A"
   try {

@@ -187,6 +187,8 @@ export interface SchoolRow {
   sendStatus: SchoolRowSendStatus;
   /** @nullable */
   lastSentAt: string | null;
+  /** @nullable */
+  pendingSendDate: string | null;
 }
 
 export interface SchoolDetail {

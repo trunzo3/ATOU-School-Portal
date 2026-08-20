@@ -303,6 +303,20 @@ async function schoolSendStatus(schoolId: number): Promise<{
   return { sendStatus: answered ? "answered" : "sent_waiting", lastSentAt: sentAt.toISOString() };
 }
 
+// Pending send: the date the logistics email is due to reach the school —
+// 60 days before the workshop. Only meaningful while nothing has been sent
+// yet and the due date hasn't passed; otherwise there's nothing pending.
+function pendingSendDate(workshopDate: string | null, sendStatus: string): string | null {
+  if (sendStatus !== "never_sent" || !workshopDate) return null;
+  const due = new Date(`${workshopDate}T00:00:00Z`);
+  if (Number.isNaN(due.getTime())) return null;
+  due.setUTCDate(due.getUTCDate() - 60);
+  const dueStr = due.toISOString().slice(0, 10);
+  // Today in Pacific time, same YYYY-MM-DD shape for a plain string compare.
+  const today = new Intl.DateTimeFormat("en-CA", { timeZone: "America/Los_Angeles" }).format(new Date());
+  return dueStr >= today ? dueStr : null;
+}
+
 router.get("/admin/schools", requireAdmin, async (_req, res): Promise<void> => {
   const schools = await db.select().from(schoolsTable).orderBy(asc(schoolsTable.workshopDate));
   const rows = [];
@@ -327,6 +341,7 @@ router.get("/admin/schools", requireAdmin, async (_req, res): Promise<void> => {
       contacts: contacts.map((c) => ({ id: c.id, email: c.email, name: c.name })),
       sendStatus,
       lastSentAt,
+      pendingSendDate: pendingSendDate(school.workshopDate, sendStatus),
     });
   }
   res.json(rows);

@@ -341,7 +341,8 @@ export const GetAdminSchoolsResponseItem = zod.object({
   "name": zod.string().nullable()
 })),
   "sendStatus": zod.enum(['never_sent', 'sent_waiting', 'answered']),
-  "lastSentAt": zod.string().nullable()
+  "lastSentAt": zod.string().nullable(),
+  "pendingSendDate": zod.string().nullable()
 })
 export const GetAdminSchoolsResponse = zod.array(GetAdminSchoolsResponseItem)
 

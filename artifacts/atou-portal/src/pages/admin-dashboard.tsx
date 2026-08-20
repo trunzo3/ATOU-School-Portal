@@ -7,12 +7,10 @@ import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
-import { StatusBadge } from "@/components/ui/status-badge"
-import { formatPacificTime, cn } from "@/lib/utils"
-import { Copy, Search, ExternalLink, Lock, Mail, X, CalendarDays, AlertTriangle } from "lucide-react"
+import { formatPacificTime, formatTime12h, cn } from "@/lib/utils"
+import { Search, Lock, Mail, X, CalendarDays, AlertTriangle, AlertCircle, CheckCircle2 } from "lucide-react"
 import { useEffect, useMemo, useState } from "react"
 import { Link, useLocation } from "wouter"
-import { useToast } from "@/hooks/use-toast"
 
 // Dashboard view state survives a round trip to the send screen.
 const DASH_STATE_KEY = "atou_dash_state"
@@ -60,6 +58,30 @@ const SEND_STATUS_LABEL: Record<string, string> = {
   answered: "Answered",
 }
 
+// Icon-only state marker for the grid: green circled check (provided),
+// red circled exclamation (missing), yellow triangle (schedule conflict).
+// Tooltip and accessible label both name the question and its state.
+function StateIcon({ kind, label, tooltip }: { kind: "ok" | "missing" | "conflict"; label: string; tooltip: string }) {
+  const icon =
+    kind === "ok" ? (
+      <CheckCircle2 className="h-5 w-5 text-green-600" aria-hidden="true" />
+    ) : kind === "conflict" ? (
+      <AlertTriangle className="h-5 w-5 text-amber-500" aria-hidden="true" />
+    ) : (
+      <AlertCircle className="h-5 w-5 text-destructive" aria-hidden="true" />
+    )
+  return (
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <span role="img" aria-label={label} className="inline-flex justify-center align-middle">
+          {icon}
+        </span>
+      </TooltipTrigger>
+      <TooltipContent>{tooltip}</TooltipContent>
+    </Tooltip>
+  )
+}
+
 function DateFilterPicker({
   value,
   onChange,
@@ -89,7 +111,6 @@ export function AdminDashboard() {
   const [state, setState] = useState<DashState>(loadDashState)
   const [selected, setSelected] = useState<number[]>([])
   const [, navigate] = useLocation()
-  const { toast } = useToast()
 
   useEffect(() => {
     sessionStorage.setItem(DASH_STATE_KEY, JSON.stringify(state))
@@ -102,11 +123,6 @@ export function AdminDashboard() {
       ...prev,
       summaryFilter: filter === "all" || prev.summaryFilter === filter ? "all" : filter,
     }))
-  }
-
-  const copyLink = (link: string) => {
-    navigator.clipboard.writeText(link)
-    toast({ title: "Link copied to clipboard" })
   }
 
   const filteredSchools = useMemo(() => {
@@ -159,15 +175,6 @@ export function AdminDashboard() {
     sessionStorage.setItem(SEND_SELECTION_KEY, JSON.stringify(selected))
     navigate("/admin/send")
   }
-
-  // Fixed order for question columns
-  const questions = [
-    { key: "teachers", label: "Teachers" },
-    { key: "workshop_time", label: "Time" },
-    { key: "activity_area", label: "Activity Area" },
-    { key: "speaker_area", label: "Speaker Area" },
-    { key: "notes", label: "Notes" }
-  ]
 
   return (
     <AdminLayout>
@@ -298,20 +305,24 @@ export function AdminDashboard() {
                     aria-label="Select all visible schools"
                   />
                 </TableHead>
-                <TableHead className="w-[230px] font-semibold text-foreground">School</TableHead>
-                <TableHead className="w-[110px]">Date</TableHead>
-                <TableHead className="w-[130px]">Send Status</TableHead>
-                <TableHead className="w-[110px]">Approx # Students</TableHead>
-                {questions.map(q => (
-                  <TableHead key={q.key} className="min-w-[110px]">{q.label}</TableHead>
-                ))}
-                <TableHead className="w-[100px] text-right">Actions</TableHead>
+                <TableHead className="w-[210px] font-semibold text-foreground">School</TableHead>
+                <TableHead className="w-[80px]">Date</TableHead>
+                {/* Narrow two-word headers wrap onto two lines so no header
+                    is wider than its column's values */}
+                <TableHead className="w-[95px] whitespace-normal">Send Status</TableHead>
+                <TableHead className="w-[85px] whitespace-normal text-center">Pending Send</TableHead>
+                <TableHead className="w-[115px]">Teachers</TableHead>
+                <TableHead className="w-[85px] text-center">Time</TableHead>
+                <TableHead className="w-[80px] whitespace-normal text-center">Activity Area</TableHead>
+                <TableHead className="w-[80px] whitespace-normal text-center">Speaker Area</TableHead>
+                {/* Notes is the wide column — roughly double the others */}
+                <TableHead className="min-w-[200px]">Notes</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {filteredSchools?.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={11} className="text-center py-16">
+                  <TableCell colSpan={10} className="text-center py-16">
                     <div className="flex flex-col items-center justify-center space-y-3">
                       <div className="h-12 w-12 rounded-full bg-muted flex items-center justify-center">
                         <Search className="h-6 w-6 text-muted-foreground/60" />
@@ -368,59 +379,72 @@ export function AdminDashboard() {
                       )}
                     </div>
                   </TableCell>
-                  <TableCell>
-                    {/* Read-only copy of the Airtable "Approx # Students" field — display only */}
-                    <span className="text-sm text-muted-foreground">{school.approxStudents || "—"}</span>
+                  <TableCell className="text-center">
+                    {school.pendingSendDate ? (
+                      <span className="text-sm font-medium text-primary whitespace-nowrap">
+                        {formatPacificTime(school.pendingSendDate).split(',')[0]}
+                      </span>
+                    ) : (
+                      <span className="text-muted-foreground">—</span>
+                    )}
                   </TableCell>
-                  {questions.map(q => {
-                    const state = school.questionStates.find(s => s.questionKey === q.key)
-                    return (
-                      <TableCell key={q.key}>
-                        {state?.conflict ? (
-                          // Answered, but the time conflicts with the calculated
-                          // schedule — visually distinct from Done and Missing.
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <span className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-bold uppercase tracking-wider border bg-amber-50 text-amber-700 border-amber-300">
-                                <AlertTriangle className="h-3.5 w-3.5" />
-                                Conflict
-                              </span>
-                            </TooltipTrigger>
-                            <TooltipContent>
-                              A workshop time was provided, but it conflicts with the calculated session schedule.
-                            </TooltipContent>
-                          </Tooltip>
-                        ) : state?.answered ? (
-                          // Incomplete = answered but part is still missing
-                          // (a teacher with no student count) — partial, in
-                          // red, same rule the school form uses.
-                          <div
-                            className={cn(
-                              "text-xs truncate max-w-[150px]",
-                              state.incomplete ? "text-destructive font-medium" : "text-muted-foreground",
-                            )}
-                            title={state.summary || ""}
-                          >
-                            {state.summary || <StatusBadge complete={true} text="Done" />}
-                          </div>
-                        ) : (
-                          q.key === "notes" ? <span className="text-xs text-muted-foreground/50">Optional</span> : <StatusBadge complete={false} text="Missing" />
-                        )}
-                      </TableCell>
-                    )
-                  })}
-
-                  <TableCell className="text-right">
-                    <div className="flex justify-end gap-1">
-                      <Button variant="ghost" size="icon" className="rounded-full h-8 w-8 hover:bg-muted" onClick={() => copyLink(school.link)} title="Copy Portal Link">
-                        <Copy className="h-4 w-4 text-muted-foreground" />
-                      </Button>
-                      <Link href={`/admin/schools/${school.id}`}>
-                        <Button variant="ghost" size="icon" className="rounded-full h-8 w-8 hover:bg-primary/10" title="View Form">
-                          <ExternalLink className="h-4 w-4 text-primary" />
-                        </Button>
-                      </Link>
-                    </div>
+                  <TableCell>
+                    {(() => {
+                      const st = school.questionStates.find(s => s.questionKey === "teachers")
+                      if (!st?.answered) {
+                        return <StateIcon kind="missing" label="Teachers: missing" tooltip="No teacher list provided yet." />
+                      }
+                      // Server summary is "N teachers, M students[, … missing]" —
+                      // first two parts stacked; the missing note is signalled by
+                      // the red color and the Missing count under the school name.
+                      const parts = (st.summary || "").split(", ")
+                      return (
+                        <div className={cn("text-sm leading-snug", st.incomplete && "text-destructive font-medium")}>
+                          <div className="whitespace-nowrap">{parts[0]}</div>
+                          <div className="whitespace-nowrap">{parts[1]}</div>
+                        </div>
+                      )
+                    })()}
+                  </TableCell>
+                  <TableCell className="text-center">
+                    {(() => {
+                      const st = school.questionStates.find(s => s.questionKey === "workshop_time")
+                      if (st?.conflict) {
+                        // Conflict = answered but the times don't work — a
+                        // different problem from no answer, so a different icon.
+                        return <StateIcon kind="conflict" label="Workshop time: schedule conflict" tooltip="A workshop time was provided, but it conflicts with the calculated session schedule." />
+                      }
+                      if (st?.answered) {
+                        return <span className="text-sm whitespace-nowrap">{formatTime12h(st.summary || "")}</span>
+                      }
+                      return <StateIcon kind="missing" label="Workshop time: missing" tooltip="Workshop time: missing" />
+                    })()}
+                  </TableCell>
+                  <TableCell className="text-center">
+                    {school.questionStates.find(s => s.questionKey === "activity_area")?.answered ? (
+                      <StateIcon kind="ok" label="Activity area: provided" tooltip="Activity area: provided" />
+                    ) : (
+                      <StateIcon kind="missing" label="Activity area: missing" tooltip="Activity area: missing" />
+                    )}
+                  </TableCell>
+                  <TableCell className="text-center">
+                    {school.questionStates.find(s => s.questionKey === "speaker_area")?.answered ? (
+                      <StateIcon kind="ok" label="Speaker area: provided" tooltip="Speaker area: provided" />
+                    ) : (
+                      <StateIcon kind="missing" label="Speaker area: missing" tooltip="Speaker area: missing" />
+                    )}
+                  </TableCell>
+                  <TableCell>
+                    {(() => {
+                      const st = school.questionStates.find(s => s.questionKey === "notes")
+                      if (!st?.answered) return <span className="text-xs text-muted-foreground/50">Optional</span>
+                      // Wraps to two lines, then truncates with an ellipsis.
+                      return (
+                        <div className="text-sm text-muted-foreground line-clamp-2" title={st.summary || ""}>
+                          {st.summary}
+                        </div>
+                      )
+                    })()}
                   </TableCell>
                 </TableRow>
               ))}

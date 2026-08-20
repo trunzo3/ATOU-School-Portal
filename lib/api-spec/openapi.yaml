@@ -895,7 +895,10 @@ components:
             $ref: "#/components/schemas/Contact"
         sendStatus: { type: string, enum: [never_sent, sent_waiting, answered] }
         lastSentAt: { type: ["string", "null"] }
-      required: [id, name, code, link, workshopDate, locked, approxStudents, questionStates, missingCount, contacts, sendStatus, lastSentAt]
+        # Date the logistics email is due to go out (60 days before the
+        # workshop); null once sent or when the due date has passed.
+        pendingSendDate: { type: ["string", "null"] }
+      required: [id, name, code, link, workshopDate, locked, approxStudents, questionStates, missingCount, contacts, sendStatus, lastSentAt, pendingSendDate]
     Contact:
       type: object
       properties:

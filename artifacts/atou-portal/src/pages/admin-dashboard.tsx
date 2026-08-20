@@ -53,9 +53,21 @@ function loadDashState(): DashState {
 }
 
 const SEND_STATUS_LABEL: Record<string, string> = {
-  never_sent: "Never sent",
+  never_sent: "Not sent",
   sent_waiting: "Sent, waiting",
   answered: "Answered",
+}
+
+// A never-sent school needs attention once its workshop is 60 days away or
+// less (the logistics email should already be on its way by then).
+function sendOverdue(workshopDate: string | null, sendStatus: string): boolean {
+  if (sendStatus !== "never_sent" || !workshopDate) return false
+  const due = new Date(`${workshopDate}T00:00:00Z`)
+  if (Number.isNaN(due.getTime())) return false
+  due.setUTCDate(due.getUTCDate() - 60)
+  // Today in Pacific time, same YYYY-MM-DD shape for a plain string compare.
+  const today = new Intl.DateTimeFormat("en-CA", { timeZone: "America/Los_Angeles" }).format(new Date())
+  return due.toISOString().slice(0, 10) <= today
 }
 
 // Icon-only state marker for the grid: green circled check (provided),
@@ -271,7 +283,7 @@ export function AdminDashboard() {
               <SelectTrigger className="w-full sm:w-[180px]"><SelectValue /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Any send status</SelectItem>
-                <SelectItem value="never_sent">Never sent</SelectItem>
+                <SelectItem value="never_sent">Not sent</SelectItem>
                 <SelectItem value="sent_waiting">Sent and waiting</SelectItem>
                 <SelectItem value="answered">Answered</SelectItem>
               </SelectContent>
@@ -371,7 +383,9 @@ export function AdminDashboard() {
                   </TableCell>
                   <TableCell>
                     <div className="text-xs">
-                      {SEND_STATUS_LABEL[school.sendStatus] || school.sendStatus}
+                      <span className={cn(sendOverdue(school.workshopDate, school.sendStatus) && "text-destructive font-medium")}>
+                        {SEND_STATUS_LABEL[school.sendStatus] || school.sendStatus}
+                      </span>
                       {school.lastSentAt && (
                         <div className="text-muted-foreground mt-0.5">
                           {formatPacificTime(school.lastSentAt).split(',')[0]}

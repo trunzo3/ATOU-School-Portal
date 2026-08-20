@@ -22,6 +22,18 @@ export function formatTime12h(value: string): string {
 export function formatPacificTime(dateString: string | null | undefined): string {
   if (!dateString) return "N/A"
   try {
+    // Date-only values (YYYY-MM-DD, e.g. workshop dates) carry no time or
+    // timezone. Parsing them as timestamps lands at midnight UTC, which is
+    // the previous evening in Pacific time and shifts the calendar day back
+    // by one. Format them as plain calendar dates instead.
+    if (/^\d{4}-\d{2}-\d{2}$/.test(dateString)) {
+      return new Intl.DateTimeFormat("en-US", {
+        timeZone: "UTC",
+        month: "short",
+        day: "numeric",
+        year: "numeric",
+      }).format(new Date(`${dateString}T00:00:00Z`))
+    }
     const date = new Date(dateString)
     return new Intl.DateTimeFormat("en-US", {
       timeZone: "America/Los_Angeles",

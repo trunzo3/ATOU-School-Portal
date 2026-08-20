@@ -4,3 +4,5 @@
 - [Time-picker edit sessions](time-picker-edit-sessions.md) — amendId saves one history row per session; Radix portal focus quirks break naive outside-detection.
 - [School email signature policy](school-email-signature.md) — one body-authored signature, never append content at send time; legacy WORKSHOP DATE marker also merges.
 - [Teacher count completeness rule](teacher-count-completeness.md) — studentCount 0 means "not entered"; missing counts make a school partial on every surface, one shared rule and phrasing.
+- [Date-only rendering rule](date-only-rendering.md) — bare YYYY-MM-DD must format as UTC calendar dates; Pacific timestamp parsing shifted every date one day early until Aug 2026 fix.
+- [Pending Send display rule](pending-send-rule.md) — computed workshop−60d for never-sent schools until workshop <30 days out; no real email scheduler exists.

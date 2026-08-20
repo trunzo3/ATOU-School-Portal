@@ -2,10 +2,15 @@ import { desc, eq } from "drizzle-orm";
 import { db, answersTable, emailSendsTable, teacherSnapshotsTable } from "@workspace/db";
 import { PAM_EMAIL } from "./auth";
 import { normalizeEmail } from "./answers";
+import { AIRTABLE_ENTERED_BY } from "./airtable-merge";
 
-/** Entries by school contacts, as opposed to Pam or the Airtable import. */
+/** Entries by school contacts, as opposed to Pam, the Airtable import, or the sync. */
 export function isSchoolEntry(enteredBy: string): boolean {
-  return normalizeEmail(enteredBy) !== PAM_EMAIL && enteredBy !== "Airtable import";
+  return (
+    normalizeEmail(enteredBy) !== PAM_EMAIL &&
+    enteredBy !== "Airtable import" &&
+    enteredBy !== AIRTABLE_ENTERED_BY
+  );
 }
 
 // Send status per school: never_sent, sent_waiting (sent, no school activity

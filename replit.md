@@ -11,7 +11,7 @@ disability-awareness workshops at ~140 schools/year. Two surfaces:
 - **Admin dashboard** (`/` → login, `/admin`): grid of schools × questions with
   missing flags, copy-link buttons, per-school form reusing the same shared
   form component, edit locks, email-send prep, rich-text info pages with
-  export, admin account management, Airtable settings.
+  export, admin account management, Airtable sync status + "Sync now".
 
 ## Key business rules
 - Pam's email `programcoordinator@touchofunderstanding.org` is authorized for
@@ -23,9 +23,18 @@ disability-awareness workshops at ~140 schools/year. Two surfaces:
   "8:00 – 9:30 AM, break, 9:45 – 11:15 AM". All times Pacific.
 - Answer history is append-only — every save is a new row; this history is the
   point of the app.
-- **Airtable connection is switched OFF** in this build. Settings are stored
-  and write/read functions exist in `artifacts/api-server/src/lib/airtable.ts`
-  (with field IDs documented) but do nothing until config is filled in.
+- **Airtable two-way sync is LIVE** via the Replit Airtable connection (no API
+  key, no stored credentials). Portal saves write mapped fields to Airtable
+  immediately (failures never block the save); the in-server scheduler pulls
+  future-dated Workshops rows every 15 minutes (new schools + contacts,
+  workshop-date/contact updates, Airtable-side answer edits recorded as
+  history rows entered by "Airtable"). Conflicts: the portal wins and is
+  pushed back. Per-field last-synced baselines live in
+  `schools.airtable_sync_state`. Modules:
+  `artifacts/api-server/src/lib/airtable.ts` (HTTP + write-back, field IDs
+  documented), `airtable-sync.ts` (pull/merge engine, DB-claimed runs),
+  `airtable-merge.ts` (pure conflict rules). `notes` and `timing_note` never
+  sync.
 - Resend IS connected (`RESEND_API_KEY` secret); live school delivery is
   gated by the Settings switch (`email_sending_enabled`). Emails are sent
   exactly as composed: Pam's plain contact block lives at the end of every
@@ -61,15 +70,16 @@ row per future-dated workshop; `schools.airtable_record_id` stores the
 workshop record id for write-back. `schools.approx_students` is a read-only
 copy of the Workshops "Approx # Students" column, shown in the admin
 dashboard. Answers already typed into the Workshops sheet (Workshop Times,
-Areas, Teacher Name/Student Count + emails) ARE imported as starting answers
-with enteredBy "Airtable import"; free-form teacher text is parsed
-best-effort by `scripts/src/parse-workshop-answers.ts`. Write-back to
-Airtable stays OFF. Re-run:
-`pnpm --filter @workspace/scripts run import-airtable` (DESTRUCTIVE — wipes
-schools, contacts, answers, teacher snapshots; the payload JSON
-`scripts/src/airtable-import.json` is refreshed from Airtable by the agent).
-The old sample-data seed (`run seed`) still exists but is superseded.
-Write-back to Airtable remains switched OFF.
+Areas, Teacher Name/Student Count + emails) come in as starting answers
+with enteredBy "Airtable" (the one-time import used "Airtable import");
+free-form teacher text is parsed best-effort
+(`artifacts/api-server/src/lib/parse-teachers.ts`, copied from
+`scripts/src/parse-workshop-answers.ts`). New future-dated workshops and
+Airtable-side edits now arrive continuously via the sync — the destructive
+one-time import (`pnpm --filter @workspace/scripts run import-airtable`)
+should NOT be re-run (it wipes schools, contacts, answers, teacher
+snapshots). The old sample-data seed (`run seed`) still exists but is
+superseded.
 
 ## User preferences
 (none recorded yet)

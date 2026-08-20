@@ -1,7 +1,7 @@
 import {
-  useGetSettings,
-  useUpdateSettings,
-  getGetSettingsQueryKey,
+  useGetAirtableStatus,
+  useSyncAirtableNow,
+  getGetAirtableStatusQueryKey,
   useGetEmailStatus,
   useUpdateEmailSettings,
   useSendTestEmail,
@@ -14,10 +14,11 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Switch } from "@/components/ui/switch"
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import { useToast } from "@/hooks/use-toast"
 import { useQueryClient } from "@tanstack/react-query"
-import { Database, AlertCircle, Mail, Send, CheckCircle2, XCircle } from "lucide-react"
+import { formatPacificTime } from "@/lib/utils"
+import { Database, Mail, RefreshCw, Send, CheckCircle2, XCircle } from "lucide-react"
 
 function apiErrorMessage(error: unknown): string {
   if (typeof error === "object" && error !== null && "data" in error) {
@@ -35,40 +36,39 @@ function apiErrorMessage(error: unknown): string {
 }
 
 export function AdminSettings() {
-  const { data: settings } = useGetSettings()
+  const { data: airtable } = useGetAirtableStatus()
   const { data: emailStatus } = useGetEmailStatus()
-  const updateSettings = useUpdateSettings()
+  const syncAirtable = useSyncAirtableNow()
   const updateEmailSettings = useUpdateEmailSettings()
   const sendTestEmail = useSendTestEmail()
   const queryClient = useQueryClient()
   const { toast } = useToast()
 
-  const [apiKey, setApiKey] = useState("")
-  const [baseId, setBaseId] = useState("")
-  const [tableId, setTableId] = useState("")
   const [testEmail, setTestEmail] = useState("")
   const [testResponse, setTestResponse] = useState<{
     kind: "success" | "error"
     text: string
   } | null>(null)
 
-  useEffect(() => {
-    if (settings) {
-      setBaseId(settings.baseId || "")
-      setTableId(settings.tableId || "")
-      // We never receive the API key back, so we leave it empty.
-      // If settings.apiKeySet is true, the user knows it's set.
-    }
-  }, [settings])
-
-  const handleSave = (e: React.FormEvent) => {
-    e.preventDefault()
-    updateSettings.mutate({ data: { apiKey, baseId, tableId } }, {
-      onSuccess: () => {
-        toast({ title: "Airtable connection saved" })
-        setApiKey("") // Clear it after save
-        queryClient.invalidateQueries({ queryKey: getGetSettingsQueryKey() })
-      }
+  const handleSyncNow = () => {
+    syncAirtable.mutate(undefined, {
+      onSuccess: (status) => {
+        queryClient.invalidateQueries({ queryKey: getGetAirtableStatusQueryKey() })
+        toast({
+          title:
+            status.lastSyncOk === false
+              ? "Sync finished with problems"
+              : "Airtable sync finished",
+          description: status.lastSyncMessage ?? undefined,
+        })
+      },
+      onError: (error) => {
+        toast({
+          title: "Sync failed",
+          description: apiErrorMessage(error),
+          variant: "destructive",
+        })
+      },
     })
   }
 
@@ -232,67 +232,81 @@ export function AdminSettings() {
 
         <Card>
           <CardHeader>
-            <div className="flex items-center justify-between">
+            <div className="flex items-start justify-between gap-4">
               <div>
                 <CardTitle className="flex items-center gap-2">
                   <Database className="h-5 w-5 text-primary" />
-                  Airtable Connection
+                  Airtable Sync
                 </CardTitle>
-                <CardDescription>Sync form answers directly to your Airtable base.</CardDescription>
+                <CardDescription>Two-way sync with the Airtable Workshops table.</CardDescription>
               </div>
-              <div className="flex flex-col items-end">
-                <div className="flex items-center gap-2">
-                  <Switch disabled checked={false} />
-                  <span className="text-sm font-medium text-muted-foreground">Off</span>
-                </div>
-                <span className="text-xs text-muted-foreground mt-1">Coming soon</span>
+              <div className="flex flex-col items-end gap-1">
+                <span
+                  className={`flex items-center gap-1.5 text-sm font-medium ${
+                    airtable?.connected ? "text-primary" : "text-muted-foreground"
+                  }`}
+                >
+                  {airtable ? (
+                    airtable.connected ? (
+                      <CheckCircle2 className="h-4 w-4" />
+                    ) : (
+                      <XCircle className="h-4 w-4" />
+                    )
+                  ) : null}
+                  {airtable
+                    ? airtable.connected
+                      ? "Connected"
+                      : "Not connected"
+                    : "Checking…"}
+                </span>
+                <span className="text-xs text-muted-foreground">
+                  via the Replit Airtable connection
+                </span>
               </div>
             </div>
           </CardHeader>
-          <CardContent>
-            <div className="bg-muted/50 p-4 rounded-xl mb-6 border border-dashed flex items-start gap-3">
-              <AlertCircle className="h-5 w-5 text-muted-foreground mt-0.5 flex-shrink-0" />
-              <p className="text-sm text-muted-foreground">
-                This integration is currently disabled in the prototype phase. You can save your credentials below, but no data will be synced to Airtable yet.
+          <CardContent className="space-y-4">
+            <div className="rounded-xl border bg-muted/40 p-4 text-sm text-muted-foreground">
+              <p>
+                Answers saved in the portal are written to Airtable right away,
+                and changes made in Airtable are picked up automatically about
+                every 15 minutes. No API key is needed — the connection is
+                managed by Replit.
               </p>
             </div>
 
-            <form id="airtable-form" onSubmit={handleSave} className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="apiKey">Airtable Personal Access Token</Label>
-                <Input 
-                  id="apiKey" 
-                  type="password" 
-                  placeholder={settings?.apiKeySet ? "•••••••••••••••• (Leave blank to keep existing)" : "pat..."}
-                  value={apiKey}
-                  onChange={e => setApiKey(e.target.value)}
-                />
+            {airtable?.lastSyncAt ? (
+              <div
+                role="status"
+                className={`flex items-start gap-2 rounded-lg border p-3 text-sm ${
+                  airtable.lastSyncOk === false
+                    ? "border-destructive/25 bg-destructive/5 text-destructive"
+                    : "border-primary/25 bg-primary/5 text-foreground"
+                }`}
+              >
+                {airtable.lastSyncOk === false ? (
+                  <XCircle className="h-4 w-4 mt-0.5 flex-shrink-0" />
+                ) : (
+                  <CheckCircle2 className="h-4 w-4 mt-0.5 flex-shrink-0" />
+                )}
+                <span>
+                  Last sync {formatPacificTime(airtable.lastSyncAt)}
+                  {airtable.lastSyncMessage ? ` — ${airtable.lastSyncMessage}` : ""}
+                </span>
               </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="baseId">Base ID</Label>
-                  <Input 
-                    id="baseId" 
-                    placeholder="app..." 
-                    value={baseId}
-                    onChange={e => setBaseId(e.target.value)}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="tableId">Table ID</Label>
-                  <Input 
-                    id="tableId" 
-                    placeholder="tbl..." 
-                    value={tableId}
-                    onChange={e => setTableId(e.target.value)}
-                  />
-                </div>
-              </div>
-            </form>
+            ) : (
+              <p className="text-sm text-muted-foreground">No sync has run yet.</p>
+            )}
           </CardContent>
           <CardFooter className="border-t bg-muted/10 justify-end pt-6">
-            <Button type="submit" form="airtable-form" disabled={updateSettings.isPending}>
-              Save Settings
+            <Button
+              onClick={handleSyncNow}
+              disabled={!airtable?.connected || syncAirtable.isPending}
+            >
+              <RefreshCw
+                className={`h-4 w-4 mr-2 ${syncAirtable.isPending ? "animate-spin" : ""}`}
+              />
+              {syncAirtable.isPending ? "Syncing…" : "Sync Now"}
             </Button>
           </CardFooter>
         </Card>

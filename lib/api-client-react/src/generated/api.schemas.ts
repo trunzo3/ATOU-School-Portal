@@ -515,16 +515,13 @@ export interface SummaryReport {
   sinceLastWeek: SummaryReportSinceLastWeek;
 }
 
-export interface AirtableSettings {
-  apiKeySet: boolean;
-  baseId: string;
-  tableId: string;
-  enabled: boolean;
+export interface AirtableStatus {
+  connected: boolean;
+  syncing: boolean;
+  /** @nullable */
+  lastSyncAt: string | null;
+  /** @nullable */
+  lastSyncOk: boolean | null;
+  /** @nullable */
+  lastSyncMessage: string | null;
 }
-
-export interface AirtableSettingsInput {
-  apiKey: string;
-  baseId: string;
-  tableId: string;
-}
-

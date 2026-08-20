@@ -26,7 +26,6 @@ export const IdentifyPortalUserParams = zod.object({
 export const identifyPortalUserBodyEmailMin = 3;
 
 
-
 export const IdentifyPortalUserBody = zod.object({
   "email": zod.string().min(identifyPortalUserBodyEmailMin)
 })
@@ -54,11 +53,9 @@ export const FetchPortalAnswersParams = zod.object({
 export const fetchPortalAnswersBodyEmailMin = 3;
 
 
-
 export const FetchPortalAnswersBody = zod.object({
   "email": zod.string().min(fetchPortalAnswersBodyEmailMin)
 })
-
 
 
 export const fetchPortalAnswersResponseTeachersCurrentOneRowsItemEmailMin = 3;
@@ -66,11 +63,9 @@ export const fetchPortalAnswersResponseTeachersCurrentOneRowsItemEmailMin = 3;
 export const fetchPortalAnswersResponseTeachersCurrentOneRowsItemStudentCountMin = 0;
 
 
-
 export const fetchPortalAnswersResponseTeachersHistoryItemRowsItemEmailMin = 3;
 
 export const fetchPortalAnswersResponseTeachersHistoryItemRowsItemStudentCountMin = 0;
-
 
 
 export const FetchPortalAnswersResponse = zod.object({
@@ -136,8 +131,6 @@ export const SaveAnswerParams = zod.object({
 export const saveAnswerBodyEmailMin = 3;
 
 
-
-
 export const SaveAnswerBody = zod.object({
   "email": zod.string().min(saveAnswerBodyEmailMin),
   "value": zod.string().min(1),
@@ -162,12 +155,9 @@ export const SaveTeachersParams = zod.object({
 export const saveTeachersBodyEmailMin = 3;
 
 
-
 export const saveTeachersBodyRowsItemEmailMin = 3;
 
 export const saveTeachersBodyRowsItemStudentCountMin = 0;
-
-
 
 
 export const SaveTeachersBody = zod.object({
@@ -181,11 +171,9 @@ export const SaveTeachersBody = zod.object({
 })
 
 
-
 export const saveTeachersResponseRowsItemEmailMin = 3;
 
 export const saveTeachersResponseRowsItemStudentCountMin = 0;
-
 
 
 export const SaveTeachersResponse = zod.object({
@@ -227,8 +215,6 @@ export const GetPortalPagesResponse = zod.array(GetPortalPagesResponseItem)
 export const adminLoginBodyEmailMin = 3;
 
 
-
-
 export const AdminLoginBody = zod.object({
   "email": zod.string().min(adminLoginBodyEmailMin),
   "password": zod.string().min(1)
@@ -247,7 +233,6 @@ export const AdminLoginResponse = zod.object({
 export const adminForgotPasswordBodyEmailMin = 3;
 
 
-
 export const AdminForgotPasswordBody = zod.object({
   "email": zod.string().min(adminForgotPasswordBodyEmailMin)
 })
@@ -263,7 +248,6 @@ export const AdminForgotPasswordResponse = zod.object({
  */
 
 export const adminResetPasswordBodyPasswordMin = 8;
-
 
 
 export const AdminResetPasswordBody = zod.object({
@@ -411,7 +395,6 @@ export const getAutomationSettingsResponseLogisticsRulesItemDaysBeforeMax = 365;
 export const getAutomationSettingsResponseLogisticsRulesMax = 2;
 
 
-
 export const GetAutomationSettingsResponse = zod.object({
   "logistics": zod.object({
   "enabled": zod.boolean(),
@@ -439,7 +422,6 @@ export const updateAutoLogisticsBodyRulesItemDaysBeforeMax = 365;
 export const updateAutoLogisticsBodyRulesMax = 2;
 
 
-
 export const UpdateAutoLogisticsBody = zod.object({
   "enabled": zod.boolean(),
   "rules": zod.array(zod.object({
@@ -452,7 +434,6 @@ export const UpdateAutoLogisticsBody = zod.object({
 export const updateAutoLogisticsResponseLogisticsRulesItemDaysBeforeMax = 365;
 
 export const updateAutoLogisticsResponseLogisticsRulesMax = 2;
-
 
 
 export const UpdateAutoLogisticsResponse = zod.object({
@@ -482,7 +463,6 @@ export const updateWeeklySummaryBodyDayOfWeekMax = 6;
 export const updateWeeklySummaryBodyDaysAheadMax = 365;
 
 
-
 export const UpdateWeeklySummaryBody = zod.object({
   "enabled": zod.boolean(),
   "dayOfWeek": zod.number().min(updateWeeklySummaryBodyDayOfWeekMin).max(updateWeeklySummaryBodyDayOfWeekMax),
@@ -494,7 +474,6 @@ export const UpdateWeeklySummaryBody = zod.object({
 export const updateWeeklySummaryResponseLogisticsRulesItemDaysBeforeMax = 365;
 
 export const updateWeeklySummaryResponseLogisticsRulesMax = 2;
-
 
 
 export const UpdateWeeklySummaryResponse = zod.object({
@@ -522,7 +501,6 @@ export const UpdateWeeklySummaryResponse = zod.object({
 export const sendWeeklySummaryNowResponseLogisticsRulesItemDaysBeforeMax = 365;
 
 export const sendWeeklySummaryNowResponseLogisticsRulesMax = 2;
-
 
 
 export const SendWeeklySummaryNowResponse = zod.object({
@@ -732,7 +710,6 @@ export const UpdateEmailSettingsResponse = zod.object({
 export const sendTestEmailBodyEmailMin = 3;
 
 
-
 export const SendTestEmailBody = zod.object({
   "email": zod.string().min(sendTestEmailBodyEmailMin)
 })
@@ -766,10 +743,6 @@ export const GetEmailSendsResponse = zod.array(GetEmailSendsResponseItem)
 /**
  * @summary Send the logistics email to the selected schools and log it
  */
-
-
-
-
 
 
 export const SendEmailsBody = zod.object({
@@ -823,9 +796,6 @@ export const UpdateEmailTemplateParams = zod.object({
 })
 
 
-
-
-
 export const UpdateEmailTemplateBody = zod.object({
   "subject": zod.string().min(1),
   "body": zod.string().min(1)
@@ -859,7 +829,6 @@ export const createAdminUserBodyEmailMin = 3;
 export const createAdminUserBodyPasswordMin = 8;
 
 
-
 export const CreateAdminUserBody = zod.object({
   "email": zod.string().min(createAdminUserBodyEmailMin),
   "password": zod.string().min(createAdminUserBodyPasswordMin)
@@ -880,7 +849,6 @@ export const UpdateAdminUserParams = zod.object({
 })
 
 export const updateAdminUserBodyPasswordMin = 8;
-
 
 
 export const UpdateAdminUserBody = zod.object({
@@ -926,8 +894,6 @@ export const GetAdminPagesResponse = zod.array(GetAdminPagesResponseItem)
  */
 
 
-
-
 export const CreatePageBody = zod.object({
   "title": zod.string().min(1),
   "slug": zod.string().min(1).optional(),
@@ -953,9 +919,6 @@ export const CreatePageResponse = zod.object({
 export const UpdatePageParams = zod.object({
   "id": zod.coerce.number()
 })
-
-
-
 
 
 export const UpdatePageBody = zod.object({
@@ -1005,32 +968,25 @@ export const ExportPagesResponse = zod.object({
 }))
 })
 
+/**
+ * @summary Airtable connection and sync status (auth via the Replit connection)
+ */
+export const GetAirtableStatusResponse = zod.object({
+  "connected": zod.boolean(),
+  "syncing": zod.boolean(),
+  "lastSyncAt": zod.string().nullable(),
+  "lastSyncOk": zod.boolean().nullable(),
+  "lastSyncMessage": zod.string().nullable()
+})
+
 
 /**
- * @summary Airtable connection settings (stored, connection stays off)
+ * @summary Run an Airtable sync pass immediately
  */
-export const GetSettingsResponse = zod.object({
-  "apiKeySet": zod.boolean(),
-  "baseId": zod.string(),
-  "tableId": zod.string(),
-  "enabled": zod.boolean()
+export const SyncAirtableNowResponse = zod.object({
+  "connected": zod.boolean(),
+  "syncing": zod.boolean(),
+  "lastSyncAt": zod.string().nullable(),
+  "lastSyncOk": zod.boolean().nullable(),
+  "lastSyncMessage": zod.string().nullable()
 })
-
-
-/**
- * @summary Save Airtable connection settings
- */
-export const UpdateSettingsBody = zod.object({
-  "apiKey": zod.string(),
-  "baseId": zod.string(),
-  "tableId": zod.string()
-})
-
-export const UpdateSettingsResponse = zod.object({
-  "apiKeySet": zod.boolean(),
-  "baseId": zod.string(),
-  "tableId": zod.string(),
-  "enabled": zod.boolean()
-})
-
-

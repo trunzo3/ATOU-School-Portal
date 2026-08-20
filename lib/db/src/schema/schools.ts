@@ -9,15 +9,28 @@ import {
   jsonb,
 } from "drizzle-orm/pg-core";
 
+// Two-way Airtable sync bookkeeping. `fields` holds the last value both
+// sides agreed on, keyed by Airtable field id, so the sync can tell which
+// side changed; `contactEmails` is the contact list as of the last pull, so
+// a contact removed in Airtable can be removed here without touching
+// contacts that were added in the app. Null until the first sync.
+export type AirtableSyncState = {
+  fields: Record<string, string>;
+  contactEmails: string[];
+};
+
 export const schoolsTable = pgTable("schools", {
   id: serial("id").primaryKey(),
   name: text("name").notNull(),
   code: text("code").notNull().unique(),
   workshopDate: date("workshop_date", { mode: "string" }),
   locked: boolean("locked").notNull().default(false),
-  airtableRecordId: text("airtable_record_id"),
+  // Unique so two overlapping sync runs can never create the same
+  // workshop twice (the second insert is a no-op).
+  airtableRecordId: text("airtable_record_id").unique(),
   // Read-only, pulled from the Airtable Workshops "Approx # Students" column.
   approxStudents: text("approx_students"),
+  airtableSyncState: jsonb("airtable_sync_state").$type<AirtableSyncState>(),
   // Pam can skip the automatic logistics email for one school; the daily
   // job leaves skipped schools alone and the dashboard shows a dash.
   autoSendSkipped: boolean("auto_send_skipped").notNull().default(false),

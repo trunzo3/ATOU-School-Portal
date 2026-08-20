@@ -746,35 +746,30 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/PagesExport"
-  /admin/settings:
+  /admin/airtable/status:
     get:
-      operationId: getSettings
+      operationId: getAirtableStatus
       tags: [admin]
-      summary: Airtable connection settings (stored, connection stays off)
+      summary: Airtable connection and sync status (auth via the Replit connection)
       responses:
         "200":
-          description: Settings
+          description: Status
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/AirtableSettings"
-    put:
-      operationId: updateSettings
+                $ref: "#/components/schemas/AirtableStatus"
+  /admin/airtable/sync:
+    post:
+      operationId: syncAirtableNow
       tags: [admin]
-      summary: Save Airtable connection settings
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/AirtableSettingsInput"
+      summary: Run an Airtable sync pass immediately
       responses:
         "200":
-          description: Saved
+          description: Sync finished; latest status
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/AirtableSettings"
+                $ref: "#/components/schemas/AirtableStatus"
 components:
   parameters:
     PortalCode:
@@ -1400,18 +1395,12 @@ components:
                 $ref: "#/components/schemas/SummaryEmailGroup"
           required: [from, to, newAnswers, changes, emailsSent]
       required: [asOf, windowDays, windowStart, windowEnd, counts, needsAttention, comingUp, scheduledSends, sinceLastWeek]
-    AirtableSettings:
+    AirtableStatus:
       type: object
       properties:
-        apiKeySet: { type: boolean }
-        baseId: { type: string }
-        tableId: { type: string }
-        enabled: { type: boolean }
-      required: [apiKeySet, baseId, tableId, enabled]
-    AirtableSettingsInput:
-      type: object
-      properties:
-        apiKey: { type: string }
-        baseId: { type: string }
-        tableId: { type: string }
-      required: [apiKey, baseId, tableId]
+        connected: { type: boolean }
+        syncing: { type: boolean }
+        lastSyncAt: { type: ["string", "null"] }
+        lastSyncOk: { type: ["boolean", "null"] }
+        lastSyncMessage: { type: ["string", "null"] }
+      required: [connected, syncing, lastSyncAt, lastSyncOk, lastSyncMessage]

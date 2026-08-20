@@ -25,8 +25,7 @@ import type {
   AdminUser,
   AdminUserInput,
   AdminUserUpdate,
-  AirtableSettings,
-  AirtableSettingsInput,
+  AirtableStatus,
   AnswerInput,
   AnswerVersion,
   AutoLogisticsInput,
@@ -2883,20 +2882,20 @@ export function useExportPages<TData = Awaited<ReturnType<typeof exportPages>>, 
 
 
 
-export const getGetSettingsUrl = () => {
+export const getGetAirtableStatusUrl = () => {
 
 
 
 
-  return `/api/admin/settings`
+  return `/api/admin/airtable/status`
 }
 
 /**
- * @summary Airtable connection settings (stored, connection stays off)
+ * @summary Airtable connection and sync status (auth via the Replit connection)
  */
-export const getSettings = async ( options?: Parameters<typeof customFetch>[1]): Promise<AirtableSettings> => {
+export const getAirtableStatus = async ( options?: Parameters<typeof customFetch>[1]): Promise<AirtableStatus> => {
 
-  return customFetch<AirtableSettings>(getGetSettingsUrl(),
+  return customFetch<AirtableStatus>(getGetAirtableStatusUrl(),
   {
     ...options,
     method: 'GET'
@@ -2909,45 +2908,45 @@ export const getSettings = async ( options?: Parameters<typeof customFetch>[1]):
 
 
 
-export const getGetSettingsQueryKey = () => {
+export const getGetAirtableStatusQueryKey = () => {
     return [
-    `/api/admin/settings`
+    `/api/admin/airtable/status`
     ] as const;
     }
 
 
-export const getGetSettingsQueryOptions = <TData = Awaited<ReturnType<typeof getSettings>>, TError = ErrorType<unknown>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getSettings>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+export const getGetAirtableStatusQueryOptions = <TData = Awaited<ReturnType<typeof getAirtableStatus>>, TError = ErrorType<unknown>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getAirtableStatus>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
 
-  const queryKey =  queryOptions?.queryKey ?? getGetSettingsQueryKey();
+  const queryKey =  queryOptions?.queryKey ?? getGetAirtableStatusQueryKey();
 
 
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof getSettings>>> = ({ signal }) => getSettings({ signal, ...requestOptions });
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getAirtableStatus>>> = ({ signal }) => getAirtableStatus({ signal, ...requestOptions });
 
 
 
 
 
-   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getSettings>>, TError, TData> & { queryKey: QueryKey }
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getAirtableStatus>>, TError, TData> & { queryKey: QueryKey }
 }
 
-export type GetSettingsQueryResult = NonNullable<Awaited<ReturnType<typeof getSettings>>>
-export type GetSettingsQueryError = ErrorType<unknown>
+export type GetAirtableStatusQueryResult = NonNullable<Awaited<ReturnType<typeof getAirtableStatus>>>
+export type GetAirtableStatusQueryError = ErrorType<unknown>
 
 
 /**
- * @summary Airtable connection settings (stored, connection stays off)
+ * @summary Airtable connection and sync status (auth via the Replit connection)
  */
 
-export function useGetSettings<TData = Awaited<ReturnType<typeof getSettings>>, TError = ErrorType<unknown>>(
-  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getSettings>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+export function useGetAirtableStatus<TData = Awaited<ReturnType<typeof getAirtableStatus>>, TError = ErrorType<unknown>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getAirtableStatus>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
 
  ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
 
-  const queryOptions = getGetSettingsQueryOptions(options)
+  const queryOptions = getGetAirtableStatusQueryOptions(options)
 
   const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
 
@@ -2960,25 +2959,25 @@ export function useGetSettings<TData = Awaited<ReturnType<typeof getSettings>>, 
 
 
 
-export const getUpdateSettingsUrl = () => {
+export const getSyncAirtableNowUrl = () => {
 
 
 
 
-  return `/api/admin/settings`
+  return `/api/admin/airtable/sync`
 }
 
 /**
- * @summary Save Airtable connection settings
+ * @summary Run an Airtable sync pass immediately
  */
-export const updateSettings = async (airtableSettingsInput: AirtableSettingsInput, options?: Parameters<typeof customFetch>[1]): Promise<AirtableSettings> => {
+export const syncAirtableNow = async ( options?: Parameters<typeof customFetch>[1]): Promise<AirtableStatus> => {
 
-  return customFetch<AirtableSettings>(getUpdateSettingsUrl(),
+  return customFetch<AirtableStatus>(getSyncAirtableNowUrl(),
   {
     ...options,
-    method: 'PUT',
-    headers: { 'Content-Type': 'application/json', ...options?.headers },
-    body: JSON.stringify(airtableSettingsInput)
+    method: 'POST'
+
+
   }
 );}
 
@@ -2986,11 +2985,11 @@ export const updateSettings = async (airtableSettingsInput: AirtableSettingsInpu
 
 
 
-export const getUpdateSettingsMutationOptions = <TError = ErrorType<unknown>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateSettings>>, TError,{data: BodyType<AirtableSettingsInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
-): UseMutationOptions<Awaited<ReturnType<typeof updateSettings>>, TError,{data: BodyType<AirtableSettingsInput>}, TContext> => {
+export const getSyncAirtableNowMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof syncAirtableNow>>, TError,void, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof syncAirtableNow>>, TError,void, TContext> => {
 
-const mutationKey = ['updateSettings'];
+const mutationKey = ['syncAirtableNow'];
 const {mutation: mutationOptions, request: requestOptions} = options ?
       options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
       options
@@ -3000,10 +2999,10 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
 
 
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof updateSettings>>, {data: BodyType<AirtableSettingsInput>}> = (props) => {
-          const {data} = props ?? {};
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof syncAirtableNow>>, void> = () => {
 
-          return  updateSettings(data,requestOptions)
+
+          return  syncAirtableNow(requestOptions)
         }
 
 
@@ -3013,21 +3012,21 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
   return  { mutationFn, ...mutationOptions }}
 
-    export type UpdateSettingsMutationResult = NonNullable<Awaited<ReturnType<typeof updateSettings>>>
-    export type UpdateSettingsMutationBody = BodyType<AirtableSettingsInput>
-    export type UpdateSettingsMutationError = ErrorType<unknown>
+    export type SyncAirtableNowMutationResult = NonNullable<Awaited<ReturnType<typeof syncAirtableNow>>>
+
+    export type SyncAirtableNowMutationError = ErrorType<unknown>
 
     /**
- * @summary Save Airtable connection settings
+ * @summary Run an Airtable sync pass immediately
  */
-export const useUpdateSettings = <TError = ErrorType<unknown>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateSettings>>, TError,{data: BodyType<AirtableSettingsInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+export const useSyncAirtableNow = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof syncAirtableNow>>, TError,void, TContext>, request?: SecondParameter<typeof customFetch>}
  ): UseMutationResult<
-        Awaited<ReturnType<typeof updateSettings>>,
+        Awaited<ReturnType<typeof syncAirtableNow>>,
         TError,
-        {data: BodyType<AirtableSettingsInput>},
+        void,
         TContext
       > => {
-      return useMutation(getUpdateSettingsMutationOptions(options));
+      return useMutation(getSyncAirtableNowMutationOptions(options));
     }
 

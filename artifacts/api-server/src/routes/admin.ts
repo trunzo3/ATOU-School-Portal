@@ -5,7 +5,6 @@ import {
   adminUsersTable,
   passwordResetTokensTable,
   answersTable,
-  appSettingsTable,
   contactsTable,
   emailSendsTable,
   emailTemplatesTable,
@@ -30,7 +29,6 @@ import {
   UpdateAdminUserBody,
   CreatePageBody,
   UpdatePageBody,
-  UpdateSettingsBody,
   UpdateEmailSettingsBody,
   SendTestEmailBody,
 } from "@workspace/api-zod";
@@ -44,6 +42,8 @@ import {
   type AdminRequest,
 } from "../lib/auth";
 import { appBaseUrl, schoolLink } from "../lib/appUrl";
+import { checkAirtableConnection, isAirtableConfigured } from "../lib/airtable";
+import { getAirtableSyncStatus, runAirtableSyncNow } from "../lib/airtable-sync";
 import { getQuestionStates, missingCount, normalizeEmail } from "../lib/answers";
 import {
   EMAIL_FROM,
@@ -911,48 +911,40 @@ router.get("/admin/pages/export", requireAdmin, async (_req, res): Promise<void>
   res.json({ exportedAt: new Date().toISOString(), pages: pages.map(pageOut) });
 });
 
-// --- Airtable settings (stored, connection stays OFF) ---
+// --- Airtable connection & sync (live, via the Replit Airtable connection) ---
 
-router.get("/admin/settings", requireAdmin, async (_req, res): Promise<void> => {
-  const [row] = await db
-    .select()
-    .from(appSettingsTable)
-    .where(eq(appSettingsTable.key, "airtable"));
-  let cfg = { apiKey: "", baseId: "", tableId: "" };
-  if (row) {
-    try {
-      cfg = { ...cfg, ...(JSON.parse(row.value) as Partial<typeof cfg>) };
-    } catch {
-      // ignore malformed settings
-    }
-  }
-  res.json({
-    apiKeySet: cfg.apiKey.length > 0,
-    baseId: cfg.baseId,
-    tableId: cfg.tableId,
-    enabled: false, // connection stays off in this build
-  });
+async function airtableStatusOut() {
+  const status = await getAirtableSyncStatus();
+  return {
+    connected: await checkAirtableConnection(),
+    syncing: status.runningSince !== null,
+    lastSyncAt: status.lastSyncAt,
+    lastSyncOk: status.lastSyncOk,
+    lastSyncMessage: status.lastSyncMessage,
+  };
+}
+
+router.get("/admin/airtable/status", requireAdmin, async (_req, res): Promise<void> => {
+  res.json(await airtableStatusOut());
 });
 
-router.put("/admin/settings", requireAdmin, async (req, res): Promise<void> => {
-  const parsed = UpdateSettingsBody.safeParse(req.body);
-  if (!parsed.success) {
-    res.status(400).json({ error: "Invalid settings." });
+router.post("/admin/airtable/sync", requireAdmin, async (_req, res): Promise<void> => {
+  if (!isAirtableConfigured()) {
+    res.status(503).json({
+      error: "The Airtable connection is not available in this environment.",
+    });
     return;
   }
-  await db
-    .insert(appSettingsTable)
-    .values({ key: "airtable", value: JSON.stringify(parsed.data) })
-    .onConflictDoUpdate({
-      target: appSettingsTable.key,
-      set: { value: JSON.stringify(parsed.data), updatedAt: new Date() },
+  // Same claim as the scheduled sync, so Sync now can never run a second
+  // pass on top of one already in flight.
+  const result = await runAirtableSyncNow();
+  if (result.busy) {
+    res.status(409).json({
+      error: "A sync is already running. Give it a moment, then refresh.",
     });
-  res.json({
-    apiKeySet: parsed.data.apiKey.length > 0,
-    baseId: parsed.data.baseId,
-    tableId: parsed.data.tableId,
-    enabled: false,
-  });
+    return;
+  }
+  res.json(await airtableStatusOut());
 });
 
 export default router;

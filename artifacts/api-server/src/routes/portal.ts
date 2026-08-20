@@ -162,7 +162,9 @@ router.put("/portal/:code/answers/:questionKey", async (req, res): Promise<void>
       .returning();
   }
 
-  // Write-back to Airtable (no-op while the connection is off).
+  // Live write-back to Airtable — the mapped field is overwritten right
+  // away (latest answer wins). Failures never block the save: the write
+  // logs, returns false, and the next scheduled sync pass reconciles.
   // "notes" and "timing_note" stay in our database only.
   const fieldMap: Record<string, string> = {
     workshop_time: AIRTABLE_FIELDS.workshopTime,

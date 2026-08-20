@@ -3,7 +3,7 @@ import { useGetAdminMe, useAdminLogout, getGetAdminMeQueryKey } from "@workspace
 import { Users, FileText, Settings, LogOut, Send, LayoutDashboard, Menu, ClipboardList } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { AtouLogo } from "@/components/shared/atou-logo"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { cn } from "@/lib/utils"
 
 export function AdminLayout({ children }: { children: React.ReactNode }) {
@@ -12,12 +12,15 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
   const logout = useAdminLogout()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
+  // Redirect signed-out visitors from an effect, not mid-render: React warns
+  // about (and may drop) navigation state changes made while rendering.
+  useEffect(() => {
+    if (!isLoading && !user && location !== "/") setLocation("/")
+  }, [isLoading, user, location, setLocation])
+
   if (isLoading) return <div className="min-h-screen flex items-center justify-center p-4"><div className="animate-pulse">Loading...</div></div>
 
-  if (!user) {
-    if (location !== "/") setLocation("/")
-    return null
-  }
+  if (!user) return null
 
   const handleLogout = () => {
     logout.mutate(undefined, {

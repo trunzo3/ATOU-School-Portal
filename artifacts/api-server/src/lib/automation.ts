@@ -14,6 +14,7 @@ import {
   db,
   contactsTable,
   emailSendsTable,
+  emailTemplatesTable,
   schoolsTable,
 } from "@workspace/db";
 import {
@@ -21,8 +22,10 @@ import {
   emailSendingEnabled,
   getLogisticsAutoSettings,
   getWeeklySummarySettings,
+  type LogisticsRule,
 } from "./settings";
-import { getTemplateById } from "./templates";
+import { FOLLOW_UP_TEMPLATE_ID, ensureEmailTemplates } from "./templates";
+import { getQuestionStates, missingCount } from "./answers";
 import { emailConfigured, fillMergeFields, renderEmailHtml, sendEmail } from "./email";
 import { schoolLink } from "./appUrl";
 import { buildSummaryReport, renderWeeklyEmail } from "./summary";
@@ -32,7 +35,7 @@ export type AutomationLog = (msg: string) => void;
 
 export async function runAutoLogistics(log: AutomationLog): Promise<void> {
   const settings = await getLogisticsAutoSettings();
-  if (!settings.enabled) {
+  if (!settings.enabled || settings.rules.length === 0) {
     log("Automatic logistics emails are off; skipping.");
     return;
   }
@@ -44,20 +47,39 @@ export async function runAutoLogistics(log: AutomationLog): Promise<void> {
     log("Live email sending to schools is switched off; no logistics emails sent.");
     return;
   }
+  await ensureEmailTemplates();
   const today = pacificToday();
-  const targetDate = addDays(today, settings.daysBefore);
+  for (const rule of settings.rules) {
+    await runLogisticsRule(rule, today, log);
+  }
+}
+
+// One rule = one template on one day. The follow-up template is a reminder,
+// so it only goes to schools that were emailed before, haven't had a
+// follow-up yet, and still have logistics missing. Any other template is a
+// first contact and only goes to schools that have never been emailed at all.
+async function runLogisticsRule(
+  rule: LogisticsRule,
+  today: string,
+  log: AutomationLog,
+): Promise<void> {
+  const targetDate = addDays(today, rule.daysBefore);
   if (!targetDate) return;
-  const template = await getTemplateById(settings.templateId);
+  const [template] = await db
+    .select()
+    .from(emailTemplatesTable)
+    .where(eq(emailTemplatesTable.id, rule.templateId));
   if (!template) {
-    log("No email template found; no logistics emails sent.");
+    log(`A rule points at a template that no longer exists (${rule.templateId}); it sent nothing.`);
     return;
   }
+  const isFollowUpRule = rule.templateId === FOLLOW_UP_TEMPLATE_ID;
   const schools = await db
     .select()
     .from(schoolsTable)
     .where(eq(schoolsTable.workshopDate, targetDate));
   log(
-    `Workshops on ${targetDate} (${settings.daysBefore} days out): ${schools.length} school(s).`,
+    `Workshops on ${targetDate} (${template.name}, ${rule.daysBefore} days out): ${schools.length} school(s).`,
   );
   for (const school of schools) {
     if (school.autoSendSkipped) {
@@ -69,12 +91,19 @@ export async function runAutoLogistics(log: AutomationLog): Promise<void> {
       continue;
     }
     const prior = await db
-      .select({ id: emailSendsTable.id })
+      .select({ id: emailSendsTable.id, isFollowUp: emailSendsTable.isFollowUp })
       .from(emailSendsTable)
-      .where(eq(emailSendsTable.schoolId, school.id))
-      .limit(1);
-    if (prior.length > 0) {
-      continue;
+      .where(eq(emailSendsTable.schoolId, school.id));
+    if (isFollowUpRule) {
+      if (prior.length === 0) continue; // never contacted; a "sorry to bother you again" makes no sense
+      if (prior.some((p) => p.isFollowUp)) continue; // already reminded once
+      const states = await getQuestionStates(school);
+      if (missingCount(states) === 0) {
+        log(`${school.name}: logistics are complete; no follow-up needed.`);
+        continue;
+      }
+    } else if (prior.length > 0) {
+      continue; // first contact only for schools never emailed
     }
     const contacts = await db
       .select()
@@ -95,25 +124,34 @@ export async function runAutoLogistics(log: AutomationLog): Promise<void> {
     const body = fillMergeFields(template.body, merge);
     // Claim the send BEFORE talking to Resend: inside one transaction, an
     // advisory lock on the school serializes overlapping runs, the switch,
-    // skip flag, lock, and history checks re-run under that lock, and the
-    // record is written as not-yet-delivered. If two runs overlap, or the
-    // process crashes between delivery and recording, the school still
-    // can't be emailed twice.
+    // the rule, skip flag, lock, and history checks re-run under that lock,
+    // and the record is written as not-yet-delivered. If two runs overlap,
+    // or the process crashes between delivery and recording, the school
+    // still can't be emailed twice.
     const claimId = await db.transaction(async (tx) => {
       await tx.execute(sql`select pg_advisory_xact_lock(823001, ${school.id})`);
       const freshSettings = await getLogisticsAutoSettings();
       if (!freshSettings.enabled) return null;
+      const freshRule = freshSettings.rules.find((r) => r.templateId === rule.templateId);
+      if (!freshRule || freshRule.daysBefore !== rule.daysBefore) return null;
       const [freshSchool] = await tx
         .select({ skipped: schoolsTable.autoSendSkipped, locked: schoolsTable.locked })
         .from(schoolsTable)
         .where(eq(schoolsTable.id, school.id));
       if (!freshSchool || freshSchool.skipped || freshSchool.locked) return null;
       const existing = await tx
-        .select({ id: emailSendsTable.id })
+        .select({ id: emailSendsTable.id, isFollowUp: emailSendsTable.isFollowUp })
         .from(emailSendsTable)
-        .where(eq(emailSendsTable.schoolId, school.id))
-        .limit(1);
-      if (existing.length > 0) return null;
+        .where(eq(emailSendsTable.schoolId, school.id));
+      if (isFollowUpRule) {
+        if (existing.length === 0 || existing.some((p) => p.isFollowUp)) return null;
+        // Re-check completeness under the lock too: a school that finished
+        // its logistics moments ago must not get a needless reminder.
+        const freshStates = await getQuestionStates(school);
+        if (missingCount(freshStates) === 0) return null;
+      } else if (existing.length > 0) {
+        return null;
+      }
       const [row] = await tx
         .insert(emailSendsTable)
         .values({
@@ -121,7 +159,7 @@ export async function runAutoLogistics(log: AutomationLog): Promise<void> {
           recipients,
           subject,
           body,
-          isFollowUp: false,
+          isFollowUp: isFollowUpRule,
           delivered: false,
           sentBy: "Automatic",
           source: "automatic",
@@ -144,7 +182,7 @@ export async function runAutoLogistics(log: AutomationLog): Promise<void> {
         .update(emailSendsTable)
         .set({ delivered: true })
         .where(eq(emailSendsTable.id, claimId));
-      log(`${school.name}: logistics request sent to ${recipients.length} recipient(s).`);
+      log(`${school.name}: ${template.name} sent to ${recipients.length} recipient(s).`);
     } else {
       // The claim stays in the log as "Not delivered" so it's visible in the
       // app, and the school won't be retried (its exact send day has passed).

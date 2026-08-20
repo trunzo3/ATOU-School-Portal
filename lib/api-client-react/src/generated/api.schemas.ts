@@ -338,10 +338,20 @@ export interface PagesExport {
   pages: InfoPage[];
 }
 
+export interface LogisticsRule {
+  /** @minLength 1 */
+  templateId: string;
+  /**
+     * @minimum 1
+     * @maximum 365
+     */
+  daysBefore: number;
+}
+
 export interface AutoLogisticsSettings {
   enabled: boolean;
-  daysBefore: number;
-  templateId: string;
+  /** @maxItems 2 */
+  rules: LogisticsRule[];
 }
 
 export interface WeeklySummarySettings {
@@ -360,13 +370,8 @@ export interface AutomationSettings {
 
 export interface AutoLogisticsInput {
   enabled: boolean;
-  /**
-     * @minimum 1
-     * @maximum 365
-     */
-  daysBefore: number;
-  /** @minLength 1 */
-  templateId: string;
+  /** @maxItems 2 */
+  rules: LogisticsRule[];
 }
 
 export interface WeeklySummaryInput {

@@ -34,6 +34,7 @@ export * from './healthStatus';
 export * from './infoPage';
 export * from './infoPageInput';
 export * from './infoPageUpdate';
+export * from './logisticsRule';
 export * from './okStatus';
 export * from './pagesExport';
 export * from './portalIdentity';

@@ -1191,13 +1191,22 @@ components:
           items:
             $ref: "#/components/schemas/InfoPage"
       required: [exportedAt, pages]
+    LogisticsRule:
+      type: object
+      properties:
+        templateId: { type: string, minLength: 1 }
+        daysBefore: { type: number, minimum: 1, maximum: 365 }
+      required: [templateId, daysBefore]
     AutoLogisticsSettings:
       type: object
       properties:
         enabled: { type: boolean }
-        daysBefore: { type: number }
-        templateId: { type: string }
-      required: [enabled, daysBefore, templateId]
+        rules:
+          type: array
+          maxItems: 2
+          items:
+            $ref: "#/components/schemas/LogisticsRule"
+      required: [enabled, rules]
     WeeklySummarySettings:
       type: object
       properties:
@@ -1222,9 +1231,12 @@ components:
       type: object
       properties:
         enabled: { type: boolean }
-        daysBefore: { type: number, minimum: 1, maximum: 365 }
-        templateId: { type: string, minLength: 1 }
-      required: [enabled, daysBefore, templateId]
+        rules:
+          type: array
+          maxItems: 2
+          items:
+            $ref: "#/components/schemas/LogisticsRule"
+      required: [enabled, rules]
     WeeklySummaryInput:
       type: object
       properties:

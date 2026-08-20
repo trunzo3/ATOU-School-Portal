@@ -57,6 +57,8 @@ import {
   emailSendingEnabled,
   getLogisticsAutoSettings,
   getWeeklySummarySettings,
+  logisticsRulesProblem,
+  normalizeLogisticsRules,
   normalizeRecipients,
   saveLogisticsAutoSettings,
   saveSetting,
@@ -64,7 +66,11 @@ import {
   saveWeeklySummarySettingsKeepingLastSent,
   settingValue,
 } from "../lib/settings";
-import { ensureEmailTemplates } from "../lib/templates";
+import {
+  FOLLOW_UP_TEMPLATE_ID,
+  REQUEST_TEMPLATE_ID,
+  ensureEmailTemplates,
+} from "../lib/templates";
 import { schoolSendStatus } from "../lib/send-status";
 import { buildSummaryReport, renderWeeklyEmail } from "../lib/summary";
 import { addDays, pacificToday } from "../lib/dates";
@@ -296,6 +302,10 @@ router.get("/admin/summary", requireAdmin, async (_req, res): Promise<void> => {
 router.get("/admin/schools", requireAdmin, async (_req, res): Promise<void> => {
   const schools = await db.select().from(schoolsTable).orderBy(asc(schoolsTable.workshopDate));
   const logistics = await getLogisticsAutoSettings();
+  // The Pending Send column is about a school's FIRST email, so it follows
+  // the first-contact rule (the request template); the follow-up rule never
+  // applies to a never-emailed school.
+  const requestRule = logistics.rules.find((r) => r.templateId === REQUEST_TEMPLATE_ID);
   const rows = [];
   for (const school of schools) {
     const states = await getQuestionStates(school);
@@ -320,8 +330,8 @@ router.get("/admin/schools", requireAdmin, async (_req, res): Promise<void> => {
       lastSentAt,
       pendingSendDate: pendingSendDate(school.workshopDate, sendStatus, {
         skipped: school.autoSendSkipped,
-        daysBefore: logistics.daysBefore,
-        autoEnabled: logistics.enabled,
+        daysBefore: requestRule?.daysBefore ?? 60,
+        autoEnabled: logistics.enabled && requestRule !== undefined,
       }),
     });
   }
@@ -344,20 +354,29 @@ async function schoolDetail(schoolId: number, res: Response): Promise<void> {
     .from(emailSendsTable)
     .where(eq(emailSendsTable.schoolId, school.id))
     .orderBy(desc(emailSendsTable.sentAt), desc(emailSendsTable.id));
-  // The school's automatic-send outlook: when automatic logistics emails
-  // are on and this never-emailed school has a future due date, that's the
-  // day the email goes out — unless Pam skipped it or locked the school.
+  // The school's automatic-send outlook: the next rule that would actually
+  // fire for this school, as things stand today. The first-contact rule only
+  // applies while the school has never been emailed; the follow-up rule only
+  // once it has been emailed, hasn't had a follow-up, and still has gaps.
   const logistics = await getLogisticsAutoSettings();
-  const due = school.workshopDate ? addDays(school.workshopDate, -logistics.daysBefore) : null;
-  const scheduledDate =
-    logistics.enabled &&
-    sendRows.length === 0 &&
-    !school.autoSendSkipped &&
-    !school.locked &&
-    due &&
-    due >= pacificToday()
-      ? due
-      : null;
+  let scheduledDate: string | null = null;
+  if (logistics.enabled && school.workshopDate && !school.autoSendSkipped && !school.locked) {
+    const today = pacificToday();
+    const hasAnySend = sendRows.length > 0;
+    const hasFollowUp = sendRows.some((r) => r.isFollowUp);
+    for (const rule of logistics.rules) {
+      const due = addDays(school.workshopDate, -rule.daysBefore);
+      if (!due || due < today) continue;
+      if (rule.templateId === FOLLOW_UP_TEMPLATE_ID) {
+        if (!hasAnySend || hasFollowUp) continue;
+        const states = await getQuestionStates(school);
+        if (missingCount(states) === 0) continue;
+      } else if (hasAnySend) {
+        continue;
+      }
+      if (!scheduledDate || due < scheduledDate) scheduledDate = due;
+    }
+  }
   res.json({
     id: school.id,
     name: school.name,
@@ -628,22 +647,37 @@ router.get("/admin/automation", requireAdmin, async (_req, res): Promise<void> =
 router.put("/admin/automation/logistics", requireAdmin, async (req, res): Promise<void> => {
   const parsed = UpdateAutoLogisticsBody.safeParse(req.body);
   if (!parsed.success) {
-    res.status(400).json({ error: "Send timing, a template, and on or off are required." });
+    res.status(400).json({ error: "Each rule needs a template and a number of days before the workshop." });
+    return;
+  }
+  const rules = normalizeLogisticsRules(parsed.data.rules);
+  if (rules.length !== parsed.data.rules.length) {
+    res.status(400).json({ error: "Each template can only be used by one rule." });
+    return;
+  }
+  if (parsed.data.enabled && rules.length === 0) {
+    res.status(400).json({ error: "Add a rule before turning automatic emails on." });
+    return;
+  }
+  const problem = logisticsRulesProblem(rules);
+  if (problem) {
+    res.status(400).json({ error: problem });
     return;
   }
   await ensureEmailTemplates();
-  const [template] = await db
-    .select()
-    .from(emailTemplatesTable)
-    .where(eq(emailTemplatesTable.id, parsed.data.templateId));
-  if (!template) {
-    res.status(400).json({ error: "That email template no longer exists." });
-    return;
+  for (const rule of rules) {
+    const [template] = await db
+      .select({ id: emailTemplatesTable.id })
+      .from(emailTemplatesTable)
+      .where(eq(emailTemplatesTable.id, rule.templateId));
+    if (!template) {
+      res.status(400).json({ error: "That email template no longer exists." });
+      return;
+    }
   }
   await saveLogisticsAutoSettings({
-    enabled: parsed.data.enabled,
-    daysBefore: parsed.data.daysBefore,
-    templateId: parsed.data.templateId,
+    enabled: parsed.data.enabled && rules.length > 0,
+    rules,
   });
   res.json(await automationOut());
 });

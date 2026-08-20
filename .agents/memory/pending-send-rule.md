@@ -3,7 +3,7 @@ name: Pending Send display rule
 description: How the dashboard's Pending Send date is computed now that a real automation scheduler exists.
 ---
 
-A real automation scheduler now exists (in-server, checks every 15 minutes; plus a manual daily script). The dashboard's Pending Send date is computed per school as workshop date minus the configured days-before, and shows only when ALL of:
+A real automation scheduler now exists (in-server, checks every 15 minutes; plus a manual daily script). Auto-logistics settings are now a list of up to two RULES (template + days-before, each template usable once). The Pending Send column is about a school's FIRST email, so it follows only the first-contact (request) rule; the follow-up rule never applies to never-emailed schools. The date is computed per school as workshop date minus the request rule's days-before, and shows only when ALL of:
 
 - the school has never been sent an email,
 - the school is not auto-send-skipped and not locked,

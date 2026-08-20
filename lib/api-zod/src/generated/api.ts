@@ -405,11 +405,20 @@ export const GetSummaryReportResponse = zod.object({
 /**
  * @summary Automatic email settings (logistics requests + weekly summary)
  */
+
+export const getAutomationSettingsResponseLogisticsRulesItemDaysBeforeMax = 365;
+
+export const getAutomationSettingsResponseLogisticsRulesMax = 2;
+
+
+
 export const GetAutomationSettingsResponse = zod.object({
   "logistics": zod.object({
   "enabled": zod.boolean(),
-  "daysBefore": zod.number(),
-  "templateId": zod.string()
+  "rules": zod.array(zod.object({
+  "templateId": zod.string().min(1),
+  "daysBefore": zod.number().min(1).max(getAutomationSettingsResponseLogisticsRulesItemDaysBeforeMax)
+})).max(getAutomationSettingsResponseLogisticsRulesMax)
 }),
   "weekly": zod.object({
   "enabled": zod.boolean(),
@@ -424,22 +433,35 @@ export const GetAutomationSettingsResponse = zod.object({
 /**
  * @summary Update the automatic logistics request settings
  */
-export const updateAutoLogisticsBodyDaysBeforeMax = 365;
 
+export const updateAutoLogisticsBodyRulesItemDaysBeforeMax = 365;
+
+export const updateAutoLogisticsBodyRulesMax = 2;
 
 
 
 export const UpdateAutoLogisticsBody = zod.object({
   "enabled": zod.boolean(),
-  "daysBefore": zod.number().min(1).max(updateAutoLogisticsBodyDaysBeforeMax),
-  "templateId": zod.string().min(1)
+  "rules": zod.array(zod.object({
+  "templateId": zod.string().min(1),
+  "daysBefore": zod.number().min(1).max(updateAutoLogisticsBodyRulesItemDaysBeforeMax)
+})).max(updateAutoLogisticsBodyRulesMax)
 })
+
+
+export const updateAutoLogisticsResponseLogisticsRulesItemDaysBeforeMax = 365;
+
+export const updateAutoLogisticsResponseLogisticsRulesMax = 2;
+
+
 
 export const UpdateAutoLogisticsResponse = zod.object({
   "logistics": zod.object({
   "enabled": zod.boolean(),
-  "daysBefore": zod.number(),
-  "templateId": zod.string()
+  "rules": zod.array(zod.object({
+  "templateId": zod.string().min(1),
+  "daysBefore": zod.number().min(1).max(updateAutoLogisticsResponseLogisticsRulesItemDaysBeforeMax)
+})).max(updateAutoLogisticsResponseLogisticsRulesMax)
 }),
   "weekly": zod.object({
   "enabled": zod.boolean(),
@@ -468,11 +490,20 @@ export const UpdateWeeklySummaryBody = zod.object({
   "recipients": zod.array(zod.string())
 })
 
+
+export const updateWeeklySummaryResponseLogisticsRulesItemDaysBeforeMax = 365;
+
+export const updateWeeklySummaryResponseLogisticsRulesMax = 2;
+
+
+
 export const UpdateWeeklySummaryResponse = zod.object({
   "logistics": zod.object({
   "enabled": zod.boolean(),
-  "daysBefore": zod.number(),
-  "templateId": zod.string()
+  "rules": zod.array(zod.object({
+  "templateId": zod.string().min(1),
+  "daysBefore": zod.number().min(1).max(updateWeeklySummaryResponseLogisticsRulesItemDaysBeforeMax)
+})).max(updateWeeklySummaryResponseLogisticsRulesMax)
 }),
   "weekly": zod.object({
   "enabled": zod.boolean(),
@@ -487,11 +518,20 @@ export const UpdateWeeklySummaryResponse = zod.object({
 /**
  * @summary Send the weekly summary email to the saved recipients right now
  */
+
+export const sendWeeklySummaryNowResponseLogisticsRulesItemDaysBeforeMax = 365;
+
+export const sendWeeklySummaryNowResponseLogisticsRulesMax = 2;
+
+
+
 export const SendWeeklySummaryNowResponse = zod.object({
   "logistics": zod.object({
   "enabled": zod.boolean(),
-  "daysBefore": zod.number(),
-  "templateId": zod.string()
+  "rules": zod.array(zod.object({
+  "templateId": zod.string().min(1),
+  "daysBefore": zod.number().min(1).max(sendWeeklySummaryNowResponseLogisticsRulesItemDaysBeforeMax)
+})).max(sendWeeklySummaryNowResponseLogisticsRulesMax)
 }),
   "weekly": zod.object({
   "enabled": zod.boolean(),

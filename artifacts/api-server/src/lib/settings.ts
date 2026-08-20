@@ -27,11 +27,17 @@ export async function emailSendingEnabled(): Promise<boolean> {
 // Both blocks default to OFF so a fresh production database comes up
 // switched off. Stored as JSON under one app_settings key each.
 
-export type LogisticsAutoSettings = {
-  enabled: boolean;
-  /** How many days before the workshop the logistics email goes out. */
-  daysBefore: number;
+export type LogisticsRule = {
   templateId: string;
+  /** How many days before the workshop this template goes out. */
+  daysBefore: number;
+};
+
+export type LogisticsAutoSettings = {
+  /** One switch for the whole block; forced off while no rules exist. */
+  enabled: boolean;
+  /** Up to two rules; each template can be used by at most one rule. */
+  rules: LogisticsRule[];
 };
 
 export type WeeklySummarySettings = {
@@ -50,9 +56,32 @@ const WEEKLY_KEY = "weekly_summary";
 
 export const DEFAULT_LOGISTICS: LogisticsAutoSettings = {
   enabled: false,
-  daysBefore: 60,
-  templateId: "logistics-request",
+  rules: [],
 };
+
+export const MAX_LOGISTICS_RULES = 2;
+
+// The template ids live here (not templates.ts) so settings helpers can use
+// them without a circular import; templates.ts re-exports them.
+export const REQUEST_TEMPLATE_ID = "logistics-request";
+export const FOLLOW_UP_TEMPLATE_ID = "logistics-follow-up";
+
+/**
+ * A plain-language problem with a rule combination, or null when it's fine.
+ * The follow-up must land closer to the workshop than the request: if it
+ * came first (or the same day) it would either never fire — no prior email
+ * to follow up on yet — or double-email a school on the shared day. A
+ * follow-up-only setup is allowed on purpose: it still covers schools Pam
+ * emailed by hand.
+ */
+export function logisticsRulesProblem(rules: LogisticsRule[]): string | null {
+  const request = rules.find((r) => r.templateId === REQUEST_TEMPLATE_ID);
+  const followUp = rules.find((r) => r.templateId === FOLLOW_UP_TEMPLATE_ID);
+  if (request && followUp && followUp.daysBefore >= request.daysBefore) {
+    return "The follow-up has to go out closer to the workshop than the request — give it a smaller number of days.";
+  }
+  return null;
+}
 
 export const DEFAULT_WEEKLY: WeeklySummarySettings = {
   enabled: false,
@@ -80,21 +109,44 @@ export function normalizeRecipients(list: unknown): string[] {
   return out;
 }
 
+/**
+ * Clean up a list of rules from a form or the database: drop entries without
+ * a template, drop repeats of the same template, drop out-of-range send days,
+ * and cap the list at two rules.
+ */
+export function normalizeLogisticsRules(list: unknown): LogisticsRule[] {
+  if (!Array.isArray(list)) return [];
+  const seen = new Set<string>();
+  const out: LogisticsRule[] = [];
+  for (const raw of list) {
+    if (typeof raw !== "object" || raw === null) continue;
+    const entry = raw as Record<string, unknown>;
+    const templateId = typeof entry.templateId === "string" ? entry.templateId.trim() : "";
+    if (!templateId || seen.has(templateId)) continue;
+    const daysBefore = clampInt(entry.daysBefore, 0, 1, 365);
+    if (daysBefore === 0) continue;
+    seen.add(templateId);
+    out.push({ templateId, daysBefore });
+    if (out.length === MAX_LOGISTICS_RULES) break;
+  }
+  return out;
+}
+
 export async function getLogisticsAutoSettings(): Promise<LogisticsAutoSettings> {
   const raw = await settingValue(LOGISTICS_KEY);
-  if (!raw) return { ...DEFAULT_LOGISTICS };
+  if (!raw) return { ...DEFAULT_LOGISTICS, rules: [] };
   try {
-    const parsed = JSON.parse(raw) as Partial<LogisticsAutoSettings>;
-    return {
-      enabled: parsed.enabled === true,
-      daysBefore: clampInt(parsed.daysBefore, DEFAULT_LOGISTICS.daysBefore, 1, 365),
-      templateId:
-        typeof parsed.templateId === "string" && parsed.templateId
-          ? parsed.templateId
-          : DEFAULT_LOGISTICS.templateId,
-    };
+    const parsed = JSON.parse(raw) as Record<string, unknown>;
+    // Settings saved before rules existed stored one template and one send
+    // day at the top level; they carry over as a single equivalent rule.
+    const rules = Array.isArray(parsed.rules)
+      ? normalizeLogisticsRules(parsed.rules)
+      : normalizeLogisticsRules([
+          { templateId: parsed.templateId, daysBefore: parsed.daysBefore },
+        ]);
+    return { enabled: parsed.enabled === true && rules.length > 0, rules };
   } catch {
-    return { ...DEFAULT_LOGISTICS };
+    return { ...DEFAULT_LOGISTICS, rules: [] };
   }
 }
 

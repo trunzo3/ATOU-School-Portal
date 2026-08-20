@@ -3,6 +3,9 @@ import { db, emailTemplatesTable, type EmailTemplateRow } from "@workspace/db";
 import { PLAIN_SIGNATURE, ensurePlainSignature, hasPlainSignature } from "./email";
 import { settingValue } from "./settings";
 
+import { FOLLOW_UP_TEMPLATE_ID, REQUEST_TEMPLATE_ID } from "./settings";
+export { FOLLOW_UP_TEMPLATE_ID, REQUEST_TEMPLATE_ID };
+
 export const DEFAULT_SUBJECT =
   "Logistics needed for A Touch of Understanding Workshop - {{school_name}} - {{workshop_date}}";
 
@@ -57,14 +60,14 @@ export async function ensureEmailTemplates(): Promise<void> {
     .insert(emailTemplatesTable)
     .values([
       {
-        id: "logistics-request",
+        id: REQUEST_TEMPLATE_ID,
         name: "Logistics Request",
         subject: savedSubject ?? DEFAULT_SUBJECT,
         body: savedBody ?? DEFAULT_TEMPLATE,
         sortOrder: 0,
       },
       {
-        id: "logistics-follow-up",
+        id: FOLLOW_UP_TEMPLATE_ID,
         name: "Logistics Follow-Up",
         subject: DEFAULT_SUBJECT,
         body: FOLLOW_UP_BODY,

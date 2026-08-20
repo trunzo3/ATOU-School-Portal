@@ -58,6 +58,58 @@ function parseRecipients(text: string): string[] {
   )]
 }
 
+// The Add/Edit form for one rule: a template pick and a send day. Only the
+// templates not used by another rule are offered.
+function RuleForm(props: {
+  pickableTemplates: Array<{ id: string; name: string }>
+  templateId: string
+  onTemplateChange: (id: string) => void
+  days: string
+  onDaysChange: (v: string) => void
+  onSave: () => void
+  onCancel: () => void
+  saving: boolean
+}) {
+  return (
+    <div className="rounded-lg border-2 border-primary/40 p-4 space-y-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div className="space-y-2">
+          <Label htmlFor="rule-template">Email template</Label>
+          <Select value={props.templateId} onValueChange={props.onTemplateChange}>
+            <SelectTrigger id="rule-template">
+              <SelectValue placeholder="Choose a template..." />
+            </SelectTrigger>
+            <SelectContent>
+              {props.pickableTemplates.map(t => (
+                <SelectItem key={t.id} value={t.id}>{t.name}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="rule-days">Days before the workshop</Label>
+          <Input
+            id="rule-days"
+            type="number"
+            min={1}
+            max={365}
+            value={props.days}
+            onChange={e => props.onDaysChange(e.target.value)}
+          />
+        </div>
+      </div>
+      <div className="flex items-center gap-2">
+        <Button size="sm" onClick={props.onSave} disabled={props.saving}>
+          {props.saving ? "Saving..." : "Save rule"}
+        </Button>
+        <Button variant="outline" size="sm" onClick={props.onCancel} disabled={props.saving}>
+          Cancel
+        </Button>
+      </div>
+    </div>
+  )
+}
+
 export function AutomationEmailsCard() {
   const { data: auto } = useGetAutomationSettings({ query: { queryKey: getGetAutomationSettingsQueryKey() } })
   const { data: templates } = useGetEmailTemplates()
@@ -68,9 +120,12 @@ export function AutomationEmailsCard() {
   const queryClient = useQueryClient()
   const { toast } = useToast()
 
-  // Logistics block
-  const [daysBefore, setDaysBefore] = useState("60")
-  const [templateId, setTemplateId] = useState("")
+  // Logistics block: a list of saved rules; the form only opens for Add/Edit.
+  // editIndex is the rule being edited, or null when adding a new one.
+  const [formOpen, setFormOpen] = useState(false)
+  const [editIndex, setEditIndex] = useState<number | null>(null)
+  const [formTemplateId, setFormTemplateId] = useState("")
+  const [formDays, setFormDays] = useState("60")
   const [confirmOpen, setConfirmOpen] = useState(false)
   const [confirmText, setConfirmText] = useState("")
 
@@ -81,8 +136,6 @@ export function AutomationEmailsCard() {
 
   useEffect(() => {
     if (!auto) return
-    setDaysBefore(String(auto.logistics.daysBefore))
-    setTemplateId(auto.logistics.templateId)
     setDayOfWeek(String(auto.weekly.dayOfWeek))
     setDaysAhead(String(auto.weekly.daysAhead))
     setRecipientsText(auto.weekly.recipients.join("\n"))
@@ -92,18 +145,21 @@ export function AutomationEmailsCard() {
 
   const refresh = () => queryClient.invalidateQueries({ queryKey: getGetAutomationSettingsQueryKey() })
 
-  const logisticsBody = (enabled: boolean) => ({
-    enabled,
-    daysBefore: Math.max(1, Math.min(365, parseInt(daysBefore, 10) || 60)),
-    // Fall back to the first template so the CONFIRM flow can't save an empty pick.
-    templateId: templateId || templates?.[0]?.id || "",
-  })
+  const rules = auto.logistics.rules
+  const templateName = (id: string) =>
+    (templates || []).find(t => t.id === id)?.name ?? "Email template"
+  const usedTemplateIds = new Set(rules.map(r => r.templateId))
+  // While editing, the rule's own template stays pickable; otherwise only unused ones.
+  const pickableTemplates = (templates || []).filter(
+    t => !usedTemplateIds.has(t.id) || (editIndex !== null && rules[editIndex]?.templateId === t.id),
+  )
 
-  const saveLogistics = (enabled: boolean, note?: string) => {
-    updateLogistics.mutate({ data: logisticsBody(enabled) }, {
+  const saveLogistics = (nextRules: typeof rules, enabled: boolean, note: string, onDone?: () => void) => {
+    updateLogistics.mutate({ data: { enabled, rules: nextRules } }, {
       onSuccess: () => {
         refresh()
-        toast({ title: note ?? "Automatic logistics emails updated" })
+        toast({ title: note })
+        onDone?.()
       },
       onError: (error) => {
         toast({
@@ -113,6 +169,56 @@ export function AutomationEmailsCard() {
         })
       },
     })
+  }
+
+  const openAddForm = () => {
+    const firstFree = (templates || []).find(t => !usedTemplateIds.has(t.id))
+    setEditIndex(null)
+    setFormTemplateId(firstFree?.id ?? "")
+    setFormDays(firstFree?.id.includes("follow") ? "30" : "60")
+    setFormOpen(true)
+  }
+
+  const openEditForm = (index: number) => {
+    const rule = rules[index]
+    if (!rule) return
+    setEditIndex(index)
+    setFormTemplateId(rule.templateId)
+    setFormDays(String(rule.daysBefore))
+    setFormOpen(true)
+  }
+
+  const closeForm = () => {
+    setFormOpen(false)
+    setEditIndex(null)
+  }
+
+  const handleSaveRule = () => {
+    if (!formTemplateId) {
+      toast({ title: "Pick an email template first", variant: "destructive" })
+      return
+    }
+    const rule = {
+      templateId: formTemplateId,
+      daysBefore: Math.max(1, Math.min(365, parseInt(formDays, 10) || 60)),
+    }
+    const nextRules = editIndex === null
+      ? [...rules, rule]
+      : rules.map((r, i) => (i === editIndex ? rule : r))
+    saveLogistics(nextRules, auto.logistics.enabled, "Rule saved", closeForm)
+  }
+
+  const handleDeleteRule = (index: number) => {
+    const nextRules = rules.filter((_, i) => i !== index)
+    const stillEnabled = nextRules.length > 0 && auto.logistics.enabled
+    saveLogistics(
+      nextRules,
+      stillEnabled,
+      auto.logistics.enabled && !stillEnabled
+        ? "Rule deleted — automatic emails are off"
+        : "Rule deleted",
+      closeForm,
+    )
   }
 
   const weeklyBody = (enabled: boolean) => ({
@@ -143,9 +249,14 @@ export function AutomationEmailsCard() {
       setConfirmText("")
       setConfirmOpen(true)
     } else {
-      saveLogistics(false, "Automatic logistics emails are off")
+      saveLogistics(rules, false, "Automatic logistics emails are off")
     }
   }
+
+  // The CONFIRM dialog spells out exactly what turning it on means.
+  const ruleSentences = rules
+    .map(r => `the "${templateName(r.templateId)}" email goes out ${r.daysBefore} day${r.daysBefore === 1 ? "" : "s"} before each workshop`)
+    .join(", and ")
 
   const handleWeeklyToggle = (on: boolean) => {
     if (on && parseRecipients(recipientsText).length === 0) {
@@ -189,25 +300,27 @@ export function AutomationEmailsCard() {
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-8">
-        {/* Logistics requests */}
+        {/* Logistics requests: a list of saved rules, edited one at a time */}
         <div className="space-y-4">
           <div className="flex items-start justify-between gap-4">
             <div>
               <h3 className="font-semibold">Logistics requests to schools</h3>
               <p className="text-sm text-muted-foreground mt-0.5">
-                Each school gets its first logistics email automatically, a set number of days
-                before its workshop. Only schools that have never been emailed are included.
+                Each school gets its logistics email automatically, a set number of days
+                before its workshop.{rules.length === 0 && " Add a rule to begin."}
               </p>
             </div>
-            <div className="flex items-center gap-2 flex-shrink-0">
-              <Switch
-                aria-label="Automatic logistics emails"
-                checked={auto.logistics.enabled}
-                onCheckedChange={handleLogisticsToggle}
-                disabled={updateLogistics.isPending}
-              />
-              <span className="text-sm font-medium">{auto.logistics.enabled ? "On" : "Off"}</span>
-            </div>
+            {rules.length > 0 && (
+              <div className="flex items-center gap-2 flex-shrink-0">
+                <Switch
+                  aria-label="Automatic logistics emails"
+                  checked={auto.logistics.enabled}
+                  onCheckedChange={handleLogisticsToggle}
+                  disabled={updateLogistics.isPending}
+                />
+                <span className="text-sm font-medium">{auto.logistics.enabled ? "On" : "Off"}</span>
+              </div>
+            )}
           </div>
 
           {auto.logistics.enabled && logisticsBlocked && (
@@ -217,40 +330,76 @@ export function AutomationEmailsCard() {
             </p>
           )}
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="auto-days-before">Days before the workshop</Label>
-              <Input
-                id="auto-days-before"
-                type="number"
-                min={1}
-                max={365}
-                value={daysBefore}
-                onChange={e => setDaysBefore(e.target.value)}
+          {rules.map((rule, index) => (
+            formOpen && editIndex === index ? (
+              <RuleForm
+                key={rule.templateId}
+                pickableTemplates={pickableTemplates}
+                templateId={formTemplateId}
+                onTemplateChange={setFormTemplateId}
+                days={formDays}
+                onDaysChange={setFormDays}
+                onSave={handleSaveRule}
+                onCancel={closeForm}
+                saving={updateLogistics.isPending}
               />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="auto-template">Email template</Label>
-              <Select value={templateId} onValueChange={setTemplateId}>
-                <SelectTrigger id="auto-template">
-                  <SelectValue placeholder="Choose a template..." />
-                </SelectTrigger>
-                <SelectContent>
-                  {(templates || []).map(t => (
-                    <SelectItem key={t.id} value={t.id}>{t.name}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => saveLogistics(auto.logistics.enabled)}
-            disabled={updateLogistics.isPending}
-          >
-            Save logistics settings
-          </Button>
+            ) : (
+              <div
+                key={rule.templateId}
+                className="flex items-center justify-between gap-4 rounded-lg border p-3"
+              >
+                <div className={formOpen ? "opacity-50" : undefined}>
+                  <span className="font-medium">{templateName(rule.templateId)}</span>
+                  <p className="text-sm text-muted-foreground">
+                    Sends {rule.daysBefore} day{rule.daysBefore === 1 ? "" : "s"} before the workshop
+                  </p>
+                </div>
+                <div className="flex items-center gap-2 flex-shrink-0">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => openEditForm(index)}
+                    disabled={formOpen || updateLogistics.isPending}
+                  >
+                    Edit
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="text-destructive hover:text-destructive"
+                    onClick={() => handleDeleteRule(index)}
+                    disabled={formOpen || updateLogistics.isPending}
+                  >
+                    Delete
+                  </Button>
+                </div>
+              </div>
+            )
+          ))}
+
+          {formOpen && editIndex === null && (
+            <RuleForm
+              pickableTemplates={pickableTemplates}
+              templateId={formTemplateId}
+              onTemplateChange={setFormTemplateId}
+              days={formDays}
+              onDaysChange={setFormDays}
+              onSave={handleSaveRule}
+              onCancel={closeForm}
+              saving={updateLogistics.isPending}
+            />
+          )}
+
+          {!formOpen && rules.length < Math.min(2, templates?.length ?? 2) && (
+            <Button variant="outline" size="sm" onClick={openAddForm}>
+              + Add a rule
+            </Button>
+          )}
+          {rules.length >= Math.min(2, templates?.length ?? 2) && (
+            <p className="text-sm text-muted-foreground">
+              Both templates are in use. Delete a rule to add a different one.
+            </p>
+          )}
         </div>
 
         <div className="border-t" />
@@ -347,10 +496,8 @@ export function AutomationEmailsCard() {
           <AlertDialogHeader>
             <AlertDialogTitle>Turn on automatic school emails?</AlertDialogTitle>
             <AlertDialogDescription>
-              Once this is on, the app will email schools by itself — the first logistics
-              request goes out {logisticsBody(true).daysBefore} days before each workshop,
-              using the "{(templates || []).find(t => t.id === logisticsBody(true).templateId)?.name ?? "first"}"
-              template. Type CONFIRM below to turn it on.
+              Once this is on, the app will email schools by itself — {ruleSentences}.
+              Type CONFIRM below to turn it on.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <div className="px-1">
@@ -368,7 +515,7 @@ export function AutomationEmailsCard() {
               disabled={confirmText.trim() !== "CONFIRM"}
               onClick={() => {
                 setConfirmOpen(false)
-                saveLogistics(true, "Automatic logistics emails are on")
+                saveLogistics(rules, true, "Automatic logistics emails are on")
               }}
             >
               Turn it on

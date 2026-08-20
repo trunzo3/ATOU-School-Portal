@@ -21,6 +21,7 @@ import {
 } from "./answers";
 import { isSchoolEntry, schoolSendStatus } from "./send-status";
 import { getLogisticsAutoSettings } from "./settings";
+import { REQUEST_TEMPLATE_ID } from "./templates";
 import { addDays, clockTo12h, diffDays, longDate, pacificToday, shortDate } from "./dates";
 import { appBaseUrl } from "./appUrl";
 
@@ -107,6 +108,10 @@ export async function buildSummaryReport(daysAhead: number): Promise<SummaryRepo
   const today = pacificToday(now);
   const windowEnd = addDays(today, daysAhead) ?? today;
   const logistics = await getLogisticsAutoSettings();
+  // The scheduled-sends section is about a school's FIRST email, so it
+  // follows the first-contact (request) rule; the follow-up rule never
+  // applies to never-emailed schools.
+  const requestRule = logistics.rules.find((r) => r.templateId === REQUEST_TEMPLATE_ID);
   const schools = await db.select().from(schoolsTable).orderBy(asc(schoolsTable.workshopDate));
 
   type Info = {
@@ -257,7 +262,9 @@ export async function buildSummaryReport(daysAhead: number): Promise<SummaryRepo
     .map((i) => ({
       schoolId: i.school.id,
       name: i.school.name,
-      sendDate: addDays(i.school.workshopDate!, -logistics.daysBefore),
+      sendDate: requestRule
+        ? addDays(i.school.workshopDate!, -requestRule.daysBefore)
+        : null,
       workshopDate: i.school.workshopDate!,
     }))
     .filter((i): i is typeof i & { sendDate: string } => Boolean(i.sendDate && i.sendDate >= today))
@@ -365,7 +372,7 @@ export async function buildSummaryReport(daysAhead: number): Promise<SummaryRepo
     counts,
     needsAttention: { sentWaiting, notSent, missingCounts, conflicts, lockedWithGaps },
     comingUp,
-    scheduledSends: { enabled: logistics.enabled, items: scheduledItems },
+    scheduledSends: { enabled: logistics.enabled && requestRule !== undefined, items: scheduledItems },
     sinceLastWeek: {
       from: from.toISOString(),
       to: now.toISOString(),

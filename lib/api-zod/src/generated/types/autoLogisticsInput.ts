@@ -5,14 +5,10 @@
  * ATOU workshop logistics API
  * OpenAPI spec version: 0.1.0
  */
+import type { LogisticsRule } from './logisticsRule';
 
 export interface AutoLogisticsInput {
   enabled: boolean;
-  /**
-     * @minimum 1
-     * @maximum 365
-     */
-  daysBefore: number;
-  /** @minLength 1 */
-  templateId: string;
+  /** @maxItems 2 */
+  rules: LogisticsRule[];
 }

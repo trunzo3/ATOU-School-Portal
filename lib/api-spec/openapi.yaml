@@ -868,8 +868,12 @@ components:
         # schedule (only ever true for workshop_time). Distinct from
         # unanswered: the school provided a time, but it doesn't work.
         conflict: { type: boolean }
+        # Answered, but part of it is still missing (only ever true for
+        # teachers: a saved list where a teacher has no student count).
+        # Counts as outstanding for complete/partial purposes.
+        incomplete: { type: boolean }
         summary: { type: ["string", "null"] }
-      required: [questionKey, answered, conflict, summary]
+      required: [questionKey, answered, conflict, incomplete, summary]
     SchoolRow:
       type: object
       properties:

@@ -150,6 +150,7 @@ export interface QuestionState {
   questionKey: string;
   answered: boolean;
   conflict: boolean;
+  incomplete: boolean;
   /** @nullable */
   summary: string | null;
 }

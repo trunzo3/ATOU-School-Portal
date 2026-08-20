@@ -12,6 +12,7 @@ import { PortalHelpfulInformation } from "@/components/shared/portal-helpful-inf
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { StatusBadge } from "@/components/ui/status-badge"
+import { cn, missingCountWord } from "@/lib/utils"
 import { AlertCircle, CheckCircle2, ChevronLeft } from "lucide-react"
 
 function formatTime(value: string) {
@@ -135,6 +136,9 @@ export function PortalDone() {
   const teachers = answers.teachers.current?.rows || []
   const teachersComplete = teachers.length > 0 && teachers.every(teacherIsComplete)
   const totalStudents = teachers.reduce((sum, teacher) => sum + (Number(teacher.studentCount) || 0), 0)
+  // Same treatment the entry form gives its total line: red with a note
+  // naming how many counts are missing; the number stays the sum entered.
+  const missingTeacherCounts = teachers.filter(teacher => !(Number(teacher.studentCount) > 0)).length
   const effectiveStudents = effectiveStudentCount(totalStudents, answers.school.approxStudents)
   const needsLunchTimes = needsThreeSessions(effectiveStudents)
 
@@ -238,9 +242,17 @@ export function PortalDone() {
                     </div>
                   ))}
                 </div>
-                <div className="border-t bg-primary/5 px-5 py-4 flex justify-between font-bold">
+                <div className={cn(
+                  "border-t bg-primary/5 px-5 py-4 flex justify-between gap-4 font-bold",
+                  missingTeacherCounts > 0 && "text-destructive",
+                )}>
                   <span>Total students</span>
-                  <span>{totalStudents}</span>
+                  <span className="text-right">
+                    {totalStudents}
+                    {missingTeacherCounts > 0 && (
+                      <>, {missingCountWord(missingTeacherCounts)} teacher count{missingTeacherCounts === 1 ? "" : "s"} missing</>
+                    )}
+                  </span>
                 </div>
               </>
             ) : (

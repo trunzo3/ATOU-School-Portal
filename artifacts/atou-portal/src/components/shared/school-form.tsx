@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button"
 import { StatusBadge } from "@/components/ui/status-badge"
 import { TimePicker } from "@/components/ui/time-picker"
 import { AtouLogo } from "@/components/shared/atou-logo"
-import { formatPacificTime, cn } from "@/lib/utils"
+import { formatPacificTime, cn, missingCountWord } from "@/lib/utils"
 import { buildSchedule as buildScheduleLib, computeBreakTimes, effectiveStudentCount, needsThreeSessions as needsThreeSessionsFor } from "@workspace/schedule"
 import { AlertCircle, CalendarDays, Plus, Trash2, Info, Users, Save, CheckCircle2, ChevronRight, Printer } from "lucide-react"
 
@@ -27,10 +27,6 @@ interface SchoolFormProps {
 }
 
 type SaveState = "dirty" | "saving" | "saved";
-
-// "one" through "ten" spelled out for the missing-count note; numerals beyond
-const missingCountWord = (n: number) =>
-  ["one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten"][n - 1] ?? String(n)
 
 function QuestionTitle({ number, children }: { number: number; children: React.ReactNode }) {
   return (
@@ -560,6 +556,11 @@ export function SchoolForm({ code, email, initialAnswers, onSaveAnswer, onSaveTe
         </CardHeader>
         <CardContent className="print:px-0">
           <div className="space-y-4">
+            {/* Permanent guidance — always visible, independent of what's entered */}
+            <div className="flex items-center gap-2 rounded-lg bg-primary/5 px-3 py-2.5 text-sm text-muted-foreground no-print">
+              <Info className="h-4 w-4 flex-shrink-0 text-primary" />
+              <span>Please enter all participating teachers, even if student counts are not confirmed.</span>
+            </div>
             <div className="hidden md:grid grid-cols-12 gap-2 text-sm font-medium text-muted-foreground no-print">
               <div className="col-span-3">First Name</div>
               <div className="col-span-3">Last Name</div>

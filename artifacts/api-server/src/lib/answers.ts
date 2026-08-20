@@ -110,19 +110,36 @@ export type QuestionStateOut = {
   // Answered, but the value conflicts with the calculated workshop
   // schedule (only ever true for workshop_time).
   conflict: boolean;
+  // Answered, but part of it is still missing (only ever true for
+  // teachers: a saved list where a teacher has no student count).
+  incomplete: boolean;
   summary: string | null;
 };
+
+// "one" through "ten" spelled out for the missing-count note; numerals beyond
+const missingCountWord = (n: number) =>
+  ["one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten"][n - 1] ?? String(n);
 
 /** Per-question state for the admin grid: teachers + the simple questions. */
 export async function getQuestionStates(school: School): Promise<QuestionStateOut[]> {
   const { questions, teachers } = await getSchoolAnswers(school.id);
   const states: QuestionStateOut[] = [];
+  // Same completeness rule the school form and confirmation screen use:
+  // a saved teacher list where any teacher has no student count is
+  // partial, not complete.
+  const missingTeacherCounts = teachers.current
+    ? teachers.current.rows.filter((r) => !(Number(r.studentCount) > 0)).length
+    : 0;
   states.push({
     questionKey: "teachers",
     answered: teachers.current !== null,
     conflict: false,
+    incomplete: missingTeacherCounts > 0,
     summary: teachers.current
-      ? `${teachers.current.rows.length} teachers, ${teachers.current.totalStudents} students`
+      ? `${teachers.current.rows.length} teachers, ${teachers.current.totalStudents} students` +
+        (missingTeacherCounts > 0
+          ? `, ${missingCountWord(missingTeacherCounts)} teacher count${missingTeacherCounts === 1 ? "" : "s"} missing`
+          : "")
       : null,
   });
 
@@ -149,6 +166,7 @@ export async function getQuestionStates(school: School): Promise<QuestionStateOu
       questionKey: q.questionKey,
       answered: q.current !== null,
       conflict: q.questionKey === "workshop_time" && q.current !== null && timeConflict,
+      incomplete: false,
       summary: q.current ? q.current.value.slice(0, 80) : null,
     });
   }
@@ -158,11 +176,13 @@ export async function getQuestionStates(school: School): Promise<QuestionStateOu
 /**
  * Required answers still outstanding. An answered-but-conflicting workshop
  * time counts as outstanding: the school isn't complete until it works.
+ * Likewise an answered-but-incomplete teacher list (a teacher missing a
+ * student count): the school isn't complete until every count is in.
  */
 export function missingCount(states: QuestionStateOut[]): number {
   return states.filter(
     (s) =>
       (REQUIRED_KEYS as readonly string[]).includes(s.questionKey) &&
-      (!s.answered || s.conflict),
+      (!s.answered || s.conflict || s.incomplete),
   ).length;
 }

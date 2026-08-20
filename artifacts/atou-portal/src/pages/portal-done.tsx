@@ -237,7 +237,14 @@ export function PortalDone() {
                       </div>
                       <div className="sm:text-right">
                         <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Students</p>
-                        <p className="font-semibold mt-1">{teacher.studentCount > 0 ? teacher.studentCount : <MissingValue />}</p>
+                        <p className="font-semibold mt-1">
+                          {teacher.studentCount > 0 ? (
+                            teacher.studentCount
+                          ) : (
+                            // Empty red-outlined box — mirrors the form's missing-count field
+                            <span aria-label="Student count missing" className="inline-block h-9 w-16 rounded-md border border-destructive bg-destructive/10 align-middle" />
+                          )}
+                        </p>
                       </div>
                     </div>
                   ))}

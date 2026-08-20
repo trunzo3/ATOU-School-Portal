@@ -557,8 +557,8 @@ export function SchoolForm({ code, email, initialAnswers, onSaveAnswer, onSaveTe
         <CardContent className="print:px-0">
           <div className="space-y-4">
             {/* Permanent guidance — always visible, independent of what's entered */}
-            <div className="flex items-center gap-2 rounded-lg bg-primary/5 px-3 py-2.5 text-sm text-muted-foreground no-print">
-              <Info className="h-4 w-4 flex-shrink-0 text-primary" />
+            <div className="flex items-center gap-2 rounded-lg bg-[#AED7E3] px-3 py-2.5 text-sm text-[#123540] no-print">
+              <Info className="h-4 w-4 flex-shrink-0 text-[#124A56]" />
               <span>Please enter all participating teachers, even if student counts are not confirmed.</span>
             </div>
             <div className="hidden md:grid grid-cols-12 gap-2 text-sm font-medium text-muted-foreground no-print">
@@ -582,7 +582,7 @@ export function SchoolForm({ code, email, initialAnswers, onSaveAnswer, onSaveTe
                      <Input type="email" placeholder="Email Address" value={row.email} onChange={(e) => handleTeacherChange(i, "email", e.target.value)} disabled={isReadOnly || initialAnswers.school.locked} className="print:border-none print:p-0 print:h-auto" />
                   </div>
                   <div className="col-span-2 flex gap-2 items-center">
-                     <Input type="number" min="0" step="1" inputMode="numeric" placeholder="Count" value={row.studentCount || ""} onChange={(e) => handleTeacherChange(i, "studentCount", parseInt(e.target.value)||0)} disabled={isReadOnly || initialAnswers.school.locked} className={cn(
+                     <Input type="number" min="0" step="1" inputMode="numeric" value={row.studentCount || ""} onChange={(e) => handleTeacherChange(i, "studentCount", parseInt(e.target.value)||0)} disabled={isReadOnly || initialAnswers.school.locked} className={cn(
                        "[-moz-appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none print:border-none print:p-0 print:h-auto",
                        // Saved row missing its count: red outline, no message —
                        // come back and fill in the number (doesn't block anything)

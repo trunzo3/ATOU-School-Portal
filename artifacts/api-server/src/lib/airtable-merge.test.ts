@@ -4,6 +4,7 @@ import {
   decideFieldSync,
   decideTeacherSync,
 } from "./airtable-merge";
+import { sameTimeText } from "./time-text";
 
 describe("decideFieldSync", () => {
   it("does nothing when both sides already agree", () => {
@@ -77,6 +78,45 @@ describe("decideFieldSync", () => {
         nextLast: "",
       });
     });
+  });
+});
+
+describe("decideFieldSync with the workshop-time comparator", () => {
+  const RAW = "8:15am - 9:45am";
+
+  it("does not push a normalized portal answer back over Airtable's raw text", () => {
+    // Pull normalized "08:15" from RAW; portal now differs textually from
+    // both the baseline and Airtable, but it's the same clock time.
+    expect(
+      decideFieldSync({ last: RAW, airtable: RAW, portal: "08:15", same: sameTimeText }),
+    ).toEqual({ action: "none", nextLast: RAW });
+  });
+
+  it("keeps Airtable's raw text as the baseline when only spellings differ (no baseline yet)", () => {
+    expect(
+      decideFieldSync({ last: undefined, airtable: RAW, portal: "08:15", same: sameTimeText }),
+    ).toEqual({ action: "none", nextLast: RAW });
+  });
+
+  it("still pushes a real portal time edit (portal wins)", () => {
+    expect(
+      decideFieldSync({ last: RAW, airtable: RAW, portal: "09:00", same: sameTimeText }),
+    ).toEqual({ action: "push", nextLast: "09:00" });
+  });
+
+  it("pulls an Airtable time edit when the portal only holds the normalized old value", () => {
+    expect(
+      decideFieldSync({ last: RAW, airtable: "9am - 10:30am", portal: "08:15", same: sameTimeText }),
+    ).toEqual({ action: "pull", nextLast: "9am - 10:30am" });
+  });
+
+  it("compares unparseable text literally", () => {
+    expect(
+      decideFieldSync({ last: "TBD", airtable: "TBD", portal: "TBD", same: sameTimeText }),
+    ).toEqual({ action: "none", nextLast: "TBD" });
+    expect(
+      decideFieldSync({ last: "TBD", airtable: "TBD", portal: "08:15", same: sameTimeText }),
+    ).toEqual({ action: "push", nextLast: "08:15" });
   });
 });
 

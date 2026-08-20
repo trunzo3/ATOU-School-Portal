@@ -55,6 +55,8 @@ import { airtableSyncAllowed, environmentName } from "./environment";
 import { logger } from "./logger";
 import { parseTeachers } from "./parse-teachers";
 import { saveSetting, settingValue } from "./settings";
+import { normalizeTimeText, sameTimeText } from "./time-text";
+import { parseHM } from "@workspace/schedule";
 
 export const AIRTABLE_SYNC_KEY = "airtable_sync";
 /** A run older than this is assumed crashed and its claim can be taken over. */
@@ -314,15 +316,21 @@ export type SeenEntry = { enteredAt: Date; id: number } | null;
 async function latestAnswer(
   schoolId: number,
   questionKey: string,
-): Promise<{ value: string; seen: SeenEntry }> {
+): Promise<{ value: string; enteredBy: string | null; seen: SeenEntry }> {
   const [row] = await db
-    .select({ id: answersTable.id, value: answersTable.value, enteredAt: answersTable.enteredAt })
+    .select({
+      id: answersTable.id,
+      value: answersTable.value,
+      enteredBy: answersTable.enteredBy,
+      enteredAt: answersTable.enteredAt,
+    })
     .from(answersTable)
     .where(and(eq(answersTable.schoolId, schoolId), eq(answersTable.questionKey, questionKey)))
     .orderBy(desc(answersTable.enteredAt), desc(answersTable.id))
     .limit(1);
   return {
     value: (row?.value ?? "").trim(),
+    enteredBy: row?.enteredBy ?? null,
     seen: row ? { enteredAt: row.enteredAt, id: row.id } : null,
   };
 }
@@ -488,7 +496,11 @@ async function createSchoolFromRecord(
   }
 
   const startingAnswers = [
-    { questionKey: "workshop_time", value: workshopTime },
+    // The time view (Start Time picker, calculated schedule, printable
+    // form) only understands "HH:MM", so Airtable's free text ("8:15am -
+    // 9:45am") is stored normalized when it parses; unparseable text is
+    // kept as-is. The sync baseline above stays the raw Airtable text.
+    { questionKey: "workshop_time", value: normalizeTimeText(workshopTime) ?? workshopTime },
     { questionKey: "activity_area", value: activityArea },
     { questionKey: "speaker_area", value: speakerArea },
   ].filter((a) => a.value !== "");
@@ -520,6 +532,82 @@ async function createSchoolFromRecord(
     { schoolId: created.id, airtableRecordId: rec.id, name: created.name },
     "[airtable] created school from new workshop record",
   );
+}
+
+export type SimpleFieldOutcome = {
+  action: "none" | "pull" | "push";
+  /** The portal's current value (the value to push when action is "push"). */
+  portalValue: string;
+  /** New per-field baseline, or null when it must stay put (a failed guarded pull). */
+  nextLast: string | null;
+  /** History rows appended this pass (a pull, or a workshop-time backfill). */
+  rowsInserted: number;
+};
+
+/**
+ * One simple field's reconcile step (exported for integration tests).
+ *
+ * Workshop time gets three extra behaviors, so Airtable-sourced times feed
+ * the portal's time view (Start Time picker / schedule / printable form),
+ * which only understands "HH:MM":
+ * - a pull stores the normalized "HH:MM" of Airtable's free text when it
+ *   parses (raw text when it doesn't), while the baseline stays the raw
+ *   Airtable text;
+ * - values compare by clock value (sameTimeText), so the portal's
+ *   normalized form of Airtable's own text is never mistaken for a portal
+ *   edit and pushed back over Airtable's original text;
+ * - when the sides agree but the current answer is unparseable
+ *   Airtable-entered text that normalizes now (a school synced before
+ *   normalization existed), a normalized history row is backfilled using
+ *   the same guarded insert as a pull. Portal-entered answers are never
+ *   touched.
+ */
+export async function reconcileSimpleField(args: {
+  schoolId: number;
+  questionKey: string;
+  airtableValue: string;
+  last: string | undefined;
+}): Promise<SimpleFieldOutcome> {
+  const { schoolId, questionKey, airtableValue, last } = args;
+  const isWorkshopTime = questionKey === "workshop_time";
+  const { value: portalValue, enteredBy, seen } = await latestAnswer(schoolId, questionKey);
+  const decision = decideFieldSync({
+    last,
+    airtable: airtableValue,
+    portal: portalValue,
+    same: isWorkshopTime ? sameTimeText : undefined,
+  });
+  if (decision.action === "pull") {
+    const value = isWorkshopTime
+      ? (normalizeTimeText(airtableValue) ?? airtableValue)
+      : airtableValue;
+    const inserted = await insertAnswerFromAirtable(schoolId, questionKey, value, seen);
+    // On a failed guarded insert a portal save landed mid-run. The baseline
+    // stays put, so the next pass sees "portal changed" and pushes it.
+    return {
+      action: "pull",
+      portalValue,
+      nextLast: inserted ? decision.nextLast : null,
+      rowsInserted: inserted ? 1 : 0,
+    };
+  }
+  if (decision.action === "push") {
+    return { action: "push", portalValue, nextLast: null, rowsInserted: 0 };
+  }
+  let rowsInserted = 0;
+  if (
+    isWorkshopTime &&
+    enteredBy === AIRTABLE_ENTERED_BY &&
+    portalValue !== "" &&
+    parseHM(portalValue) === null
+  ) {
+    const normalized = normalizeTimeText(portalValue);
+    if (normalized !== null) {
+      const inserted = await insertAnswerFromAirtable(schoolId, questionKey, normalized, seen);
+      if (inserted) rowsInserted = 1;
+    }
+  }
+  return { action: "none", portalValue, nextLast: decision.nextLast, rowsInserted };
 }
 
 async function reconcileSchool(
@@ -577,27 +665,24 @@ async function reconcileSchool(
     }
   }
 
-  // Simple answer fields, both ways.
+  // Simple answer fields, both ways. Workshop time is special: the portal
+  // stores a normalized "HH:MM" of Airtable's free text (so the time view
+  // populates), the baseline stays Airtable's raw text, and the comparison
+  // is by clock value so the normalized form never reads as a portal edit.
   for (const { questionKey, fieldId } of SIMPLE_SYNC_FIELDS) {
     const airtableValue = airtableCellToString(f[fieldId]);
-    const { value: portalValue, seen } = await latestAnswer(school.id, questionKey);
-    const decision = decideFieldSync({
+    const outcome = await reconcileSimpleField({
+      schoolId: school.id,
+      questionKey,
+      airtableValue,
       last: state?.fields?.[fieldId],
-      airtable: airtableValue,
-      portal: portalValue,
     });
-    if (decision.action === "pull") {
-      const inserted = await insertAnswerFromAirtable(school.id, questionKey, airtableValue, seen);
-      if (inserted) {
-        counters.answersPulled += 1;
-        fieldPatch[fieldId] = decision.nextLast;
-      }
-      // else: a portal save landed mid-run. The baseline stays put, so the
-      // next pass sees "portal changed" and pushes the portal's value.
-    } else if (decision.action === "push") {
-      pushFields[fieldId] = portalValue;
-    } else {
-      fieldPatch[fieldId] = decision.nextLast;
+    counters.answersPulled += outcome.rowsInserted;
+    if (outcome.action === "push") {
+      pushFields[fieldId] = outcome.portalValue;
+    }
+    if (outcome.nextLast !== null) {
+      fieldPatch[fieldId] = outcome.nextLast;
     }
   }
 

@@ -30,11 +30,22 @@ export function decideFieldSync(args: {
   last: string | undefined;
   airtable: string;
   portal: string;
+  /**
+   * Optional equivalence for values with several spellings of the same
+   * thing (defaults to strict equality). The workshop-time field passes a
+   * clock-value comparison here so the portal's normalized "08:15" derived
+   * from Airtable's "8:15am - 9:45am" is not mistaken for a portal edit
+   * and pushed back over Airtable's original text.
+   */
+  same?: (a: string, b: string) => boolean;
 }): FieldSyncDecision {
   const { last, airtable, portal } = args;
-  if (airtable === portal) {
-    // Both sides already agree — just (re)record the baseline.
-    return { action: "none", nextLast: portal };
+  const same = args.same ?? ((a: string, b: string) => a === b);
+  if (same(airtable, portal)) {
+    // Both sides already agree — just (re)record the baseline. Airtable's
+    // spelling becomes the baseline so an equivalent-but-different portal
+    // form never reads as a change on later passes.
+    return { action: "none", nextLast: airtable };
   }
   if (last === undefined) {
     // No baseline: portal wins when it has a value, otherwise adopt Airtable's.
@@ -42,11 +53,11 @@ export function decideFieldSync(args: {
       ? { action: "push", nextLast: portal }
       : { action: "pull", nextLast: airtable };
   }
-  if (portal !== last) {
+  if (!same(portal, last)) {
     // Portal changed — portal wins, even if Airtable changed too.
     return { action: "push", nextLast: portal };
   }
-  if (airtable !== last) {
+  if (!same(airtable, last)) {
     return { action: "pull", nextLast: airtable };
   }
   return { action: "none", nextLast: last };

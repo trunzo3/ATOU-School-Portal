@@ -72,7 +72,7 @@ export function AdminSummary() {
     const url = URL.createObjectURL(blob)
     const a = document.createElement("a")
     a.href = url
-    a.download = `atou-weekly-summary-${report.windowStart}.csv`
+    a.download = `atou-snapshot-${report.windowStart}.csv`
     a.click()
     URL.revokeObjectURL(url)
   }
@@ -83,7 +83,7 @@ export function AdminSummary() {
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4">
           <div>
             <p className="text-xs font-bold uppercase tracking-[0.16em] text-primary mb-1">Program Operations</p>
-            <h1 className="text-3xl font-serif font-bold text-foreground">Weekly Summary</h1>
+            <h1 className="text-3xl font-serif font-bold text-foreground">Snapshot</h1>
             <p className="text-muted-foreground mt-1">
               Current as of {formatPacificTime(report.asOf)} · Covering the next {report.windowDays} days
               ({day(report.windowStart)} – {day(report.windowEnd)})

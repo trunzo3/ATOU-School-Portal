@@ -18,6 +18,9 @@ export const schoolsTable = pgTable("schools", {
   airtableRecordId: text("airtable_record_id"),
   // Read-only, pulled from the Airtable Workshops "Approx # Students" column.
   approxStudents: text("approx_students"),
+  // Pam can skip the automatic logistics email for one school; the daily
+  // job leaves skipped schools alone and the dashboard shows a dash.
+  autoSendSkipped: boolean("auto_send_skipped").notNull().default(false),
   createdAt: timestamp("created_at", { withTimezone: true })
     .notNull()
     .defaultNow(),
@@ -79,6 +82,11 @@ export const emailSendsTable = pgTable("email_sends", {
   body: text("body").notNull(),
   isFollowUp: boolean("is_follow_up").notNull().default(false),
   delivered: boolean("delivered").notNull().default(false),
+  // "manual" (sent by an admin from the Send screen) or "automatic"
+  // (sent by the daily job).
+  source: text("source").notNull().default("manual"),
+  // Name of the email template the send started from, when known.
+  templateName: text("template_name"),
   sentBy: text("sent_by").notNull(),
   sentAt: timestamp("sent_at", { withTimezone: true }).notNull().defaultNow(),
 });

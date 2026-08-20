@@ -1,0 +1,53 @@
+Build the weekly summary and the two automatic emails. The attached mockup shows the summary page — Replit should style it with the app's existing branding rather than copying the mockup's colors.
+
+THE SUMMARY PAGE at /admin/summary
+
+A read-only page, live every time it loads. At the top: "Current as of" with today's date and time, and the window it covers. Then four counts — workshops in the window, complete, partial, untouched.
+
+Then these sections, in order:
+
+Needs attention — sent and waiting, with how many days each has been waiting, longest first · not sent with a workshop 60 days out or less · schools missing student counts, showing how many teachers · schedule conflicts, naming the conflict · locked schools with unanswered questions.
+
+Coming up — every workshop in the window with its date and what's still open on it.
+
+Scheduled sends — which automatic logistics emails go out and when, with the workshop date.
+
+Since last week — a rolling seven days back from now: schools that answered, answers that changed with the old and new values and a timestamp, and emails sent, marked manual or automatic.
+
+Every school name links to that school's detail screen. At the bottom, a link to the dashboard, a Print button, and a Download CSV button that exports what's on screen. The page should print cleanly without the navigation.
+
+The window follows the "days ahead" setting below — it isn't fixed at 30.
+
+SETTINGS — a new card called "Automatic emails"
+
+Two blocks, both stored in the database, both defaulting to off so a fresh production database comes up switched off.
+
+Logistics requests: on/off · how many days before the workshop to send, defaulting to 60 · which template to use. Turning this on requires typing CONFIRM, because it emails real school staff.
+
+Weekly summary: on/off · which day of the week · how many days ahead it looks · a recipient list Pam can add to and remove from freely, since these are internal addresses that change · a "Send now" button · and a line showing when it last went out.
+
+The weekly summary email carries the headline counts and the "needs attention" list, with a link to the full page. Its "as of" date is the date it was sent.
+
+THE DAILY SCRIPT
+
+One script, run once a day by a Replit Scheduled Deployment. It reads the settings and does whatever is due.
+
+For logistics requests: find schools whose workshop is exactly the configured number of days away, that haven't already been sent one and haven't been skipped, and send. It sends regardless of whether the school already has answers.
+
+For the weekly summary: if today is the configured day and it hasn't already gone out today, send it.
+
+Record every send so nothing can fire twice.
+
+THE SENT LOG on /admin/send
+
+Automatic sends appear alongside manual ones. Each row keeps its existing template pill and gains a colored bar down the left edge marking automatic versus manual, plus the template name as text. Pam can filter to one or the other.
+
+SCHOOL DETAIL at /admin/schools/:id
+
+Show that school's send history — the same rows as the sent log, filtered to this school.
+
+Where a school has an automatic email scheduled, show the date it will go out, with a Skip button beside it. Skipping stops that automatic send for that school and shows as skipped.
+
+THE DASHBOARD at /admin
+
+The Pending Send column already shows the scheduled date. A skipped school shows a dash.

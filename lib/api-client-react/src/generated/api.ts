@@ -29,6 +29,9 @@ import type {
   AirtableSettingsInput,
   AnswerInput,
   AnswerVersion,
+  AutoLogisticsInput,
+  AutoSendSkipInput,
+  AutomationSettings,
   EmailSendRecord,
   EmailSettingsInput,
   EmailStatus,
@@ -52,10 +55,12 @@ import type {
   SchoolRow,
   SendEmailsInput,
   SendEmailsResult,
+  SummaryReport,
   TeachersInput,
   TeachersSnapshot,
   TestEmailInput,
-  TestEmailResult
+  TestEmailResult,
+  WeeklySummaryInput
 } from './api.schemas';
 
 import { customFetch } from '../custom-fetch';
@@ -1038,6 +1043,373 @@ export function useGetAdminSummary<TData = Awaited<ReturnType<typeof getAdminSum
 
 
 
+export const getGetSummaryReportUrl = () => {
+
+
+
+
+  return `/api/admin/summary-report`
+}
+
+/**
+ * @summary The full weekly-summary report for the admin summary page
+ */
+export const getSummaryReport = async ( options?: Parameters<typeof customFetch>[1]): Promise<SummaryReport> => {
+
+  return customFetch<SummaryReport>(getGetSummaryReportUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetSummaryReportQueryKey = () => {
+    return [
+    `/api/admin/summary-report`
+    ] as const;
+    }
+
+
+export const getGetSummaryReportQueryOptions = <TData = Awaited<ReturnType<typeof getSummaryReport>>, TError = ErrorType<unknown>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getSummaryReport>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetSummaryReportQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getSummaryReport>>> = ({ signal }) => getSummaryReport({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getSummaryReport>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetSummaryReportQueryResult = NonNullable<Awaited<ReturnType<typeof getSummaryReport>>>
+export type GetSummaryReportQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary The full weekly-summary report for the admin summary page
+ */
+
+export function useGetSummaryReport<TData = Awaited<ReturnType<typeof getSummaryReport>>, TError = ErrorType<unknown>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getSummaryReport>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetSummaryReportQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getGetAutomationSettingsUrl = () => {
+
+
+
+
+  return `/api/admin/automation`
+}
+
+/**
+ * @summary Automatic email settings (logistics requests + weekly summary)
+ */
+export const getAutomationSettings = async ( options?: Parameters<typeof customFetch>[1]): Promise<AutomationSettings> => {
+
+  return customFetch<AutomationSettings>(getGetAutomationSettingsUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetAutomationSettingsQueryKey = () => {
+    return [
+    `/api/admin/automation`
+    ] as const;
+    }
+
+
+export const getGetAutomationSettingsQueryOptions = <TData = Awaited<ReturnType<typeof getAutomationSettings>>, TError = ErrorType<unknown>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getAutomationSettings>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetAutomationSettingsQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getAutomationSettings>>> = ({ signal }) => getAutomationSettings({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getAutomationSettings>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetAutomationSettingsQueryResult = NonNullable<Awaited<ReturnType<typeof getAutomationSettings>>>
+export type GetAutomationSettingsQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary Automatic email settings (logistics requests + weekly summary)
+ */
+
+export function useGetAutomationSettings<TData = Awaited<ReturnType<typeof getAutomationSettings>>, TError = ErrorType<unknown>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getAutomationSettings>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetAutomationSettingsQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getUpdateAutoLogisticsUrl = () => {
+
+
+
+
+  return `/api/admin/automation/logistics`
+}
+
+/**
+ * @summary Update the automatic logistics request settings
+ */
+export const updateAutoLogistics = async (autoLogisticsInput: AutoLogisticsInput, options?: Parameters<typeof customFetch>[1]): Promise<AutomationSettings> => {
+
+  return customFetch<AutomationSettings>(getUpdateAutoLogisticsUrl(),
+  {
+    ...options,
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(autoLogisticsInput)
+  }
+);}
+
+
+
+
+
+export const getUpdateAutoLogisticsMutationOptions = <TError = ErrorType<ErrorMessage>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateAutoLogistics>>, TError,{data: BodyType<AutoLogisticsInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof updateAutoLogistics>>, TError,{data: BodyType<AutoLogisticsInput>}, TContext> => {
+
+const mutationKey = ['updateAutoLogistics'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof updateAutoLogistics>>, {data: BodyType<AutoLogisticsInput>}> = (props) => {
+          const {data} = props ?? {};
+
+          return  updateAutoLogistics(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type UpdateAutoLogisticsMutationResult = NonNullable<Awaited<ReturnType<typeof updateAutoLogistics>>>
+    export type UpdateAutoLogisticsMutationBody = BodyType<AutoLogisticsInput>
+    export type UpdateAutoLogisticsMutationError = ErrorType<ErrorMessage>
+
+    /**
+ * @summary Update the automatic logistics request settings
+ */
+export const useUpdateAutoLogistics = <TError = ErrorType<ErrorMessage>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateAutoLogistics>>, TError,{data: BodyType<AutoLogisticsInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof updateAutoLogistics>>,
+        TError,
+        {data: BodyType<AutoLogisticsInput>},
+        TContext
+      > => {
+      return useMutation(getUpdateAutoLogisticsMutationOptions(options));
+    }
+
+export const getUpdateWeeklySummaryUrl = () => {
+
+
+
+
+  return `/api/admin/automation/weekly`
+}
+
+/**
+ * @summary Update the weekly summary email settings
+ */
+export const updateWeeklySummary = async (weeklySummaryInput: WeeklySummaryInput, options?: Parameters<typeof customFetch>[1]): Promise<AutomationSettings> => {
+
+  return customFetch<AutomationSettings>(getUpdateWeeklySummaryUrl(),
+  {
+    ...options,
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(weeklySummaryInput)
+  }
+);}
+
+
+
+
+
+export const getUpdateWeeklySummaryMutationOptions = <TError = ErrorType<ErrorMessage>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateWeeklySummary>>, TError,{data: BodyType<WeeklySummaryInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof updateWeeklySummary>>, TError,{data: BodyType<WeeklySummaryInput>}, TContext> => {
+
+const mutationKey = ['updateWeeklySummary'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof updateWeeklySummary>>, {data: BodyType<WeeklySummaryInput>}> = (props) => {
+          const {data} = props ?? {};
+
+          return  updateWeeklySummary(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type UpdateWeeklySummaryMutationResult = NonNullable<Awaited<ReturnType<typeof updateWeeklySummary>>>
+    export type UpdateWeeklySummaryMutationBody = BodyType<WeeklySummaryInput>
+    export type UpdateWeeklySummaryMutationError = ErrorType<ErrorMessage>
+
+    /**
+ * @summary Update the weekly summary email settings
+ */
+export const useUpdateWeeklySummary = <TError = ErrorType<ErrorMessage>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateWeeklySummary>>, TError,{data: BodyType<WeeklySummaryInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof updateWeeklySummary>>,
+        TError,
+        {data: BodyType<WeeklySummaryInput>},
+        TContext
+      > => {
+      return useMutation(getUpdateWeeklySummaryMutationOptions(options));
+    }
+
+export const getSendWeeklySummaryNowUrl = () => {
+
+
+
+
+  return `/api/admin/automation/weekly/send-now`
+}
+
+/**
+ * @summary Send the weekly summary email to the saved recipients right now
+ */
+export const sendWeeklySummaryNow = async ( options?: Parameters<typeof customFetch>[1]): Promise<AutomationSettings> => {
+
+  return customFetch<AutomationSettings>(getSendWeeklySummaryNowUrl(),
+  {
+    ...options,
+    method: 'POST'
+
+
+  }
+);}
+
+
+
+
+
+export const getSendWeeklySummaryNowMutationOptions = <TError = ErrorType<ErrorMessage>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof sendWeeklySummaryNow>>, TError,void, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof sendWeeklySummaryNow>>, TError,void, TContext> => {
+
+const mutationKey = ['sendWeeklySummaryNow'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof sendWeeklySummaryNow>>, void> = () => {
+
+
+          return  sendWeeklySummaryNow(requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type SendWeeklySummaryNowMutationResult = NonNullable<Awaited<ReturnType<typeof sendWeeklySummaryNow>>>
+
+    export type SendWeeklySummaryNowMutationError = ErrorType<ErrorMessage>
+
+    /**
+ * @summary Send the weekly summary email to the saved recipients right now
+ */
+export const useSendWeeklySummaryNow = <TError = ErrorType<ErrorMessage>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof sendWeeklySummaryNow>>, TError,void, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof sendWeeklySummaryNow>>,
+        TError,
+        void,
+        TContext
+      > => {
+      return useMutation(getSendWeeklySummaryNowMutationOptions(options));
+    }
+
 export const getGetAdminSchoolsUrl = () => {
 
 
@@ -1262,6 +1634,78 @@ export const useSetSchoolLock = <TError = ErrorType<unknown>,
         TContext
       > => {
       return useMutation(getSetSchoolLockMutationOptions(options));
+    }
+
+export const getSetAutoSendSkipUrl = (id: number,) => {
+
+
+
+
+  return `/api/admin/schools/${id}/auto-send`
+}
+
+/**
+ * @summary Skip or restore a school's automatic logistics email
+ */
+export const setAutoSendSkip = async (id: number,
+    autoSendSkipInput: AutoSendSkipInput, options?: Parameters<typeof customFetch>[1]): Promise<SchoolDetail> => {
+
+  return customFetch<SchoolDetail>(getSetAutoSendSkipUrl(id),
+  {
+    ...options,
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(autoSendSkipInput)
+  }
+);}
+
+
+
+
+
+export const getSetAutoSendSkipMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof setAutoSendSkip>>, TError,{id: number;data: BodyType<AutoSendSkipInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof setAutoSendSkip>>, TError,{id: number;data: BodyType<AutoSendSkipInput>}, TContext> => {
+
+const mutationKey = ['setAutoSendSkip'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof setAutoSendSkip>>, {id: number;data: BodyType<AutoSendSkipInput>}> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  setAutoSendSkip(id,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type SetAutoSendSkipMutationResult = NonNullable<Awaited<ReturnType<typeof setAutoSendSkip>>>
+    export type SetAutoSendSkipMutationBody = BodyType<AutoSendSkipInput>
+    export type SetAutoSendSkipMutationError = ErrorType<unknown>
+
+    /**
+ * @summary Skip or restore a school's automatic logistics email
+ */
+export const useSetAutoSendSkip = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof setAutoSendSkip>>, TError,{id: number;data: BodyType<AutoSendSkipInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof setAutoSendSkip>>,
+        TError,
+        {id: number;data: BodyType<AutoSendSkipInput>},
+        TContext
+      > => {
+      return useMutation(getSetAutoSendSkipMutationOptions(options));
     }
 
 export const getGetEmailStatusUrl = () => {

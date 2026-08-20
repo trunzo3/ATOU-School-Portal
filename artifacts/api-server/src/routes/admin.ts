@@ -23,6 +23,9 @@ import {
   SetSchoolLockBody,
   UpdateEmailTemplateBody,
   SendEmailsBody,
+  UpdateAutoLogisticsBody,
+  UpdateWeeklySummaryBody,
+  SetAutoSendSkipBody,
   CreateAdminUserBody,
   UpdateAdminUserBody,
   CreatePageBody,
@@ -44,14 +47,27 @@ import { appBaseUrl, schoolLink } from "../lib/appUrl";
 import { getQuestionStates, missingCount, normalizeEmail } from "../lib/answers";
 import {
   EMAIL_FROM,
-  PLAIN_SIGNATURE,
   emailConfigured,
-  ensurePlainSignature,
   fillMergeFields,
-  hasPlainSignature,
   renderEmailHtml,
   sendEmail,
 } from "../lib/email";
+import {
+  EMAIL_SENDING_ENABLED_KEY,
+  emailSendingEnabled,
+  getLogisticsAutoSettings,
+  getWeeklySummarySettings,
+  normalizeRecipients,
+  saveLogisticsAutoSettings,
+  saveSetting,
+  claimWeeklySend,
+  saveWeeklySummarySettingsKeepingLastSent,
+  settingValue,
+} from "../lib/settings";
+import { ensureEmailTemplates } from "../lib/templates";
+import { schoolSendStatus } from "../lib/send-status";
+import { buildSummaryReport, renderWeeklyEmail } from "../lib/summary";
+import { addDays, pacificToday } from "../lib/dates";
 
 const router: IRouter = Router();
 
@@ -274,41 +290,12 @@ router.get("/admin/summary", requireAdmin, async (_req, res): Promise<void> => {
   });
 });
 
-// Send status per school: never_sent, sent_waiting (sent, no school activity
-// since), or answered (a school contact saved something after the last send).
-async function schoolSendStatus(schoolId: number): Promise<{
-  sendStatus: "never_sent" | "sent_waiting" | "answered";
-  lastSentAt: string | null;
-}> {
-  const [lastSend] = await db
-    .select()
-    .from(emailSendsTable)
-    .where(eq(emailSendsTable.schoolId, schoolId))
-    .orderBy(desc(emailSendsTable.sentAt))
-    .limit(1);
-  if (!lastSend) return { sendStatus: "never_sent", lastSentAt: null };
-  const sentAt = lastSend.sentAt;
-  const isSchoolEntry = (enteredBy: string) =>
-    normalizeEmail(enteredBy) !== PAM_EMAIL && enteredBy !== "Airtable import";
-  const answers = await db
-    .select({ enteredBy: answersTable.enteredBy, enteredAt: answersTable.enteredAt })
-    .from(answersTable)
-    .where(eq(answersTable.schoolId, schoolId));
-  const snapshots = await db
-    .select({ enteredBy: teacherSnapshotsTable.enteredBy, enteredAt: teacherSnapshotsTable.enteredAt })
-    .from(teacherSnapshotsTable)
-    .where(eq(teacherSnapshotsTable.schoolId, schoolId));
-  const answered = [...answers, ...snapshots].some(
-    (r) => r.enteredAt > sentAt && isSchoolEntry(r.enteredBy),
-  );
-  return { sendStatus: answered ? "answered" : "sent_waiting", lastSentAt: sentAt.toISOString() };
-}
-
 // Pending send: the date the logistics email is due to reach the school —
-// 60 days before the workshop. Only meaningful while nothing has been sent
-// yet and the due date hasn't passed; otherwise there's nothing pending.
+// the configured days-before window ahead of the workshop. Only meaningful
+// while nothing has been sent yet; skipped schools show nothing.
 router.get("/admin/schools", requireAdmin, async (_req, res): Promise<void> => {
   const schools = await db.select().from(schoolsTable).orderBy(asc(schoolsTable.workshopDate));
+  const logistics = await getLogisticsAutoSettings();
   const rows = [];
   for (const school of schools) {
     const states = await getQuestionStates(school);
@@ -331,7 +318,11 @@ router.get("/admin/schools", requireAdmin, async (_req, res): Promise<void> => {
       contacts: contacts.map((c) => ({ id: c.id, email: c.email, name: c.name })),
       sendStatus,
       lastSentAt,
-      pendingSendDate: pendingSendDate(school.workshopDate, sendStatus),
+      pendingSendDate: pendingSendDate(school.workshopDate, sendStatus, {
+        skipped: school.autoSendSkipped,
+        daysBefore: logistics.daysBefore,
+        autoEnabled: logistics.enabled,
+      }),
     });
   }
   res.json(rows);
@@ -348,6 +339,25 @@ async function schoolDetail(schoolId: number, res: Response): Promise<void> {
     .from(contactsTable)
     .where(eq(contactsTable.schoolId, school.id))
     .orderBy(asc(contactsTable.id));
+  const sendRows = await db
+    .select()
+    .from(emailSendsTable)
+    .where(eq(emailSendsTable.schoolId, school.id))
+    .orderBy(desc(emailSendsTable.sentAt), desc(emailSendsTable.id));
+  // The school's automatic-send outlook: when automatic logistics emails
+  // are on and this never-emailed school has a future due date, that's the
+  // day the email goes out — unless Pam skipped it or locked the school.
+  const logistics = await getLogisticsAutoSettings();
+  const due = school.workshopDate ? addDays(school.workshopDate, -logistics.daysBefore) : null;
+  const scheduledDate =
+    logistics.enabled &&
+    sendRows.length === 0 &&
+    !school.autoSendSkipped &&
+    !school.locked &&
+    due &&
+    due >= pacificToday()
+      ? due
+      : null;
   res.json({
     id: school.id,
     name: school.name,
@@ -357,6 +367,8 @@ async function schoolDetail(schoolId: number, res: Response): Promise<void> {
     locked: school.locked,
     approxStudents: school.approxStudents,
     contacts: contacts.map((c) => ({ id: c.id, email: c.email, name: c.name })),
+    sendHistory: sendRows.map((r) => sendOut(r, school.name)),
+    autoSend: { skipped: school.autoSendSkipped, scheduledDate },
   });
 }
 
@@ -376,98 +388,6 @@ router.patch("/admin/schools/:id/lock", requireAdmin, async (req, res): Promise<
 });
 
 // --- email sending ---
-
-const DEFAULT_SUBJECT =
-  "Logistics needed for A Touch of Understanding Workshop - {{school_name}} - {{workshop_date}}";
-
-const DEFAULT_TEMPLATE = `[Pam — this template needs your wording before it's used. Write the email in your own voice; {{school_name}}, {{workshop_date}}, and {{link}} are filled in automatically for each school.]
-
-Hello,
-
-...
-
-Please fill in your workshop logistics for {{school_name}} ({{workshop_date}}) here: {{link}}
-
-Thank you,
-Pam
-
-${PLAIN_SIGNATURE}`;
-
-const EMAIL_SENDING_ENABLED_KEY = "email_sending_enabled";
-
-async function settingValue(key: string): Promise<string | null> {
-  const [row] = await db.select().from(appSettingsTable).where(eq(appSettingsTable.key, key));
-  return row ? row.value : null;
-}
-
-async function saveSetting(key: string, value: string): Promise<void> {
-  await db
-    .insert(appSettingsTable)
-    .values({ key, value })
-    .onConflictDoUpdate({
-      target: appSettingsTable.key,
-      set: { value, updatedAt: new Date() },
-    });
-}
-
-async function emailSendingEnabled(): Promise<boolean> {
-  return (await settingValue(EMAIL_SENDING_ENABLED_KEY)) === "true";
-}
-
-// The follow-up template shares the same subject line as the request template.
-const FOLLOW_UP_BODY = `Hello,
-
-I'm sorry to bother you again however your workshop is quickly approaching and we need to gather the logistics.
-
-Please complete your workshop logistics here: {{link}}
-
-Thank you,
-Pam
-
-${PLAIN_SIGNATURE}`;
-
-// Seed the named templates once. The "Logistics Request" template inherits any
-// wording Pam already saved under the old single-template settings keys.
-// Every template body ends with Pam's plain contact block: it is part of the
-// editable message now that no signature is appended at send time, so
-// templates saved while the old automatic signature stripped the typed block
-// get it restored here without touching the administrator's own wording.
-async function ensureEmailTemplates(): Promise<void> {
-  const existing = await db.select().from(emailTemplatesTable);
-  if (existing.length > 0) {
-    for (const t of existing) {
-      if (!hasPlainSignature(t.body)) {
-        await db
-          .update(emailTemplatesTable)
-          .set({ body: ensurePlainSignature(t.body) })
-          .where(eq(emailTemplatesTable.id, t.id));
-      }
-    }
-    return;
-  }
-  const savedSubject = await settingValue("email_template_subject");
-  const savedBodyRaw = await settingValue("email_template");
-  const savedBody = savedBodyRaw === null ? null : ensurePlainSignature(savedBodyRaw);
-  await db
-    .insert(emailTemplatesTable)
-    .values([
-      {
-        id: "logistics-request",
-        name: "Logistics Request",
-        subject: savedSubject ?? DEFAULT_SUBJECT,
-        body: savedBody ?? DEFAULT_TEMPLATE,
-        sortOrder: 0,
-      },
-      {
-        id: "logistics-follow-up",
-        name: "Logistics Follow-Up",
-        subject: DEFAULT_SUBJECT,
-        body: FOLLOW_UP_BODY,
-        sortOrder: 1,
-      },
-    ])
-    .onConflictDoNothing();
-}
 
 function templateOut(t: EmailTemplateRow) {
   return {
@@ -584,6 +504,8 @@ function sendOut(s: {
   delivered: boolean;
   sentBy: string;
   sentAt: Date;
+  source: string;
+  templateName: string | null;
 }, schoolName: string) {
   return {
     id: s.id,
@@ -595,6 +517,8 @@ function sendOut(s: {
     delivered: s.delivered,
     sentBy: s.sentBy,
     sentAt: s.sentAt.toISOString(),
+    source: s.source,
+    templateName: s.templateName,
   };
 }
 
@@ -675,11 +599,131 @@ router.post("/admin/send", requireAdmin, async (req: AdminRequest, res): Promise
         isFollowUp: priorSends.length > 0,
         delivered: result.delivered,
         sentBy,
+        source: "manual",
+        templateName: parsed.data.templateName?.trim() || null,
       })
       .returning();
     sends.push(sendOut(row!, school.name));
   }
   res.json({ configured, enabled, sends, errors });
+});
+
+// --- weekly summary & automatic emails ---
+
+router.get("/admin/summary-report", requireAdmin, async (_req, res): Promise<void> => {
+  const weekly = await getWeeklySummarySettings();
+  res.json(await buildSummaryReport(weekly.daysAhead));
+});
+
+async function automationOut() {
+  const logistics = await getLogisticsAutoSettings();
+  const weekly = await getWeeklySummarySettings();
+  return { logistics, weekly };
+}
+
+router.get("/admin/automation", requireAdmin, async (_req, res): Promise<void> => {
+  res.json(await automationOut());
+});
+
+router.put("/admin/automation/logistics", requireAdmin, async (req, res): Promise<void> => {
+  const parsed = UpdateAutoLogisticsBody.safeParse(req.body);
+  if (!parsed.success) {
+    res.status(400).json({ error: "Send timing, a template, and on or off are required." });
+    return;
+  }
+  await ensureEmailTemplates();
+  const [template] = await db
+    .select()
+    .from(emailTemplatesTable)
+    .where(eq(emailTemplatesTable.id, parsed.data.templateId));
+  if (!template) {
+    res.status(400).json({ error: "That email template no longer exists." });
+    return;
+  }
+  await saveLogisticsAutoSettings({
+    enabled: parsed.data.enabled,
+    daysBefore: parsed.data.daysBefore,
+    templateId: parsed.data.templateId,
+  });
+  res.json(await automationOut());
+});
+
+router.put("/admin/automation/weekly", requireAdmin, async (req, res): Promise<void> => {
+  const parsed = UpdateWeeklySummaryBody.safeParse(req.body);
+  if (!parsed.success) {
+    res.status(400).json({ error: "Day of week, days ahead, and recipients are required." });
+    return;
+  }
+  const recipients = normalizeRecipients(parsed.data.recipients);
+  if (parsed.data.enabled && recipients.length === 0) {
+    res.status(400).json({ error: "Add at least one recipient before turning the weekly summary on." });
+    return;
+  }
+  // The stored lastSentAt always wins inside this save, so a form submit
+  // can never erase a send timestamp the daily job wrote concurrently.
+  await saveWeeklySummarySettingsKeepingLastSent({
+    enabled: parsed.data.enabled,
+    dayOfWeek: parsed.data.dayOfWeek,
+    daysAhead: parsed.data.daysAhead,
+    recipients,
+    lastSentAt: null,
+  });
+  res.json(await automationOut());
+});
+
+router.post(
+  "/admin/automation/weekly/send-now",
+  requireAdmin,
+  async (_req, res): Promise<void> => {
+    const weekly = await getWeeklySummarySettings();
+    if (weekly.recipients.length === 0) {
+      res.status(400).json({ error: "Add at least one recipient first." });
+      return;
+    }
+    if (!emailConfigured()) {
+      res.status(503).json({
+        error: "Resend is not connected. Add the RESEND_API_KEY secret and try again.",
+      });
+      return;
+    }
+    // Claim before sending, exactly like the daily job, so Send now can
+    // never overlap with the scheduled send (or a double-click) and deliver
+    // the summary twice. Send now works whether or not the switch is on.
+    const claimed = await claimWeeklySend(weekly.lastSentAt, new Date().toISOString());
+    if (!claimed) {
+      res.status(409).json({
+        error: "A summary email is going out right now. Give it a moment, then check the last-sent time.",
+      });
+      return;
+    }
+    const report = await buildSummaryReport(weekly.daysAhead);
+    const { subject, text } = renderWeeklyEmail(report);
+    const result = await sendEmail({
+      to: weekly.recipients,
+      subject,
+      text,
+      html: renderEmailHtml(text),
+    });
+    if (!result.delivered) {
+      res.status(503).json({ error: result.error ?? "Resend rejected the summary email." });
+      return;
+    }
+    res.json(await automationOut());
+  },
+);
+
+router.patch("/admin/schools/:id/auto-send", requireAdmin, async (req, res): Promise<void> => {
+  const parsed = SetAutoSendSkipBody.safeParse(req.body);
+  if (!parsed.success) {
+    res.status(400).json({ error: "skipped must be true or false." });
+    return;
+  }
+  const id = idParam(req);
+  await db
+    .update(schoolsTable)
+    .set({ autoSendSkipped: parsed.data.skipped })
+    .where(eq(schoolsTable.id, id));
+  await schoolDetail(id, res);
 });
 
 // --- admin accounts ---

@@ -317,6 +317,193 @@ export const GetAdminSummaryResponse = zod.object({
 
 
 /**
+ * @summary The full weekly-summary report for the admin summary page
+ */
+export const GetSummaryReportResponse = zod.object({
+  "asOf": zod.string(),
+  "windowDays": zod.number(),
+  "windowStart": zod.string(),
+  "windowEnd": zod.string(),
+  "counts": zod.object({
+  "workshops": zod.number(),
+  "complete": zod.number(),
+  "partial": zod.number(),
+  "untouched": zod.number()
+}),
+  "needsAttention": zod.object({
+  "sentWaiting": zod.array(zod.object({
+  "schoolId": zod.number(),
+  "name": zod.string(),
+  "lastSentAt": zod.string(),
+  "daysWaiting": zod.number()
+})),
+  "notSent": zod.array(zod.object({
+  "schoolId": zod.number(),
+  "name": zod.string(),
+  "workshopDate": zod.string(),
+  "daysUntil": zod.number()
+})),
+  "missingCounts": zod.array(zod.object({
+  "schoolId": zod.number(),
+  "name": zod.string(),
+  "missing": zod.number(),
+  "total": zod.number()
+})),
+  "conflicts": zod.array(zod.object({
+  "schoolId": zod.number(),
+  "name": zod.string(),
+  "description": zod.string()
+})),
+  "lockedWithGaps": zod.array(zod.object({
+  "schoolId": zod.number(),
+  "name": zod.string(),
+  "gaps": zod.string()
+}))
+}),
+  "comingUp": zod.array(zod.object({
+  "schoolId": zod.number(),
+  "name": zod.string(),
+  "workshopDate": zod.string(),
+  "stillOpen": zod.string(),
+  "complete": zod.boolean()
+})),
+  "scheduledSends": zod.object({
+  "enabled": zod.boolean(),
+  "items": zod.array(zod.object({
+  "schoolId": zod.number(),
+  "name": zod.string(),
+  "sendDate": zod.string(),
+  "workshopDate": zod.string()
+}))
+}),
+  "sinceLastWeek": zod.object({
+  "from": zod.string(),
+  "to": zod.string(),
+  "newAnswers": zod.array(zod.object({
+  "schoolId": zod.number(),
+  "name": zod.string(),
+  "status": zod.enum(['complete', 'partial']),
+  "date": zod.string()
+})),
+  "changes": zod.array(zod.object({
+  "schoolId": zod.number(),
+  "name": zod.string(),
+  "label": zod.string(),
+  "oldValue": zod.string(),
+  "newValue": zod.string(),
+  "at": zod.string()
+})),
+  "emailsSent": zod.array(zod.object({
+  "label": zod.string(),
+  "schools": zod.number(),
+  "source": zod.enum(['manual', 'automatic'])
+}))
+})
+})
+
+
+/**
+ * @summary Automatic email settings (logistics requests + weekly summary)
+ */
+export const GetAutomationSettingsResponse = zod.object({
+  "logistics": zod.object({
+  "enabled": zod.boolean(),
+  "daysBefore": zod.number(),
+  "templateId": zod.string()
+}),
+  "weekly": zod.object({
+  "enabled": zod.boolean(),
+  "dayOfWeek": zod.number(),
+  "daysAhead": zod.number(),
+  "recipients": zod.array(zod.string()),
+  "lastSentAt": zod.string().nullable()
+})
+})
+
+
+/**
+ * @summary Update the automatic logistics request settings
+ */
+export const updateAutoLogisticsBodyDaysBeforeMax = 365;
+
+
+
+
+export const UpdateAutoLogisticsBody = zod.object({
+  "enabled": zod.boolean(),
+  "daysBefore": zod.number().min(1).max(updateAutoLogisticsBodyDaysBeforeMax),
+  "templateId": zod.string().min(1)
+})
+
+export const UpdateAutoLogisticsResponse = zod.object({
+  "logistics": zod.object({
+  "enabled": zod.boolean(),
+  "daysBefore": zod.number(),
+  "templateId": zod.string()
+}),
+  "weekly": zod.object({
+  "enabled": zod.boolean(),
+  "dayOfWeek": zod.number(),
+  "daysAhead": zod.number(),
+  "recipients": zod.array(zod.string()),
+  "lastSentAt": zod.string().nullable()
+})
+})
+
+
+/**
+ * @summary Update the weekly summary email settings
+ */
+export const updateWeeklySummaryBodyDayOfWeekMin = 0;
+export const updateWeeklySummaryBodyDayOfWeekMax = 6;
+
+export const updateWeeklySummaryBodyDaysAheadMax = 365;
+
+
+
+export const UpdateWeeklySummaryBody = zod.object({
+  "enabled": zod.boolean(),
+  "dayOfWeek": zod.number().min(updateWeeklySummaryBodyDayOfWeekMin).max(updateWeeklySummaryBodyDayOfWeekMax),
+  "daysAhead": zod.number().min(1).max(updateWeeklySummaryBodyDaysAheadMax),
+  "recipients": zod.array(zod.string())
+})
+
+export const UpdateWeeklySummaryResponse = zod.object({
+  "logistics": zod.object({
+  "enabled": zod.boolean(),
+  "daysBefore": zod.number(),
+  "templateId": zod.string()
+}),
+  "weekly": zod.object({
+  "enabled": zod.boolean(),
+  "dayOfWeek": zod.number(),
+  "daysAhead": zod.number(),
+  "recipients": zod.array(zod.string()),
+  "lastSentAt": zod.string().nullable()
+})
+})
+
+
+/**
+ * @summary Send the weekly summary email to the saved recipients right now
+ */
+export const SendWeeklySummaryNowResponse = zod.object({
+  "logistics": zod.object({
+  "enabled": zod.boolean(),
+  "daysBefore": zod.number(),
+  "templateId": zod.string()
+}),
+  "weekly": zod.object({
+  "enabled": zod.boolean(),
+  "dayOfWeek": zod.number(),
+  "daysAhead": zod.number(),
+  "recipients": zod.array(zod.string()),
+  "lastSentAt": zod.string().nullable()
+})
+})
+
+
+/**
  * @summary All schools with per-question answer state for the grid
  */
 export const GetAdminSchoolsResponseItem = zod.object({
@@ -366,7 +553,24 @@ export const GetAdminSchoolResponse = zod.object({
   "id": zod.number(),
   "email": zod.string(),
   "name": zod.string().nullable()
-}))
+})),
+  "sendHistory": zod.array(zod.object({
+  "id": zod.number(),
+  "schoolId": zod.number(),
+  "schoolName": zod.string(),
+  "recipients": zod.array(zod.string()),
+  "subject": zod.string(),
+  "isFollowUp": zod.boolean(),
+  "delivered": zod.boolean(),
+  "sentBy": zod.string(),
+  "sentAt": zod.string(),
+  "source": zod.enum(['manual', 'automatic']),
+  "templateName": zod.string().nullable()
+})),
+  "autoSend": zod.object({
+  "skipped": zod.boolean(),
+  "scheduledDate": zod.string().nullable()
+})
 })
 
 
@@ -393,7 +597,68 @@ export const SetSchoolLockResponse = zod.object({
   "id": zod.number(),
   "email": zod.string(),
   "name": zod.string().nullable()
-}))
+})),
+  "sendHistory": zod.array(zod.object({
+  "id": zod.number(),
+  "schoolId": zod.number(),
+  "schoolName": zod.string(),
+  "recipients": zod.array(zod.string()),
+  "subject": zod.string(),
+  "isFollowUp": zod.boolean(),
+  "delivered": zod.boolean(),
+  "sentBy": zod.string(),
+  "sentAt": zod.string(),
+  "source": zod.enum(['manual', 'automatic']),
+  "templateName": zod.string().nullable()
+})),
+  "autoSend": zod.object({
+  "skipped": zod.boolean(),
+  "scheduledDate": zod.string().nullable()
+})
+})
+
+
+/**
+ * @summary Skip or restore a school's automatic logistics email
+ */
+export const SetAutoSendSkipParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+export const SetAutoSendSkipBody = zod.object({
+  "skipped": zod.boolean()
+})
+
+export const SetAutoSendSkipResponse = zod.object({
+  "id": zod.number(),
+  "name": zod.string(),
+  "code": zod.string(),
+  "link": zod.string(),
+  "workshopDate": zod.string().nullable(),
+  "locked": zod.boolean(),
+  "approxStudents": zod.string().nullable(),
+  "contacts": zod.array(zod.object({
+  "id": zod.number(),
+  "email": zod.string(),
+  "name": zod.string().nullable()
+})),
+  "sendHistory": zod.array(zod.object({
+  "id": zod.number(),
+  "schoolId": zod.number(),
+  "schoolName": zod.string(),
+  "recipients": zod.array(zod.string()),
+  "subject": zod.string(),
+  "isFollowUp": zod.boolean(),
+  "delivered": zod.boolean(),
+  "sentBy": zod.string(),
+  "sentAt": zod.string(),
+  "source": zod.enum(['manual', 'automatic']),
+  "templateName": zod.string().nullable()
+})),
+  "autoSend": zod.object({
+  "skipped": zod.boolean(),
+  "scheduledDate": zod.string().nullable()
+})
 })
 
 
@@ -451,7 +716,9 @@ export const GetEmailSendsResponseItem = zod.object({
   "isFollowUp": zod.boolean(),
   "delivered": zod.boolean(),
   "sentBy": zod.string(),
-  "sentAt": zod.string()
+  "sentAt": zod.string(),
+  "source": zod.enum(['manual', 'automatic']),
+  "templateName": zod.string().nullable()
 })
 export const GetEmailSendsResponse = zod.array(GetEmailSendsResponseItem)
 
@@ -471,7 +738,8 @@ export const SendEmailsBody = zod.object({
   "emails": zod.array(zod.string()).min(1)
 })).min(1),
   "subject": zod.string().min(1),
-  "message": zod.string().min(1)
+  "message": zod.string().min(1),
+  "templateName": zod.string().optional()
 })
 
 export const SendEmailsResponse = zod.object({
@@ -486,7 +754,9 @@ export const SendEmailsResponse = zod.object({
   "isFollowUp": zod.boolean(),
   "delivered": zod.boolean(),
   "sentBy": zod.string(),
-  "sentAt": zod.string()
+  "sentAt": zod.string(),
+  "source": zod.enum(['manual', 'automatic']),
+  "templateName": zod.string().nullable()
 })),
   "errors": zod.array(zod.string())
 })

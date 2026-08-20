@@ -14,4 +14,5 @@ export interface SendEmailsInput {
   subject: string;
   /** @minLength 1 */
   message: string;
+  templateName?: string;
 }

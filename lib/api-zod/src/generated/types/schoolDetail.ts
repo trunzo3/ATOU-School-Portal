@@ -5,7 +5,9 @@
  * ATOU workshop logistics API
  * OpenAPI spec version: 0.1.0
  */
+import type { AutoSendInfo } from './autoSendInfo';
 import type { Contact } from './contact';
+import type { EmailSendRecord } from './emailSendRecord';
 
 export interface SchoolDetail {
   id: number;
@@ -18,4 +20,6 @@ export interface SchoolDetail {
   /** @nullable */
   approxStudents: string | null;
   contacts: Contact[];
+  sendHistory: EmailSendRecord[];
+  autoSend: AutoSendInfo;
 }

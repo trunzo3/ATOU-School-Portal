@@ -5,6 +5,7 @@
  * ATOU workshop logistics API
  * OpenAPI spec version: 0.1.0
  */
+import type { EmailSendRecordSource } from './emailSendRecordSource';
 
 export interface EmailSendRecord {
   id: number;
@@ -16,4 +17,7 @@ export interface EmailSendRecord {
   delivered: boolean;
   sentBy: string;
   sentAt: string;
+  source: EmailSendRecordSource;
+  /** @nullable */
+  templateName: string | null;
 }

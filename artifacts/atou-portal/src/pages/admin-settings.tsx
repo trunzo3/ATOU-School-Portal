@@ -8,6 +8,7 @@ import {
   getGetEmailStatusQueryKey,
 } from "@workspace/api-client-react"
 import { AdminLayout } from "@/components/layout/admin-layout"
+import { AutomationEmailsCard } from "@/components/shared/automation-emails-card"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -226,6 +227,8 @@ export function AdminSettings() {
             </form>
           </CardContent>
         </Card>
+
+        <AutomationEmailsCard />
 
         <Card>
           <CardHeader>

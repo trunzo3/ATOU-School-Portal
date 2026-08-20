@@ -191,6 +191,35 @@ export interface SchoolRow {
   pendingSendDate: string | null;
 }
 
+export type EmailSendRecordSource = typeof EmailSendRecordSource[keyof typeof EmailSendRecordSource];
+
+
+export const EmailSendRecordSource = {
+  manual: 'manual',
+  automatic: 'automatic',
+} as const;
+
+export interface EmailSendRecord {
+  id: number;
+  schoolId: number;
+  schoolName: string;
+  recipients: string[];
+  subject: string;
+  isFollowUp: boolean;
+  delivered: boolean;
+  sentBy: string;
+  sentAt: string;
+  source: EmailSendRecordSource;
+  /** @nullable */
+  templateName: string | null;
+}
+
+export interface AutoSendInfo {
+  skipped: boolean;
+  /** @nullable */
+  scheduledDate: string | null;
+}
+
 export interface SchoolDetail {
   id: number;
   name: string;
@@ -202,6 +231,12 @@ export interface SchoolDetail {
   /** @nullable */
   approxStudents: string | null;
   contacts: Contact[];
+  sendHistory: EmailSendRecord[];
+  autoSend: AutoSendInfo;
+}
+
+export interface AutoSendSkipInput {
+  skipped: boolean;
 }
 
 export interface SchoolLockUpdate {
@@ -230,18 +265,6 @@ export interface TestEmailResult {
   providerId: string | null;
 }
 
-export interface EmailSendRecord {
-  id: number;
-  schoolId: number;
-  schoolName: string;
-  recipients: string[];
-  subject: string;
-  isFollowUp: boolean;
-  delivered: boolean;
-  sentBy: string;
-  sentAt: string;
-}
-
 export interface SendEmailsItem {
   schoolId: number;
   /** @minItems 1 */
@@ -255,6 +278,7 @@ export interface SendEmailsInput {
   subject: string;
   /** @minLength 1 */
   message: string;
+  templateName?: string;
 }
 
 export interface SendEmailsResult {
@@ -312,6 +336,178 @@ export interface InfoPageUpdate {
 export interface PagesExport {
   exportedAt: string;
   pages: InfoPage[];
+}
+
+export interface AutoLogisticsSettings {
+  enabled: boolean;
+  daysBefore: number;
+  templateId: string;
+}
+
+export interface WeeklySummarySettings {
+  enabled: boolean;
+  dayOfWeek: number;
+  daysAhead: number;
+  recipients: string[];
+  /** @nullable */
+  lastSentAt: string | null;
+}
+
+export interface AutomationSettings {
+  logistics: AutoLogisticsSettings;
+  weekly: WeeklySummarySettings;
+}
+
+export interface AutoLogisticsInput {
+  enabled: boolean;
+  /**
+     * @minimum 1
+     * @maximum 365
+     */
+  daysBefore: number;
+  /** @minLength 1 */
+  templateId: string;
+}
+
+export interface WeeklySummaryInput {
+  enabled: boolean;
+  /**
+     * @minimum 0
+     * @maximum 6
+     */
+  dayOfWeek: number;
+  /**
+     * @minimum 1
+     * @maximum 365
+     */
+  daysAhead: number;
+  recipients: string[];
+}
+
+export interface SummaryCounts {
+  workshops: number;
+  complete: number;
+  partial: number;
+  untouched: number;
+}
+
+export interface SummarySentWaiting {
+  schoolId: number;
+  name: string;
+  lastSentAt: string;
+  daysWaiting: number;
+}
+
+export interface SummaryNotSent {
+  schoolId: number;
+  name: string;
+  workshopDate: string;
+  daysUntil: number;
+}
+
+export interface SummaryMissingCounts {
+  schoolId: number;
+  name: string;
+  missing: number;
+  total: number;
+}
+
+export interface SummaryConflict {
+  schoolId: number;
+  name: string;
+  description: string;
+}
+
+export interface SummaryLockedGap {
+  schoolId: number;
+  name: string;
+  gaps: string;
+}
+
+export interface SummaryComingUp {
+  schoolId: number;
+  name: string;
+  workshopDate: string;
+  stillOpen: string;
+  complete: boolean;
+}
+
+export interface SummaryScheduledSend {
+  schoolId: number;
+  name: string;
+  sendDate: string;
+  workshopDate: string;
+}
+
+export type SummaryNewAnswerStatus = typeof SummaryNewAnswerStatus[keyof typeof SummaryNewAnswerStatus];
+
+
+export const SummaryNewAnswerStatus = {
+  complete: 'complete',
+  partial: 'partial',
+} as const;
+
+export interface SummaryNewAnswer {
+  schoolId: number;
+  name: string;
+  status: SummaryNewAnswerStatus;
+  date: string;
+}
+
+export interface SummaryChange {
+  schoolId: number;
+  name: string;
+  label: string;
+  oldValue: string;
+  newValue: string;
+  at: string;
+}
+
+export type SummaryEmailGroupSource = typeof SummaryEmailGroupSource[keyof typeof SummaryEmailGroupSource];
+
+
+export const SummaryEmailGroupSource = {
+  manual: 'manual',
+  automatic: 'automatic',
+} as const;
+
+export interface SummaryEmailGroup {
+  label: string;
+  schools: number;
+  source: SummaryEmailGroupSource;
+}
+
+export type SummaryReportNeedsAttention = {
+  sentWaiting: SummarySentWaiting[];
+  notSent: SummaryNotSent[];
+  missingCounts: SummaryMissingCounts[];
+  conflicts: SummaryConflict[];
+  lockedWithGaps: SummaryLockedGap[];
+};
+
+export type SummaryReportScheduledSends = {
+  enabled: boolean;
+  items: SummaryScheduledSend[];
+};
+
+export type SummaryReportSinceLastWeek = {
+  from: string;
+  to: string;
+  newAnswers: SummaryNewAnswer[];
+  changes: SummaryChange[];
+  emailsSent: SummaryEmailGroup[];
+};
+
+export interface SummaryReport {
+  asOf: string;
+  windowDays: number;
+  windowStart: string;
+  windowEnd: string;
+  counts: SummaryCounts;
+  needsAttention: SummaryReportNeedsAttention;
+  comingUp: SummaryComingUp[];
+  scheduledSends: SummaryReportScheduledSends;
+  sinceLastWeek: SummaryReportSinceLastWeek;
 }
 
 export interface AirtableSettings {

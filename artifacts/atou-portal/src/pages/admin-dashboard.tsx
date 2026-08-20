@@ -40,16 +40,27 @@ const DEFAULT_STATE: DashState = {
 }
 
 function loadDashState(): DashState {
+  let state = DEFAULT_STATE
   try {
     const raw = sessionStorage.getItem(DASH_STATE_KEY)
     if (raw) {
       const saved = { ...DEFAULT_STATE, ...JSON.parse(raw) }
       // The "untouched" summary card was removed; clear any saved filter for it.
       if ((saved.summaryFilter as string) === "untouched") saved.summaryFilter = "all"
-      return saved
+      state = saved
     }
   } catch { /* fall through */ }
-  return DEFAULT_STATE
+  // Links from the weekly summary page carry filters in the URL
+  // (/admin?from=…&to=…&status=…); they win over any saved view.
+  const params = new URLSearchParams(window.location.search)
+  if (params.has("from") || params.has("to") || params.has("status")) {
+    state = { ...DEFAULT_STATE, dateFrom: params.get("from") ?? "", dateTo: params.get("to") ?? "" }
+    const status = params.get("status")
+    if (status === "complete" || status === "incomplete" || status === "partial" || status === "untouched") {
+      state.completeness = status
+    }
+  }
+  return state
 }
 
 const SEND_STATUS_LABEL: Record<string, string> = {
@@ -144,9 +155,11 @@ export function AdminDashboard() {
       if (state.dateFrom && (!s.workshopDate || s.workshopDate < state.dateFrom)) return false
       if (state.dateTo && (!s.workshopDate || s.workshopDate > state.dateTo)) return false
       if (state.sendStatus !== "all" && s.sendStatus !== state.sendStatus) return false
+      const answeredAny = s.questionStates.some(question => question.answered)
       if (state.completeness === "complete" && s.missingCount > 0) return false
       if (state.completeness === "incomplete" && s.missingCount === 0) return false
-      const answeredAny = s.questionStates.some(question => question.answered)
+      if (state.completeness === "partial" && (s.missingCount === 0 || !answeredAny)) return false
+      if (state.completeness === "untouched" && answeredAny) return false
       if (state.summaryFilter === "complete" && s.missingCount > 0) return false
       if (state.summaryFilter === "partial" && (s.missingCount === 0 || !answeredAny)) return false
       if (state.summaryFilter === "locked" && !s.locked) return false
@@ -294,6 +307,8 @@ export function AdminDashboard() {
                 <SelectItem value="all">Any answer status</SelectItem>
                 <SelectItem value="complete">All answers in</SelectItem>
                 <SelectItem value="incomplete">Missing answers</SelectItem>
+                <SelectItem value="partial">Partially answered</SelectItem>
+                <SelectItem value="untouched">Nothing entered yet</SelectItem>
               </SelectContent>
             </Select>
             {(state.search || state.dateFrom || state.dateTo || state.sendStatus !== "all" || state.completeness !== "all" || state.summaryFilter !== "all" || state.sort !== "date") && (

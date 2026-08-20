@@ -5,4 +5,5 @@
 - [School email signature policy](school-email-signature.md) — one body-authored signature, never append content at send time; legacy WORKSHOP DATE marker also merges.
 - [Teacher count completeness rule](teacher-count-completeness.md) — studentCount 0 means "not entered"; missing counts make a school partial on every surface, one shared rule and phrasing.
 - [Date-only rendering rule](date-only-rendering.md) — bare YYYY-MM-DD must format as UTC calendar dates; Pacific timestamp parsing shifted every date one day early until Aug 2026 fix.
-- [Pending Send display rule](pending-send-rule.md) — computed workshop−60d for never-sent schools until workshop <30 days out; no real email scheduler exists.
+- [Pending Send display rule](pending-send-rule.md) — workshop−daysBefore for never-sent, unskipped schools; past-due dates show as dash (automation fires on the exact day only).
+- [Automation send-claim protocol](automation-send-claims.md) — every automatic email claims its send in the DB before calling Resend; in-server scheduler runs every 15 min, overlap-safe.

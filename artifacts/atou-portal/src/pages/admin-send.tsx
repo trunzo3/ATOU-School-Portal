@@ -86,6 +86,7 @@ export function AdminSend() {
   const [showPreview, setShowPreview] = useState(false)
   const [addQuery, setAddQuery] = useState("")
   const [confirmation, setConfirmation] = useState<string | null>(null)
+  const [logFilter, setLogFilter] = useState<"all" | "manual" | "automatic">("all")
   const consumedRef = useRef(false)
 
   const selectedTemplate = (templates || []).find(t => t.id === selectedTemplateId)
@@ -190,7 +191,7 @@ export function AdminSend() {
       .filter(i => i.emails.length > 0)
     if (items.length === 0) return
     setConfirmation(null)
-    sendEmails.mutate({ data: { items, subject, message } }, {
+    sendEmails.mutate({ data: { items, subject, message, ...(selectedTemplate ? { templateName: selectedTemplate.name } : {}) } }, {
       onSuccess: (result) => {
         const n = result.sends.length
         const m = result.sends.reduce((sum, s) => sum + s.recipients.length, 0)
@@ -482,45 +483,80 @@ export function AdminSend() {
 
         {/* Sent log */}
         <Card className="border-t-4 border-t-secondary">
-          <CardHeader>
-            <CardTitle>Sent Log</CardTitle>
-            <CardDescription>Past sends, newest first.</CardDescription>
+          <CardHeader className="flex-row items-start justify-between gap-4 space-y-0">
+            <div>
+              <CardTitle>Sent Log</CardTitle>
+              <CardDescription className="mt-1.5">
+                Past sends, newest first. The colored bar shows whether an email was sent
+                by hand or automatically.
+              </CardDescription>
+            </div>
+            <Select value={logFilter} onValueChange={v => setLogFilter(v as typeof logFilter)}>
+              <SelectTrigger className="w-[170px] flex-shrink-0" aria-label="Filter the sent log">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All sends</SelectItem>
+                <SelectItem value="manual">Sent by hand</SelectItem>
+                <SelectItem value="automatic">Sent automatically</SelectItem>
+              </SelectContent>
+            </Select>
           </CardHeader>
           <CardContent>
-            {!sends || sends.length === 0 ? (
-              <p className="text-muted-foreground bg-muted/20 p-12 rounded-xl text-center border border-dashed border-border/60">
-                Nothing has been sent yet.
-              </p>
-            ) : (
-              <div className="divide-y">
-                {sends.map(send => (
-                  <div key={send.id} className="py-3 flex items-start justify-between gap-4">
-                    <div className="min-w-0">
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <Link href={`/admin/schools/${send.schoolId}`} className="font-medium text-primary hover:underline">
-                          {send.schoolName}
-                        </Link>
-                        <Badge variant={send.isFollowUp ? "secondary" : "default"}>
-                          {send.isFollowUp ? "Follow-up" : "First send"}
-                        </Badge>
-                        {!send.delivered && (
-                          <Badge variant="outline" className="text-amber-700 border-amber-300">Not delivered</Badge>
-                        )}
+            {(() => {
+              const visibleSends = (sends || []).filter(s => logFilter === "all" || s.source === logFilter)
+              if (!sends || sends.length === 0) {
+                return (
+                  <p className="text-muted-foreground bg-muted/20 p-12 rounded-xl text-center border border-dashed border-border/60">
+                    Nothing has been sent yet.
+                  </p>
+                )
+              }
+              if (visibleSends.length === 0) {
+                return (
+                  <p className="text-muted-foreground bg-muted/20 p-12 rounded-xl text-center border border-dashed border-border/60">
+                    No {logFilter === "manual" ? "by-hand" : "automatic"} sends yet.
+                  </p>
+                )
+              }
+              return (
+                <div className="divide-y">
+                  {visibleSends.map(send => (
+                    <div
+                      key={send.id}
+                      className={`py-3 pl-3 border-l-4 ${send.source === "automatic" ? "border-l-secondary" : "border-l-primary"} flex items-start justify-between gap-4`}
+                    >
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <Link href={`/admin/schools/${send.schoolId}`} className="font-medium text-primary hover:underline">
+                            {send.schoolName}
+                          </Link>
+                          <Badge variant={send.isFollowUp ? "secondary" : "default"}>
+                            {send.isFollowUp ? "Follow-up" : "First send"}
+                          </Badge>
+                          <Badge variant="outline" className={send.source === "automatic" ? "text-secondary border-secondary/40" : "text-primary border-primary/40"}>
+                            {send.source === "automatic" ? "Automatic" : "By hand"}
+                          </Badge>
+                          {!send.delivered && (
+                            <Badge variant="outline" className="text-amber-700 border-amber-300">Not delivered</Badge>
+                          )}
+                        </div>
+                        <p className="text-sm text-muted-foreground mt-1 break-words">
+                          To: {send.recipients.join(", ")}
+                        </p>
+                        <p className="text-xs text-muted-foreground mt-0.5">
+                          {formatPacificTime(send.sentAt)} · by {send.sentBy}
+                          {send.templateName ? ` · "${send.templateName}" template` : ""}
+                        </p>
                       </div>
-                      <p className="text-sm text-muted-foreground mt-1 break-words">
-                        To: {send.recipients.join(", ")}
-                      </p>
-                      <p className="text-xs text-muted-foreground mt-0.5">
-                        {formatPacificTime(send.sentAt)} · by {send.sentBy}
-                      </p>
+                      <Button variant="outline" size="sm" className="border-secondary/35 text-secondary hover:bg-secondary hover:text-secondary-foreground" onClick={() => resend(send.schoolId, send.recipients)}>
+                        <Mail className="h-4 w-4 mr-2" /> Resend
+                      </Button>
                     </div>
-                    <Button variant="outline" size="sm" className="border-secondary/35 text-secondary hover:bg-secondary hover:text-secondary-foreground" onClick={() => resend(send.schoolId, send.recipients)}>
-                      <Mail className="h-4 w-4 mr-2" /> Resend
-                    </Button>
-                  </div>
-                ))}
-              </div>
-            )}
+                  ))}
+                </div>
+              )
+            })()}
           </CardContent>
         </Card>
       </div>

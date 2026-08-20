@@ -1,6 +1,6 @@
 import { Link, useLocation } from "wouter"
 import { useGetAdminMe, useAdminLogout, getGetAdminMeQueryKey } from "@workspace/api-client-react"
-import { Users, FileText, Settings, LogOut, Send, LayoutDashboard, Menu } from "lucide-react"
+import { Users, FileText, Settings, LogOut, Send, LayoutDashboard, Menu, ClipboardList } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { AtouLogo } from "@/components/shared/atou-logo"
 import { useState } from "react"
@@ -29,6 +29,7 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
 
   const navLinks = [
     { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
+    { href: "/admin/summary", label: "Weekly Summary", icon: ClipboardList },
     { href: "/admin/send", label: "Send Emails", icon: Send },
     { href: "/admin/pages", label: "Info Pages", icon: FileText },
     { href: "/admin/admins", label: "Admin Users", icon: Users },

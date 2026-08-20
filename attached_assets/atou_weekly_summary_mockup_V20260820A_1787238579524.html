@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Weekly Summary — A Touch of Understanding</title>
+<style>
+  :root{
+    --ink:#12303a; --muted:#5b7480; --faint:#8fa3ac;
+    --teal:#1f6f7e; --line:#e3e6e8; --hair:#eceef0;
+    --red:#c8443a; --green:#2f8a5b; --amber:#c08a1e;
+    --bg:#f2f5f6; --card:#ffffff;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+       font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+       font-size:14px;line-height:1.55}
+  .wrap{max-width:920px;margin:0 auto;padding:28px 24px 64px}
+  h1,h2,h3{font-family:Georgia,"Times New Roman",serif;font-weight:600;margin:0}
+  h1{font-size:30px;letter-spacing:-.2px}
+  h2{font-size:19px}
+  h3{font-size:15px}
+  .eyebrow{font-size:11.5px;letter-spacing:.09em;text-transform:uppercase;
+           color:var(--teal);font-weight:600;margin-bottom:5px}
+  .asof{color:var(--muted);font-size:13px;margin-top:6px}
+
+  .topbar{background:var(--card);border-bottom:1px solid var(--line);
+          padding:16px 24px;display:flex;align-items:center;gap:12px}
+  .mark{width:34px;height:34px;border-radius:50%;background:var(--teal);flex:none}
+  .brand{font-family:Georgia,serif;font-size:17px;font-weight:600}
+  .brandsub{font-size:10.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--teal)}
+
+  .tiles{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:22px 0 30px}
+  .tile{background:var(--card);border:1px solid var(--line);border-radius:11px;
+        padding:15px 16px}
+  .tile .n{font-family:Georgia,serif;font-size:27px;line-height:1.1}
+  .tile .l{font-size:11px;letter-spacing:.07em;text-transform:uppercase;
+           color:var(--muted);margin-top:3px}
+
+  section{margin-bottom:30px}
+  .sechead{display:flex;align-items:baseline;gap:9px;margin-bottom:11px}
+  .count{font-size:12px;color:var(--muted)}
+
+  .card{background:var(--card);border:1px solid var(--line);border-radius:11px;
+        overflow:hidden}
+  .grp{padding:13px 17px;border-bottom:1px solid var(--hair)}
+  .grp:last-child{border-bottom:none}
+  .grp h3{margin-bottom:7px;display:flex;align-items:center;gap:7px}
+  .dot{width:7px;height:7px;border-radius:50%;flex:none}
+  .row{display:flex;justify-content:space-between;gap:14px;padding:5px 0;
+       font-size:13.5px;border-top:1px solid var(--hair)}
+  .row:first-of-type{border-top:none}
+  .row a{color:var(--teal);text-decoration:none}
+  .meta{color:var(--muted);font-size:12.5px;white-space:nowrap}
+  .warn{color:var(--red)}
+  .amber{color:var(--amber)}
+  .empty{color:var(--faint);font-size:13px;font-style:italic}
+
+  table{width:100%;border-collapse:collapse;font-size:13.5px}
+  th{text-align:left;font-size:11px;letter-spacing:.07em;text-transform:uppercase;
+     color:var(--muted);font-weight:600;padding:11px 17px;background:#f7f9fa}
+  td{padding:11px 17px;border-top:1px solid var(--hair);vertical-align:top}
+  td a{color:var(--teal);text-decoration:none}
+  .ok{color:var(--green)}
+
+  .foot{display:flex;justify-content:space-between;align-items:center;
+        border-top:1px solid var(--line);padding-top:18px;margin-top:34px}
+  .btns{display:flex;gap:9px}
+  button{font:inherit;font-size:13px;padding:8px 15px;border-radius:999px;
+         border:1px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer}
+  button.p{background:var(--teal);border-color:var(--teal);color:#fff}
+  .foot a{color:var(--teal);text-decoration:none;font-size:13px}
+
+  @media print{
+    body{background:#fff}
+    .topbar,.foot{display:none}
+    .card,.tile{border-color:#ccc}
+  }
+  @media (max-width:640px){
+    .tiles{grid-template-columns:repeat(2,1fr)}
+    .wrap{padding:20px 14px 48px}
+  }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="mark"></div>
+  <div>
+    <div class="brand">A Touch of Understanding</div>
+    <div class="brandsub">Workshop Logistics Portal</div>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <div class="eyebrow">Program Operations</div>
+  <h1>Weekly Summary</h1>
+  <p class="asof">Current as of Thursday, August 20, 2026 at 7:52 AM · Covering the next 30 days</p>
+
+  <div class="tiles">
+    <div class="tile"><div class="n">14</div><div class="l">Workshops</div></div>
+    <div class="tile"><div class="n" style="color:var(--green)">6</div><div class="l">Complete</div></div>
+    <div class="tile"><div class="n" style="color:var(--amber)">5</div><div class="l">Partial</div></div>
+    <div class="tile"><div class="n" style="color:var(--red)">3</div><div class="l">Untouched</div></div>
+  </div>
+
+  <section>
+    <div class="sechead"><h2>Needs attention</h2><span class="count">9 items</span></div>
+    <div class="card">
+
+      <div class="grp">
+        <h3><span class="dot" style="background:var(--amber)"></span>Sent and waiting</h3>
+        <div class="row"><a href="#">Del Paso Manor Elementary</a><span class="meta">Sent Jul 22 · 29 days</span></div>
+        <div class="row"><a href="#">Sierra Oaks Elementary</a><span class="meta">Sent Aug 4 · 16 days</span></div>
+        <div class="row"><a href="#">Green Oaks Fundamental</a><span class="meta">Sent Aug 11 · 9 days</span></div>
+      </div>
+
+      <div class="grp">
+        <h3><span class="dot" style="background:var(--red)"></span>Not sent, inside 60 days</h3>
+        <div class="row"><a href="#">Cottage Hill Elementary</a><span class="meta warn">Workshop Sep 4 · 15 days</span></div>
+        <div class="row"><a href="#">Oakmont High School</a><span class="meta warn">Workshop Sep 18 · 29 days</span></div>
+      </div>
+
+      <div class="grp">
+        <h3><span class="dot" style="background:var(--red)"></span>Missing student counts</h3>
+        <div class="row"><a href="#">Mariposa Avenue Elementary</a><span class="meta">2 of 4 teachers</span></div>
+        <div class="row"><a href="#">Green Oaks Fundamental</a><span class="meta">1 of 3 teachers</span></div>
+      </div>
+
+      <div class="grp">
+        <h3><span class="dot" style="background:var(--amber)"></span>Schedule conflicts</h3>
+        <div class="row"><a href="#">Sierra Oaks Elementary</a><span class="meta">Lunch overlaps morning sessions</span></div>
+      </div>
+
+      <div class="grp">
+        <h3><span class="dot" style="background:var(--red)"></span>Locked with gaps</h3>
+        <div class="row"><a href="#">Twin Rivers Elementary</a><span class="meta">Speaker area not provided</span></div>
+      </div>
+
+    </div>
+  </section>
+
+  <section>
+    <div class="sechead"><h2>Coming up</h2><span class="count">Next 30 days</span></div>
+    <div class="card">
+      <table>
+        <thead><tr><th>School</th><th>Date</th><th>Still open</th></tr></thead>
+        <tbody>
+          <tr><td><a href="#">Cottage Hill Elementary</a></td><td>Sep 4</td><td class="warn">Everything — not yet sent</td></tr>
+          <tr><td><a href="#">Green Oaks Fundamental</a></td><td>Sep 9</td><td class="warn">1 student count</td></tr>
+          <tr><td><a href="#">Del Paso Manor Elementary</a></td><td>Sep 12</td><td class="ok">Nothing — complete</td></tr>
+          <tr><td><a href="#">Oakmont High School</a></td><td>Sep 18</td><td class="warn">Everything — not yet sent</td></tr>
+          <tr><td><a href="#">Sierra Oaks Elementary</a></td><td>Sep 23</td><td class="warn">Schedule conflict</td></tr>
+          <tr><td><a href="#">Mariposa Avenue Elementary</a></td><td>Sep 30</td><td class="warn">2 student counts, speaker area</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section>
+    <div class="sechead"><h2>Scheduled sends</h2></div>
+    <div class="card">
+      <table>
+        <thead><tr><th>School</th><th>Goes out</th><th>Workshop</th></tr></thead>
+        <tbody>
+          <tr><td><a href="#">Twin Rivers Elementary</a></td><td>Aug 24</td><td>Oct 23</td></tr>
+          <tr><td><a href="#">Whitney Avenue Elementary</a></td><td>Sep 2</td><td>Nov 1</td></tr>
+          <tr><td><a href="#">Rocklin Elementary</a></td><td>Sep 14</td><td>Nov 13</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section>
+    <div class="sechead"><h2>Since last week</h2><span class="count">Aug 13 – Aug 20</span></div>
+    <div class="card">
+
+      <div class="grp">
+        <h3>New answers</h3>
+        <div class="row"><a href="#">Del Paso Manor Elementary</a><span class="meta">Completed Aug 18</span></div>
+        <div class="row"><a href="#">Green Oaks Fundamental</a><span class="meta">Partial, Aug 19</span></div>
+      </div>
+
+      <div class="grp">
+        <h3>Changes</h3>
+        <div class="row"><span>Sierra Oaks — student count <span class="meta">75 → 109</span></span><span class="meta">Aug 17, 4:12 PM</span></div>
+        <div class="row"><span>Mariposa Avenue — start time <span class="meta">9:00 AM → 8:30 AM</span></span><span class="meta">Aug 19, 11:04 AM</span></div>
+      </div>
+
+      <div class="grp">
+        <h3>Emails sent</h3>
+        <div class="row"><span>Logistics request · 3 schools</span><span class="meta">Automatic</span></div>
+        <div class="row"><span>Logistics follow-up · 2 schools</span><span class="meta">By Pam</span></div>
+      </div>
+
+    </div>
+  </section>
+
+  <div class="foot">
+    <a href="#">Open the dashboard →</a>
+    <div class="btns">
+      <button>Download CSV</button>
+      <button class="p">Print</button>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

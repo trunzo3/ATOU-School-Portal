@@ -10,6 +10,7 @@ import { AdminLogin } from "@/pages/admin-login"
 import { ForgotPassword } from "@/pages/forgot-password"
 import { ResetPassword } from "@/pages/reset-password"
 import { AdminDashboard } from "@/pages/admin-dashboard"
+import { AdminSummary } from "@/pages/admin-summary"
 import { AdminSchoolDetail } from "@/pages/admin-school-detail"
 import { AdminSend } from "@/pages/admin-send"
 import { AdminPages } from "@/pages/admin-pages"
@@ -30,6 +31,7 @@ function Router() {
         <Route path="/forgot-password" component={ForgotPassword} />
         <Route path="/reset-password" component={ResetPassword} />
         <Route path="/admin" component={AdminDashboard} />
+        <Route path="/admin/summary" component={AdminSummary} />
         <Route path="/admin/schools/:id" component={AdminSchoolDetail} />
         <Route path="/admin/send" component={AdminSend} />
         <Route path="/admin/pages" component={AdminPages} />

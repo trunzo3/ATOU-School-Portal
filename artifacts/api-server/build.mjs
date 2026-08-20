@@ -15,7 +15,13 @@ async function buildAll() {
   await rm(distDir, { recursive: true, force: true });
 
   await esbuild({
-    entryPoints: [path.resolve(artifactDir, "src/index.ts")],
+    // Two entry points: the API server and the daily automation script
+    // (run by a Scheduled Deployment). Outputs land at dist/index.mjs and
+    // dist/jobs/daily.mjs, mirroring their paths under src/.
+    entryPoints: [
+      path.resolve(artifactDir, "src/index.ts"),
+      path.resolve(artifactDir, "src/jobs/daily.ts"),
+    ],
     platform: "node",
     bundle: true,
     format: "esm",

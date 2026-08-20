@@ -286,6 +286,102 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/AdminSummary"
+  /admin/summary-report:
+    get:
+      operationId: getSummaryReport
+      tags: [admin]
+      summary: The full weekly-summary report for the admin summary page
+      responses:
+        "200":
+          description: Report
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SummaryReport"
+  /admin/automation:
+    get:
+      operationId: getAutomationSettings
+      tags: [admin]
+      summary: Automatic email settings (logistics requests + weekly summary)
+      responses:
+        "200":
+          description: Settings
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AutomationSettings"
+  /admin/automation/logistics:
+    put:
+      operationId: updateAutoLogistics
+      tags: [admin]
+      summary: Update the automatic logistics request settings
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AutoLogisticsInput"
+      responses:
+        "200":
+          description: Updated settings
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AutomationSettings"
+        "400":
+          description: Invalid settings
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorMessage"
+  /admin/automation/weekly:
+    put:
+      operationId: updateWeeklySummary
+      tags: [admin]
+      summary: Update the weekly summary email settings
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/WeeklySummaryInput"
+      responses:
+        "200":
+          description: Updated settings
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AutomationSettings"
+        "400":
+          description: Invalid settings
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorMessage"
+  /admin/automation/weekly/send-now:
+    post:
+      operationId: sendWeeklySummaryNow
+      tags: [admin]
+      summary: Send the weekly summary email to the saved recipients right now
+      responses:
+        "200":
+          description: Sent; settings with the new last-sent time
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AutomationSettings"
+        "400":
+          description: No recipients saved yet
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorMessage"
+        "503":
+          description: Resend is not configured or rejected the email
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorMessage"
   /admin/schools:
     get:
       operationId: getAdminSchools
@@ -333,6 +429,26 @@ paths:
           application/json:
             schema:
               $ref: "#/components/schemas/SchoolLockUpdate"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SchoolDetail"
+  /admin/schools/{id}/auto-send:
+    patch:
+      operationId: setAutoSendSkip
+      tags: [admin]
+      summary: Skip or restore a school's automatic logistics email
+      parameters:
+        - $ref: "#/components/parameters/SchoolId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AutoSendSkipInput"
       responses:
         "200":
           description: Updated
@@ -920,7 +1036,26 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/Contact"
-      required: [id, name, code, link, workshopDate, locked, approxStudents, contacts]
+        sendHistory:
+          type: array
+          items:
+            $ref: "#/components/schemas/EmailSendRecord"
+        autoSend:
+          $ref: "#/components/schemas/AutoSendInfo"
+      required: [id, name, code, link, workshopDate, locked, approxStudents, contacts, sendHistory, autoSend]
+    AutoSendInfo:
+      type: object
+      properties:
+        skipped: { type: boolean }
+        # The day the automatic logistics email will go out, when automatic
+        # sending is on and this school still has one coming; otherwise null.
+        scheduledDate: { type: ["string", "null"] }
+      required: [skipped, scheduledDate]
+    AutoSendSkipInput:
+      type: object
+      properties:
+        skipped: { type: boolean }
+      required: [skipped]
     SchoolLockUpdate:
       type: object
       properties:
@@ -964,7 +1099,9 @@ components:
         delivered: { type: boolean }
         sentBy: { type: string }
         sentAt: { type: string }
-      required: [id, schoolId, schoolName, recipients, subject, isFollowUp, delivered, sentBy, sentAt]
+        source: { type: string, enum: [manual, automatic] }
+        templateName: { type: ["string", "null"] }
+      required: [id, schoolId, schoolName, recipients, subject, isFollowUp, delivered, sentBy, sentAt, source, templateName]
     SendEmailsItem:
       type: object
       properties:
@@ -984,6 +1121,9 @@ components:
             $ref: "#/components/schemas/SendEmailsItem"
         subject: { type: string, minLength: 1 }
         message: { type: string, minLength: 1 }
+        # Which saved template the message was loaded from, if any; recorded
+        # in the sent log so Pam can tell requests from follow-ups.
+        templateName: { type: string }
       required: [items, subject, message]
     SendEmailsResult:
       type: object
@@ -1051,6 +1191,203 @@ components:
           items:
             $ref: "#/components/schemas/InfoPage"
       required: [exportedAt, pages]
+    AutoLogisticsSettings:
+      type: object
+      properties:
+        enabled: { type: boolean }
+        daysBefore: { type: number }
+        templateId: { type: string }
+      required: [enabled, daysBefore, templateId]
+    WeeklySummarySettings:
+      type: object
+      properties:
+        enabled: { type: boolean }
+        # 0 = Sunday … 6 = Saturday, in Pacific time.
+        dayOfWeek: { type: number }
+        daysAhead: { type: number }
+        recipients:
+          type: array
+          items: { type: string }
+        lastSentAt: { type: ["string", "null"] }
+      required: [enabled, dayOfWeek, daysAhead, recipients, lastSentAt]
+    AutomationSettings:
+      type: object
+      properties:
+        logistics:
+          $ref: "#/components/schemas/AutoLogisticsSettings"
+        weekly:
+          $ref: "#/components/schemas/WeeklySummarySettings"
+      required: [logistics, weekly]
+    AutoLogisticsInput:
+      type: object
+      properties:
+        enabled: { type: boolean }
+        daysBefore: { type: number, minimum: 1, maximum: 365 }
+        templateId: { type: string, minLength: 1 }
+      required: [enabled, daysBefore, templateId]
+    WeeklySummaryInput:
+      type: object
+      properties:
+        enabled: { type: boolean }
+        dayOfWeek: { type: number, minimum: 0, maximum: 6 }
+        daysAhead: { type: number, minimum: 1, maximum: 365 }
+        recipients:
+          type: array
+          items: { type: string }
+      required: [enabled, dayOfWeek, daysAhead, recipients]
+    SummaryCounts:
+      type: object
+      properties:
+        workshops: { type: number }
+        complete: { type: number }
+        partial: { type: number }
+        untouched: { type: number }
+      required: [workshops, complete, partial, untouched]
+    SummarySentWaiting:
+      type: object
+      properties:
+        schoolId: { type: number }
+        name: { type: string }
+        lastSentAt: { type: string }
+        daysWaiting: { type: number }
+      required: [schoolId, name, lastSentAt, daysWaiting]
+    SummaryNotSent:
+      type: object
+      properties:
+        schoolId: { type: number }
+        name: { type: string }
+        workshopDate: { type: string }
+        daysUntil: { type: number }
+      required: [schoolId, name, workshopDate, daysUntil]
+    SummaryMissingCounts:
+      type: object
+      properties:
+        schoolId: { type: number }
+        name: { type: string }
+        missing: { type: number }
+        total: { type: number }
+      required: [schoolId, name, missing, total]
+    SummaryConflict:
+      type: object
+      properties:
+        schoolId: { type: number }
+        name: { type: string }
+        description: { type: string }
+      required: [schoolId, name, description]
+    SummaryLockedGap:
+      type: object
+      properties:
+        schoolId: { type: number }
+        name: { type: string }
+        gaps: { type: string }
+      required: [schoolId, name, gaps]
+    SummaryComingUp:
+      type: object
+      properties:
+        schoolId: { type: number }
+        name: { type: string }
+        workshopDate: { type: string }
+        stillOpen: { type: string }
+        complete: { type: boolean }
+      required: [schoolId, name, workshopDate, stillOpen, complete]
+    SummaryScheduledSend:
+      type: object
+      properties:
+        schoolId: { type: number }
+        name: { type: string }
+        sendDate: { type: string }
+        workshopDate: { type: string }
+      required: [schoolId, name, sendDate, workshopDate]
+    SummaryNewAnswer:
+      type: object
+      properties:
+        schoolId: { type: number }
+        name: { type: string }
+        status: { type: string, enum: [complete, partial] }
+        date: { type: string }
+      required: [schoolId, name, status, date]
+    SummaryChange:
+      type: object
+      properties:
+        schoolId: { type: number }
+        name: { type: string }
+        label: { type: string }
+        oldValue: { type: string }
+        newValue: { type: string }
+        at: { type: string }
+      required: [schoolId, name, label, oldValue, newValue, at]
+    SummaryEmailGroup:
+      type: object
+      properties:
+        label: { type: string }
+        schools: { type: number }
+        source: { type: string, enum: [manual, automatic] }
+      required: [label, schools, source]
+    SummaryReport:
+      type: object
+      properties:
+        asOf: { type: string }
+        windowDays: { type: number }
+        windowStart: { type: string }
+        windowEnd: { type: string }
+        counts:
+          $ref: "#/components/schemas/SummaryCounts"
+        needsAttention:
+          type: object
+          properties:
+            sentWaiting:
+              type: array
+              items:
+                $ref: "#/components/schemas/SummarySentWaiting"
+            notSent:
+              type: array
+              items:
+                $ref: "#/components/schemas/SummaryNotSent"
+            missingCounts:
+              type: array
+              items:
+                $ref: "#/components/schemas/SummaryMissingCounts"
+            conflicts:
+              type: array
+              items:
+                $ref: "#/components/schemas/SummaryConflict"
+            lockedWithGaps:
+              type: array
+              items:
+                $ref: "#/components/schemas/SummaryLockedGap"
+          required: [sentWaiting, notSent, missingCounts, conflicts, lockedWithGaps]
+        comingUp:
+          type: array
+          items:
+            $ref: "#/components/schemas/SummaryComingUp"
+        scheduledSends:
+          type: object
+          properties:
+            enabled: { type: boolean }
+            items:
+              type: array
+              items:
+                $ref: "#/components/schemas/SummaryScheduledSend"
+          required: [enabled, items]
+        sinceLastWeek:
+          type: object
+          properties:
+            from: { type: string }
+            to: { type: string }
+            newAnswers:
+              type: array
+              items:
+                $ref: "#/components/schemas/SummaryNewAnswer"
+            changes:
+              type: array
+              items:
+                $ref: "#/components/schemas/SummaryChange"
+            emailsSent:
+              type: array
+              items:
+                $ref: "#/components/schemas/SummaryEmailGroup"
+          required: [from, to, newAnswers, changes, emailsSent]
+      required: [asOf, windowDays, windowStart, windowEnd, counts, needsAttention, comingUp, scheduledSends, sinceLastWeek]
     AirtableSettings:
       type: object
       properties:

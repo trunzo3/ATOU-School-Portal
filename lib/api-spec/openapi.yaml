@@ -989,7 +989,9 @@ components:
       type: object
       properties:
         email: { type: string, minLength: 3 }
-        value: { type: string, minLength: 1 }
+        # Blank is allowed ONLY for schedule_override ("reset to calculated");
+        # the route rejects blank values for every other question key.
+        value: { type: string }
         # When set, and it identifies the latest history entry for this
         # question written by the same person, that entry is updated in
         # place instead of a new one being appended. Used so one edit

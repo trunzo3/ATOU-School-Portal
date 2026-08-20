@@ -13,7 +13,15 @@
 /** Student count at which a school needs three sessions (and lunch times). */
 export const THREE_SESSION_MIN_STUDENTS = 105;
 
-export type ScheduleLine = { label: string; time: string };
+export type ScheduleLine = {
+  label: string;
+  /** Formatted display range, e.g. "8:15 AM – 9:45 AM". */
+  time: string;
+  /** Start of the line in 24-hour "HH:MM" (for editable schedule fields). */
+  start: string;
+  /** End of the line in 24-hour "HH:MM" (for editable schedule fields). */
+  end: string;
+};
 
 /** Machine-readable conflict reasons, parallel to `warnings`. */
 export type ScheduleConflict = "lunch_before_sessions_end" | "lunch_end_not_after_start";
@@ -36,6 +44,12 @@ export function parseHM(s: string): number | null {
   const mm = Number(m[2]);
   if (h > 23 || mm > 59) return null;
   return h * 60 + mm;
+}
+
+/** Format minutes since midnight as 24-hour "HH:MM". */
+function minToHM(mins: number): string {
+  const clamped = ((mins % 1440) + 1440) % 1440;
+  return `${String(Math.floor(clamped / 60)).padStart(2, "0")}:${String(clamped % 60).padStart(2, "0")}`;
 }
 
 /** Format minutes since midnight as "h:mm AM/PM". */
@@ -93,10 +107,16 @@ export function buildSchedule({ workshopTime, lunchStart, lunchEnd, threeSession
   const s1End = start + 90;
   const s2Start = s1End + 15;
   const s2End = s2Start + 90;
+  const line = (label: string, from: number, to: number): ScheduleLine => ({
+    label,
+    time: `${fmtMin(from)} – ${fmtMin(to)}`,
+    start: minToHM(from),
+    end: minToHM(to),
+  });
   const lines: ScheduleLine[] = [
-    { label: "Session 1", time: `${fmtMin(start)} – ${fmtMin(s1End)}` },
-    { label: "Break", time: `${fmtMin(s1End)} – ${fmtMin(s2Start)}` },
-    { label: "Session 2", time: `${fmtMin(s2Start)} – ${fmtMin(s2End)}` },
+    line("Session 1", start, s1End),
+    line("Break", s1End, s2Start),
+    line("Session 2", s2Start, s2End),
   ];
   const warnings: string[] = [];
   const conflicts: ScheduleConflict[] = [];
@@ -115,8 +135,8 @@ export function buildSchedule({ workshopTime, lunchStart, lunchEnd, threeSession
         warnings.push("Lunch end needs to be after lunch start.");
         conflicts.push("lunch_end_not_after_start");
       }
-      lines.push({ label: "Lunch", time: `${fmtMin(ls)} – ${fmtMin(le)}` });
-      if (le > ls) lines.push({ label: "Session 3", time: `${fmtMin(le)} – ${fmtMin(le + 90)}` });
+      lines.push(line("Lunch", ls, le));
+      if (le > ls) lines.push(line("Session 3", le, le + 90));
     }
   }
   return { lines, warnings, conflicts, pending };
@@ -139,4 +159,86 @@ export function describeConflict(conflict: ScheduleConflict): string {
     case "lunch_end_not_after_start":
       return "lunch end time is not after lunch start";
   }
+}
+
+// ---------------------------------------------------------------------------
+// Manual schedule override ("Provisional Schedule (Adjust How You'd Like)")
+//
+// When someone adjusts the provisional schedule by hand, the adjusted times
+// are stored as a regular answer (question key "schedule_override") so the
+// save carries enteredBy/enteredAt and full history like every other answer.
+// The stored value is the serialized text below — deliberately human-readable
+// so history entries, the weekly summary's "changes" list, and anything else
+// that shows raw answer values render as readable schedule text:
+//
+//   Session 1: 8:15 AM – 9:45 AM
+//   Break: 9:45 AM – 10:00 AM
+//   Session 2: 10:00 AM – 11:30 AM
+//
+// Only the times are adjustable; the line labels are fixed.
+
+/** One adjustable schedule line: label plus start/end in 24-hour "HH:MM". */
+export type ScheduleOverrideLine = { label: string; start: string; end: string };
+
+/** The only labels a schedule line can have, in display order. */
+export const SCHEDULE_LINE_LABELS = ["Session 1", "Break", "Session 2", "Lunch", "Session 3"] as const;
+
+/** Format a 24-hour "HH:MM" as "h:mm AM/PM"; unparseable values return "". */
+export function fmtHM(hm: string): string {
+  const mins = parseHM(hm);
+  return mins === null ? "" : fmtMin(mins);
+}
+
+/** Parse "h:mm AM/PM" back into 24-hour "HH:MM", or null. */
+function parse12h(s: string): string | null {
+  const m = /^(\d{1,2}):(\d{2})\s*([AP]M)$/i.exec(s.trim());
+  if (!m) return null;
+  let h = Number(m[1]);
+  const mm = Number(m[2]);
+  if (h < 1 || h > 12 || mm > 59) return null;
+  h = h % 12;
+  if (m[3]!.toUpperCase() === "PM") h += 12;
+  return `${String(h).padStart(2, "0")}:${String(mm).padStart(2, "0")}`;
+}
+
+/** The calculated schedule's lines as adjustable override lines. */
+export function overrideLinesFromSchedule(schedule: ScheduleResult): ScheduleOverrideLine[] {
+  return schedule.lines.map((l) => ({ label: l.label, start: l.start, end: l.end }));
+}
+
+/** Override lines as display lines ({ label, time }) like buildSchedule emits. */
+export function overrideDisplayLines(lines: ScheduleOverrideLine[]): ScheduleLine[] {
+  return lines.map((l) => ({
+    label: l.label,
+    time: `${fmtHM(l.start)} – ${fmtHM(l.end)}`,
+    start: l.start,
+    end: l.end,
+  }));
+}
+
+/** Serialize override lines into the stored (human-readable) answer value. */
+export function serializeScheduleOverride(lines: ScheduleOverrideLine[]): string {
+  return lines.map((l) => `${l.label}: ${fmtHM(l.start)} – ${fmtHM(l.end)}`).join("\n");
+}
+
+/**
+ * Parse a stored schedule-override answer value. Returns null when the value
+ * is blank (no override / reset to calculated) or not a valid serialization —
+ * callers treat null as "use the calculated schedule".
+ */
+export function parseScheduleOverride(value: string | null | undefined): ScheduleOverrideLine[] | null {
+  const trimmed = (value || "").trim();
+  if (!trimmed) return null;
+  const labels = SCHEDULE_LINE_LABELS as readonly string[];
+  const lines: ScheduleOverrideLine[] = [];
+  for (const raw of trimmed.split("\n")) {
+    const m = /^(.+?):\s*(\d{1,2}:\d{2}\s*[AP]M)\s*[–—-]\s*(\d{1,2}:\d{2}\s*[AP]M)$/i.exec(raw.trim());
+    if (!m) return null;
+    const label = m[1]!.trim();
+    const start = parse12h(m[2]!);
+    const end = parse12h(m[3]!);
+    if (!labels.includes(label) || start === null || end === null) return null;
+    lines.push({ label, start, end });
+  }
+  return lines.length > 0 ? lines : null;
 }

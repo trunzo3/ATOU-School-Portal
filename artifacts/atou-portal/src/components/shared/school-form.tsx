@@ -8,8 +8,8 @@ import { StatusBadge } from "@/components/ui/status-badge"
 import { TimePicker } from "@/components/ui/time-picker"
 import { AtouLogo } from "@/components/shared/atou-logo"
 import { formatPacificTime, cn, missingCountWord } from "@/lib/utils"
-import { buildSchedule as buildScheduleLib, computeBreakTimes, effectiveStudentCount, needsThreeSessions as needsThreeSessionsFor } from "@workspace/schedule"
-import { AlertCircle, CalendarDays, Plus, Trash2, Info, Users, Save, CheckCircle2, ChevronRight, Printer } from "lucide-react"
+import { buildSchedule as buildScheduleLib, computeBreakTimes, effectiveStudentCount, fmtHM, needsThreeSessions as needsThreeSessionsFor, overrideLinesFromSchedule, overrideDisplayLines, parseScheduleOverride, serializeScheduleOverride, type ScheduleOverrideLine } from "@workspace/schedule"
+import { AlertCircle, CalendarDays, Plus, Trash2, Info, Users, Save, CheckCircle2, ChevronRight, Printer, RotateCcw } from "lucide-react"
 
 interface SchoolFormProps {
   code: string;
@@ -62,6 +62,13 @@ export function SchoolForm({ code, email, initialAnswers, onSaveAnswer, onSaveTe
   }
   const [lunchStart, setLunchStart] = useState(cleanTime(getQ("lunch_start")?.current?.value))
   const [lunchEnd, setLunchEnd] = useState(cleanTime(getQ("lunch_end")?.current?.value))
+  // Manual adjustments to the provisional schedule. null = untouched, so the
+  // box live-updates from the calculated schedule; non-null = the adjusted
+  // times win and persist (saved under the "schedule_override" answer key).
+  const [overrideLines, setOverrideLines] = useState<ScheduleOverrideLine[] | null>(
+    () => parseScheduleOverride(getQ("schedule_override")?.current?.value)
+  )
+  const [resettingSchedule, setResettingSchedule] = useState(false)
   const [activityArea, setActivityArea] = useState(getQ("activity_area")?.current?.value || "")
   const [speakerArea, setSpeakerArea] = useState(getQ("speaker_area")?.current?.value || "")
   const [notes, setNotes] = useState(getQ("notes")?.current?.value || "")
@@ -420,7 +427,7 @@ export function SchoolForm({ code, email, initialAnswers, onSaveAnswer, onSaveTe
               <div key={i} className="space-y-0.5">
                 <div className="text-xs">{h.enteredBy} • {formatPacificTime(h.enteredAt)}</div>
                 <div className="italic whitespace-pre-wrap break-words">"{formatStartTime(h.value)}"</div>
-                {h.schedule && <div className="text-xs">Calculated schedule: {h.schedule}</div>}
+                {h.schedule && <div className="text-xs">Provisional schedule: {h.schedule}</div>}
                 {h.note && (
                   <div className="text-xs">
                     Timing note: <span className="italic whitespace-pre-wrap break-words">"{h.note}"</span>
@@ -482,7 +489,59 @@ export function SchoolForm({ code, email, initialAnswers, onSaveAnswer, onSaveTe
   const qAct = getQ("activity_area");
   const qSpk = getQ("speaker_area");
   const qNotes = getQ("notes");
+  const qSched = getQ("schedule_override");
   const calculatedSchedule = timeValue ? buildSchedule(needsThreeSessions) : null;
+
+  // --- Provisional schedule editing -------------------------------------
+  // Editing any schedule time materializes the current lines (adjusted if
+  // one exists, else the live calculation) into an override and saves the
+  // whole serialized schedule as one answer. Saves reuse the time-picker
+  // edit-session machinery so one edit session = one history entry.
+  const savedScheduleValue = () => qSched?.current?.value ?? ""
+  const editScheduleLine = (index: number, part: "start" | "end", v: string) => {
+    const base = overrideLines ?? (calculatedSchedule ? overrideLinesFromSchedule(calculatedSchedule) : null)
+    if (!base) return
+    const next = base.map((l, i) => (i === index ? { ...l, [part]: v } : l))
+    setOverrideLines(next)
+    const serialized = serializeScheduleOverride(next)
+    markEdited("schedule_override", serialized, savedScheduleValue())
+    handleSessionSave("schedule_override", serialized, savedScheduleValue())
+  }
+  const endScheduleEditSession = () => {
+    const draft = draftRef.current["schedule_override"]
+    if (!draft) return
+    endEditSession("schedule_override", draft, savedScheduleValue())
+  }
+  // "Reset to calculated": a blank save clears the override (kept in history
+  // like any other change). Runs behind the per-key save chain so an
+  // in-flight adjustment save can't land after the reset.
+  const resetSchedule = () => {
+    if (resettingSchedule) return
+    setResettingSchedule(true)
+    setAnswerSaveError("")
+    draftRef.current["schedule_override"] = ""
+    const prev = sessionChainRef.current["schedule_override"] ?? Promise.resolve()
+    sessionChainRef.current["schedule_override"] = prev.then(async () => {
+      // Invalidate any earlier schedule save still resolving
+      saveSeqRef.current["schedule_override"] = (saveSeqRef.current["schedule_override"] ?? 0) + 1
+      sessionTokenRef.current["schedule_override"] = (sessionTokenRef.current["schedule_override"] ?? 0) + 1
+      amendIdRef.current["schedule_override"] = undefined
+      try {
+        await onSaveAnswer("schedule_override", "")
+        lastSavedRef.current["schedule_override"] = ""
+        setOverrideLines(null)
+        setSaveStates(s => {
+          const next = { ...s }
+          delete next["schedule_override"]
+          return next
+        })
+      } catch {
+        setAnswerSaveError("We couldn't reset the schedule. Please try again.")
+      } finally {
+        setResettingSchedule(false)
+      }
+    })
+  }
   const workshopDate = initialAnswers.school.workshopDate
     ? new Intl.DateTimeFormat("en-US", {
         month: "long",
@@ -672,74 +731,114 @@ export function SchoolForm({ code, email, initialAnswers, onSaveAnswer, onSaveTe
           </div>
         </CardHeader>
         <CardContent className="print:px-0">
-          <div className="space-y-4 max-w-sm">
-            {qTime?.current && !isClockTime && (
-              <div className="space-y-1">
-                <Label className="text-muted-foreground">Currently saved</Label>
-                <div className="bg-primary/5 p-3 rounded-md text-sm border border-primary/20 whitespace-pre-line">
-                  {qTime.current.value}
+          <div className="space-y-4">
+            <div className="space-y-4 max-w-sm">
+              {qTime?.current && !isClockTime && (
+                <div className="space-y-1">
+                  <Label className="text-muted-foreground">Currently saved</Label>
+                  <div className="bg-primary/5 p-3 rounded-md text-sm border border-primary/20 whitespace-pre-line">
+                    {qTime.current.value}
+                  </div>
                 </div>
+              )}
+              <div className="space-y-2">
+                <Label>Start Time</Label>
+                <TimePicker
+                  aria-label="Start Time"
+                  value={timeValue}
+                  onChange={v => { setTimeValue(v); markEdited("workshop_time", v, isClockTime ? rawTimeValue.trim() : ""); handleSessionSave("workshop_time", v, qTime?.current?.value) }}
+                  onSessionEnd={v => endEditSession("workshop_time", v, qTime?.current?.value)}
+                  disabled={isReadOnly || initialAnswers.school.locked}
+                />
               </div>
-            )}
-            <div className="space-y-2">
-              <Label>Start Time</Label>
-              <TimePicker
-                aria-label="Start Time"
-                value={timeValue}
-                onChange={v => { setTimeValue(v); markEdited("workshop_time", v, isClockTime ? rawTimeValue.trim() : ""); handleSessionSave("workshop_time", v, qTime?.current?.value) }}
-                onSessionEnd={v => endEditSession("workshop_time", v, qTime?.current?.value)}
-                disabled={isReadOnly || initialAnswers.school.locked}
-              />
+
+              {needsThreeSessions && (
+                <div className="space-y-4 print:grid print:grid-cols-2 print:gap-3 print:space-y-0">
+                  <div className="space-y-2">
+                    <Label>School Lunch Starts</Label>
+                    <TimePicker
+                      aria-label="School Lunch Starts"
+                      value={lunchStart}
+                      onChange={v => { setLunchStart(v); markEdited("lunch_start", v, cleanTime(getQ("lunch_start")?.current?.value)); handleSessionSave("lunch_start", v, cleanTime(getQ("lunch_start")?.current?.value)) }}
+                      onSessionEnd={v => endEditSession("lunch_start", v, cleanTime(getQ("lunch_start")?.current?.value))}
+                      disabled={isReadOnly || initialAnswers.school.locked}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>School Lunch Ends</Label>
+                    <TimePicker
+                      aria-label="School Lunch Ends"
+                      value={lunchEnd}
+                      onChange={v => { setLunchEnd(v); markEdited("lunch_end", v, cleanTime(getQ("lunch_end")?.current?.value)); handleSessionSave("lunch_end", v, cleanTime(getQ("lunch_end")?.current?.value)) }}
+                      onSessionEnd={v => endEditSession("lunch_end", v, cleanTime(getQ("lunch_end")?.current?.value))}
+                      disabled={isReadOnly || initialAnswers.school.locked}
+                    />
+                  </div>
+                </div>
+              )}
             </div>
-            
-            {needsThreeSessions && (
-              <div className="space-y-4 print:grid print:grid-cols-2 print:gap-3 print:space-y-0">
-                <div className="space-y-2">
-                  <Label>School Lunch Starts</Label>
-                  <TimePicker
-                    aria-label="School Lunch Starts"
-                    value={lunchStart}
-                    onChange={v => { setLunchStart(v); markEdited("lunch_start", v, cleanTime(getQ("lunch_start")?.current?.value)); handleSessionSave("lunch_start", v, cleanTime(getQ("lunch_start")?.current?.value)) }}
-                    onSessionEnd={v => endEditSession("lunch_start", v, cleanTime(getQ("lunch_start")?.current?.value))}
-                    disabled={isReadOnly || initialAnswers.school.locked}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label>School Lunch Ends</Label>
-                  <TimePicker
-                    aria-label="School Lunch Ends"
-                    value={lunchEnd}
-                    onChange={v => { setLunchEnd(v); markEdited("lunch_end", v, cleanTime(getQ("lunch_end")?.current?.value)); handleSessionSave("lunch_end", v, cleanTime(getQ("lunch_end")?.current?.value)) }}
-                    onSessionEnd={v => endEditSession("lunch_end", v, cleanTime(getQ("lunch_end")?.current?.value))}
-                    disabled={isReadOnly || initialAnswers.school.locked}
-                  />
-                </div>
-              </div>
-            )}
 
             {(() => {
-              const schedule = timeValue ? buildSchedule(needsThreeSessions) : null;
-              if (!schedule) return null;
+              // Adjusted times win and persist; untouched, the box keeps
+              // live-updating from the start time and lunch times above.
+              const displayLines = overrideLines ?? (calculatedSchedule ? overrideLinesFromSchedule(calculatedSchedule) : null);
+              if (!displayLines) return null;
+              const canEditSchedule = !isReadOnly && !initialAnswers.school.locked;
               return (
-                <div className="bg-primary/5 text-primary p-3 rounded-md text-sm border border-primary/20 space-y-1">
-                  <div className="font-semibold">Calculated Schedule</div>
-                  {schedule.lines.map((l, i) => (
-                    <div key={i} className="flex justify-between gap-4">
+                <div className="bg-primary/5 text-primary p-3 rounded-md text-sm border border-primary/20 space-y-2">
+                  <div className="font-semibold">Provisional Schedule (Adjust How You'd Like)</div>
+                  {displayLines.map((l, i) => (
+                    <div key={l.label} className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1">
                       <span className={l.label === "Lunch" ? "font-semibold text-amber-700 dark:text-amber-300" : l.label === "Break" ? "text-primary/70" : "font-medium"}>{l.label}</span>
-                      <span>{l.time}</span>
+                      {canEditSchedule ? (
+                        <div className="flex flex-wrap items-center gap-1.5">
+                          <TimePicker
+                            aria-label={`${l.label} start`}
+                            value={l.start}
+                            onChange={v => editScheduleLine(i, "start", v)}
+                            onSessionEnd={endScheduleEditSession}
+                          />
+                          <span aria-hidden="true" className="text-primary/70">–</span>
+                          <TimePicker
+                            aria-label={`${l.label} end`}
+                            value={l.end}
+                            onChange={v => editScheduleLine(i, "end", v)}
+                            onSessionEnd={endScheduleEditSession}
+                          />
+                        </div>
+                      ) : (
+                        <span>{fmtHM(l.start)} – {fmtHM(l.end)}</span>
+                      )}
                     </div>
                   ))}
-                  {schedule.pending && (
-                    <div className="text-primary/80 pt-1">{schedule.pending}</div>
+                  {!overrideLines && calculatedSchedule?.pending && (
+                    <div className="text-primary/80 pt-1">{calculatedSchedule.pending}</div>
                   )}
-                  {schedule.warnings.map((w, i) => (
+                  {!overrideLines && calculatedSchedule?.warnings.map((w, i) => (
                     <div key={i} className="text-destructive pt-1">{w}</div>
                   ))}
+                  {overrideLines ? (
+                    <div className="flex flex-wrap items-center justify-between gap-2 pt-1 no-print">
+                      <span className="text-xs text-primary/80">Adjusted by hand — no longer updates automatically from the times above.</span>
+                      {canEditSchedule && (
+                        <Button type="button" variant="outline" size="sm" onClick={resetSchedule} disabled={resettingSchedule}>
+                          <RotateCcw className="h-3.5 w-3.5 mr-1.5" />
+                          {resettingSchedule ? "Resetting..." : "Reset to calculated"}
+                        </Button>
+                      )}
+                    </div>
+                  ) : (
+                    canEditSchedule && (
+                      <div className="text-xs text-primary/70 pt-1 no-print">
+                        These times update automatically until you adjust them — then your times are kept.
+                      </div>
+                    )
+                  )}
                 </div>
               );
             })()}
 
-            <div className="space-y-2 pt-4">
+            <div className="space-y-2 pt-4 max-w-sm">
               <Label className="text-muted-foreground flex justify-between">
                 <span>Timing Notes / Constraints</span>
                 <span className="text-xs font-normal">Optional</span>
@@ -756,8 +855,8 @@ export function SchoolForm({ code, email, initialAnswers, onSaveAnswer, onSaveTe
             
             {renderSectionSave(
               needsThreeSessions
-                ? ["workshop_time", "timing_note", "lunch_start", "lunch_end"]
-                : ["workshop_time", "timing_note"],
+                ? ["workshop_time", "timing_note", "lunch_start", "lunch_end", "schedule_override"]
+                : ["workshop_time", "timing_note", "schedule_override"],
               () => {
                 handleSave("workshop_time", timeValue, qTime?.current?.value)
                 handleSave("timing_note", timingNote, qNote?.current?.value)
@@ -765,11 +864,23 @@ export function SchoolForm({ code, email, initialAnswers, onSaveAnswer, onSaveTe
                   handleSave("lunch_start", lunchStart, cleanTime(getQ("lunch_start")?.current?.value))
                   handleSave("lunch_end", lunchEnd, cleanTime(getQ("lunch_end")?.current?.value))
                 }
+                if (overrideLines) {
+                  handleSave("schedule_override", serializeScheduleOverride(overrideLines), savedScheduleValue())
+                }
               })}
 
             {qTime?.current && (
               <div className="text-xs text-muted-foreground no-print">
                 Last updated by {qTime.current.enteredBy} at {formatPacificTime(qTime.current.enteredAt)}
+              </div>
+            )}
+            {qSched?.current && (
+              <div className="text-xs text-muted-foreground no-print">
+                {qSched.current.value.trim() ? (
+                  <>Schedule last updated by {qSched.current.enteredBy} at {formatPacificTime(qSched.current.enteredAt)}</>
+                ) : (
+                  <>Schedule reset to calculated by {qSched.current.enteredBy} at {formatPacificTime(qSched.current.enteredAt)}</>
+                )}
               </div>
             )}
           </div>
@@ -784,6 +895,21 @@ export function SchoolForm({ code, email, initialAnswers, onSaveAnswer, onSaveTe
               </div>
             );
           })}
+          {(() => {
+            // Schedule adjustments, rendered as the readable schedule text
+            // they were saved as; a blank entry was a reset to calculated.
+            const hist = (qSched?.history || []).map((h: any) => ({
+              ...h,
+              value: (h.value || "").trim() ? h.value : "Reset to calculated schedule",
+            }));
+            if (hist.length === 0) return null;
+            return (
+              <div className="mt-1">
+                <div className="text-xs text-muted-foreground mt-3">Provisional schedule</div>
+                {renderHistory("schedule_override", hist)}
+              </div>
+            );
+          })()}
         </CardContent>
       </Card>
 
@@ -1030,8 +1156,17 @@ export function SchoolForm({ code, email, initialAnswers, onSaveAnswer, onSaveTe
           )}
         </div>
         <div className="atou-print-schedule">
-          <span>Calculated schedule</span>
-          {calculatedSchedule ? (
+          <span>{overrideLines ? "Provisional schedule (adjusted by hand)" : "Provisional schedule"}</span>
+          {overrideLines ? (
+            <div>
+              {overrideDisplayLines(overrideLines).map((line, index, all) => (
+                <span key={line.label}>
+                  <strong>{line.label}</strong> {line.time}
+                  {index < all.length - 1 && <b aria-hidden="true">•</b>}
+                </span>
+              ))}
+            </div>
+          ) : calculatedSchedule ? (
             <>
               <div>
                 {calculatedSchedule.lines.map((line, index) => (

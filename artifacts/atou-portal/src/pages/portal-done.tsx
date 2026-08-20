@@ -6,7 +6,7 @@ import {
   useFetchPortalAnswers,
   useGetPortalPages,
 } from "@workspace/api-client-react"
-import { buildSchedule, describeConflict, effectiveStudentCount, needsThreeSessions } from "@workspace/schedule"
+import { buildSchedule, describeConflict, effectiveStudentCount, needsThreeSessions, overrideDisplayLines, parseScheduleOverride } from "@workspace/schedule"
 import { PortalLayout } from "@/components/layout/portal-layout"
 import { PortalHelpfulInformation } from "@/components/shared/portal-helpful-information"
 import { Button } from "@/components/ui/button"
@@ -152,13 +152,17 @@ export function PortalDone() {
 
   // Same schedule/conflict verdict the form shows (shared library): a
   // workshop time whose lunch conflicts with the calculated schedule is
-  // flagged like a missing answer, not shown as "Provided".
+  // flagged like a missing answer, not shown as "Provided". A hand-adjusted
+  // provisional schedule supersedes the calculation, so its conflicts no
+  // longer flag anything.
+  const scheduleOverride = parseScheduleOverride(getValue("schedule_override"))
   const schedule = workshopTime
     ? buildSchedule({ workshopTime, lunchStart, lunchEnd, threeSessions: needsLunchTimes })
     : null
-  const timeConflicts = schedule?.conflicts ?? []
+  const timeConflicts = scheduleOverride ? [] : schedule?.conflicts ?? []
   const timeConflict = timeConflicts.length > 0
   const conflictSummary = timeConflicts.map(describeConflict).join(", and ")
+  const scheduleLines = scheduleOverride ? overrideDisplayLines(scheduleOverride) : schedule?.lines ?? null
 
   const requiredItems = [
     { label: "Teachers and student counts", complete: teachersComplete },
@@ -298,6 +302,21 @@ export function PortalDone() {
                 </>
               )}
               <SummaryField label="Timing notes / constraints" value={timingNote} optional />
+              {scheduleLines && scheduleLines.length > 0 && (
+                <div className="rounded-xl border bg-muted/20 p-4 sm:col-span-2">
+                  <dt className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+                    Provisional schedule{scheduleOverride ? " (adjusted by hand)" : ""}
+                  </dt>
+                  <dd className="mt-2 space-y-1 text-foreground">
+                    {scheduleLines.map(line => (
+                      <div key={line.label} className="flex justify-between gap-4">
+                        <span className={line.label === "Lunch" ? "font-semibold" : undefined}>{line.label}</span>
+                        <span>{line.time}</span>
+                      </div>
+                    ))}
+                  </dd>
+                </div>
+              )}
             </dl>
           </CardContent>
         </Card>

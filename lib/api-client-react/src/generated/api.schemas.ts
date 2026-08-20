@@ -84,7 +84,6 @@ export interface SchoolAnswers {
 export interface AnswerInput {
   /** @minLength 3 */
   email: string;
-  /** @minLength 1 */
   value: string;
   amendId?: number;
 }
@@ -584,4 +583,3 @@ export interface AirtableStatus {
   /** @nullable */
   lastSyncMessage: string | null;
 }
-

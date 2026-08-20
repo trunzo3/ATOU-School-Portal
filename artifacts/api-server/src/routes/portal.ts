@@ -21,6 +21,7 @@ import {
   isAuthorizedForSchool,
   normalizeEmail,
 } from "../lib/answers";
+import { parseScheduleOverride } from "@workspace/schedule";
 import { PAM_EMAIL } from "../lib/auth";
 import {
   AIRTABLE_FIELDS,
@@ -110,6 +111,18 @@ router.put("/portal/:code/answers/:questionKey", async (req, res): Promise<void>
   const questionKey = Array.isArray(rawKey) ? String(rawKey[0]) : String(rawKey);
   if (!(QUESTION_KEYS as readonly string[]).includes(questionKey)) {
     res.status(400).json({ error: "Unknown question." });
+    return;
+  }
+  // Blank values are rejected — except for schedule_override, where a blank
+  // save means "reset to the calculated schedule" (the reset is kept in
+  // history like any other change). Non-blank overrides must round-trip.
+  if (questionKey === "schedule_override") {
+    if (parsed.data.value.trim() && parseScheduleOverride(parsed.data.value) === null) {
+      res.status(400).json({ error: "That schedule isn't in a recognized format." });
+      return;
+    }
+  } else if (!parsed.data.value.trim()) {
+    res.status(400).json({ error: "A value is required." });
     return;
   }
   const school = await findSchoolByCode(codeParam(req));

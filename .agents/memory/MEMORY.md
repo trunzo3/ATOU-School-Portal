@@ -9,3 +9,4 @@
 - [Date-only rendering rule](date-only-rendering.md) — bare YYYY-MM-DD must format as UTC calendar dates; Pacific timestamp parsing shifted every date one day early until Aug 2026 fix.
 - [Pending Send display rule](pending-send-rule.md) — workshop−daysBefore for never-sent, unskipped schools; past-due dates show as dash (automation fires on the exact day only).
 - [Automation send-claim protocol](automation-send-claims.md) — every automatic email claims its send in the DB before calling Resend; in-server scheduler runs every 15 min, overlap-safe.
+- [Schedule override answer format](schedule-override-format.md) — schedule_override stores readable round-trip text; blank = reset (only key allowed blank); parseable override suppresses conflict flags everywhere.

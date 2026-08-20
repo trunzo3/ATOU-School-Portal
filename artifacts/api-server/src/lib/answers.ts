@@ -12,6 +12,7 @@ import {
   buildSchedule,
   effectiveStudentCount,
   needsThreeSessions,
+  parseScheduleOverride,
 } from "@workspace/schedule";
 
 export const QUESTION_KEYS = [
@@ -19,6 +20,7 @@ export const QUESTION_KEYS = [
   "timing_note",
   "lunch_start",
   "lunch_end",
+  "schedule_override",
   "activity_area",
   "speaker_area",
   "notes",
@@ -156,12 +158,15 @@ export async function getQuestionStates(school: School): Promise<QuestionStateOu
     lunchEnd: currentValue("lunch_end"),
     threeSessions: needsThreeSessions(effectiveStudents),
   });
-  const timeConflict = schedule !== null && schedule.conflicts.length > 0;
+  // A hand-adjusted provisional schedule supersedes the calculated one, so
+  // a calculated-schedule conflict no longer flags the school as incomplete.
+  const hasManualSchedule = parseScheduleOverride(currentValue("schedule_override")) !== null;
+  const timeConflict = schedule !== null && schedule.conflicts.length > 0 && !hasManualSchedule;
 
   for (const q of questions) {
-    // timing_note is optional; the lunch times feed the workshop-time
-    // schedule and aren't tracked as their own grid columns.
-    if (["timing_note", "lunch_start", "lunch_end"].includes(q.questionKey)) continue;
+    // timing_note is optional; the lunch times and schedule override feed
+    // the workshop-time schedule and aren't tracked as their own grid columns.
+    if (["timing_note", "lunch_start", "lunch_end", "schedule_override"].includes(q.questionKey)) continue;
     states.push({
       questionKey: q.questionKey,
       answered: q.current !== null,

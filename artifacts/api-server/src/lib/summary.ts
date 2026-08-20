@@ -12,6 +12,7 @@ import {
   describeConflict,
   effectiveStudentCount,
   needsThreeSessions,
+  parseScheduleOverride,
 } from "@workspace/schedule";
 import {
   getQuestionStates,
@@ -71,6 +72,7 @@ const QUESTION_LABELS: Record<string, string> = {
   timing_note: "timing note",
   lunch_start: "lunch start",
   lunch_end: "lunch end",
+  schedule_override: "provisional schedule",
   activity_area: "activity area",
   speaker_area: "speaker area",
   notes: "notes",
@@ -99,7 +101,11 @@ function openParts(states: QuestionStateOut[], missingTeacherCounts: number): st
 
 function fmtValue(key: string, value: string): string {
   const trimmed = value.trim();
-  const shown = TIME_KEYS.has(key) ? clockTo12h(trimmed) : trimmed;
+  // The stored schedule override is multi-line readable text; a blank value
+  // means the adjustment was reset back to the calculated schedule.
+  if (key === "schedule_override" && !trimmed) return "reset to calculated";
+  const oneLine = key === "schedule_override" ? trimmed.replace(/\s*\n\s*/g, "; ") : trimmed;
+  const shown = TIME_KEYS.has(key) ? clockTo12h(oneLine) : oneLine;
   return shown.length > 60 ? `${shown.slice(0, 57)}…` : shown;
 }
 
@@ -145,8 +151,11 @@ export async function buildSummaryReport(daysAhead: number): Promise<SummaryRepo
         effectiveStudentCount(detail.teachers.current?.totalStudents ?? 0, school.approxStudents),
       ),
     });
+    // A hand-adjusted provisional schedule supersedes the calculated one,
+    // so its conflicts stop being reported (matches getQuestionStates).
+    const hasManualSchedule = parseScheduleOverride(cur("schedule_override")) !== null;
     const conflictDescription =
-      schedule && schedule.conflicts.length > 0
+      schedule && schedule.conflicts.length > 0 && !hasManualSchedule
         ? capitalize(schedule.conflicts.map(describeConflict).join("; "))
         : null;
     const wd = school.workshopDate;

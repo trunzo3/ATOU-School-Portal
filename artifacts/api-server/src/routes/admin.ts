@@ -43,15 +43,14 @@ import { appBaseUrl, schoolLink } from "../lib/appUrl";
 import { getQuestionStates, missingCount, normalizeEmail } from "../lib/answers";
 import {
   EMAIL_FROM,
+  PLAIN_SIGNATURE,
   emailConfigured,
+  ensurePlainSignature,
   fillMergeFields,
+  hasPlainSignature,
+  renderEmailHtml,
   sendEmail,
 } from "../lib/email";
-import {
-  DEFAULT_CANCELLATION_POLICY_URL,
-  appendSignatureText,
-  renderEmailHtml,
-} from "../lib/signature";
 
 const router: IRouter = Router();
 
@@ -385,10 +384,11 @@ Hello,
 Please fill in your workshop logistics for {{school_name}} ({{workshop_date}}) here: {{link}}
 
 Thank you,
-Pam`;
+Pam
+
+${PLAIN_SIGNATURE}`;
 
 const EMAIL_SENDING_ENABLED_KEY = "email_sending_enabled";
-const CANCELLATION_POLICY_URL_KEY = "cancellation_policy_url";
 
 async function settingValue(key: string): Promise<string | null> {
   const [row] = await db.select().from(appSettingsTable).where(eq(appSettingsTable.key, key));
@@ -409,11 +409,6 @@ async function emailSendingEnabled(): Promise<boolean> {
   return (await settingValue(EMAIL_SENDING_ENABLED_KEY)) === "true";
 }
 
-async function cancellationPolicyUrl(): Promise<string> {
-  const stored = (await settingValue(CANCELLATION_POLICY_URL_KEY))?.trim();
-  return stored || DEFAULT_CANCELLATION_POLICY_URL;
-}
-
 // The follow-up template shares the same subject line as the request template.
 const FOLLOW_UP_BODY = `Hello,
 
@@ -422,28 +417,32 @@ I'm sorry to bother you again however your workshop is quickly approaching and w
 Please complete your workshop logistics here: {{link}}
 
 Thank you,
-Pam`;
+Pam
 
-// Remove a manually typed outro (the "Pam Evers" contact block, or a trailing
-// "A Touch of Understanding" line) from migrated wording — the polished ATOU
-// signature is appended automatically to every email, so keeping a typed one
-// in the template would make it appear twice. The body keeps its
-// "Thank you,\nPam" sign-off.
-function stripTypedOutro(body: string): string {
-  const match = /^[ \t]*Pam Evers[ \t]*$/m.exec(body);
-  let cut = match ? body.slice(0, match.index) : body;
-  cut = cut.replace(/\s+$/, "");
-  return cut.replace(/\n[ \t]*A Touch of Understanding[^\n]*$/i, "");
-}
+${PLAIN_SIGNATURE}`;
 
 // Seed the named templates once. The "Logistics Request" template inherits any
 // wording Pam already saved under the old single-template settings keys.
+// Every template body ends with Pam's plain contact block: it is part of the
+// editable message now that no signature is appended at send time, so
+// templates saved while the old automatic signature stripped the typed block
+// get it restored here without touching the administrator's own wording.
 async function ensureEmailTemplates(): Promise<void> {
   const existing = await db.select().from(emailTemplatesTable);
-  if (existing.length > 0) return;
+  if (existing.length > 0) {
+    for (const t of existing) {
+      if (!hasPlainSignature(t.body)) {
+        await db
+          .update(emailTemplatesTable)
+          .set({ body: ensurePlainSignature(t.body) })
+          .where(eq(emailTemplatesTable.id, t.id));
+      }
+    }
+    return;
+  }
   const savedSubject = await settingValue("email_template_subject");
   const savedBodyRaw = await settingValue("email_template");
-  const savedBody = savedBodyRaw === null ? null : stripTypedOutro(savedBodyRaw);
+  const savedBody = savedBodyRaw === null ? null : ensurePlainSignature(savedBodyRaw);
   await db
     .insert(emailTemplatesTable)
     .values([
@@ -509,7 +508,6 @@ router.get("/admin/email-status", requireAdmin, async (_req, res): Promise<void>
     configured: emailConfigured(),
     enabled: await emailSendingEnabled(),
     from: EMAIL_FROM,
-    cancellationPolicyUrl: await cancellationPolicyUrl(),
   });
 });
 
@@ -525,22 +523,11 @@ router.put("/admin/email-settings", requireAdmin, async (req, res): Promise<void
     });
     return;
   }
-  const policyUrl = parsed.data.cancellationPolicyUrl?.trim();
-  if (policyUrl !== undefined && policyUrl !== "" && !/^https?:\/\//i.test(policyUrl)) {
-    res.status(400).json({
-      error: "The cancellation policy link must be a full web address starting with http:// or https://.",
-    });
-    return;
-  }
   await saveSetting(EMAIL_SENDING_ENABLED_KEY, String(parsed.data.enabled));
-  if (policyUrl !== undefined) {
-    await saveSetting(CANCELLATION_POLICY_URL_KEY, policyUrl);
-  }
   res.json({
     configured: emailConfigured(),
     enabled: parsed.data.enabled,
     from: EMAIL_FROM,
-    cancellationPolicyUrl: await cancellationPolicyUrl(),
   });
 });
 
@@ -563,12 +550,11 @@ router.post("/admin/email/test", requireAdmin, async (req, res): Promise<void> =
 If you received it, Resend is connected and the sender address is working.
 
 This test does not change the live email sending switch.`;
-  const policyUrl = await cancellationPolicyUrl();
   const result = await sendEmail({
     to: [recipient],
     subject: "A Touch of Understanding email test",
-    text: appendSignatureText(testBody, policyUrl),
-    html: renderEmailHtml(testBody, policyUrl),
+    text: testBody,
+    html: renderEmailHtml(testBody),
   });
   if (!result.delivered) {
     req.log.warn({ provider: "resend" }, "Test email was rejected");
@@ -626,7 +612,6 @@ router.post("/admin/send", requireAdmin, async (req: AdminRequest, res): Promise
   const enabled = await emailSendingEnabled();
   const liveDelivery = configured && enabled;
   const sentBy = req.admin?.email ?? PAM_EMAIL;
-  const policyUrl = await cancellationPolicyUrl();
   const sends = [];
   const errors: string[] = [];
   for (const item of parsed.data.items) {
@@ -655,13 +640,14 @@ router.post("/admin/send", requireAdmin, async (req: AdminRequest, res): Promise
     // Subjects are single-line: strip any line breaks merge fields could carry.
     const subject = fillMergeFields(parsed.data.subject, merge).replace(/[\r\n]+/g, " ").trim();
     const body = fillMergeFields(parsed.data.message, merge);
-    // Pam's signature is appended automatically to both email parts.
+    // The message is sent exactly as composed — Pam's contact block lives in
+    // the body itself, so nothing is appended to either email part.
     const result = liveDelivery
       ? await sendEmail({
           to: recipients,
           subject,
-          text: appendSignatureText(body, policyUrl),
-          html: renderEmailHtml(body, policyUrl),
+          text: body,
+          html: renderEmailHtml(body),
         })
       : { delivered: false };
     if (liveDelivery && !result.delivered) {

@@ -925,13 +925,11 @@ components:
         configured: { type: boolean }
         enabled: { type: boolean }
         from: { type: string }
-        cancellationPolicyUrl: { type: string }
-      required: [configured, enabled, from, cancellationPolicyUrl]
+      required: [configured, enabled, from]
     EmailSettingsInput:
       type: object
       properties:
         enabled: { type: boolean }
-        cancellationPolicyUrl: { type: string }
       required: [enabled]
     TestEmailInput:
       type: object

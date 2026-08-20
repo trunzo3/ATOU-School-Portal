@@ -10,5 +10,4 @@ export interface EmailStatus {
   configured: boolean;
   enabled: boolean;
   from: string;
-  cancellationPolicyUrl: string;
 }

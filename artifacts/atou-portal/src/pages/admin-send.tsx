@@ -34,7 +34,6 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
 import { AtouLogo } from "@/components/shared/atou-logo"
-import { EmailSignaturePreview } from "@/components/shared/email-signature-preview"
 import { formatPacificTime } from "@/lib/utils"
 import { ChevronLeft, Eye, EyeOff, Mail, Save, Search, Send, X, AlertCircle, CheckCircle2 } from "lucide-react"
 import { useEffect, useMemo, useRef, useState } from "react"
@@ -43,6 +42,8 @@ import { useToast } from "@/hooks/use-toast"
 import { SEND_SELECTION_KEY } from "./admin-dashboard"
 
 // Client-side copy of the server's merge-field rules, for the preview.
+// Besides the canonical {{...}} fields, the literal "WORKSHOP DATE" marker
+// (as typed in Pam's original email wording) also becomes the formatted date.
 function fillMergeFields(
   template: string,
   school: { name: string; workshopDate: string | null; link: string },
@@ -58,6 +59,7 @@ function fillMergeFields(
   return template
     .replaceAll("{{school_name}}", school.name)
     .replaceAll("{{workshop_date}}", dateText)
+    .replaceAll("WORKSHOP DATE", dateText)
     .replaceAll("{{link}}", school.link)
 }
 
@@ -378,7 +380,7 @@ export function AdminSend() {
               />
               <p className="text-xs text-muted-foreground">
                 {"{{school_name}}"}, {"{{workshop_date}}"}, and {"{{link}}"} are filled in automatically for each school.
-                Pam's ATOU signature is added automatically at the end of every email.
+                The email is sent exactly as written here, so keep Pam's contact block at the end of the message.
               </p>
             </div>
 
@@ -427,10 +429,6 @@ export function AdminSend() {
                 <div>
                   <span className="text-xs text-muted-foreground block">Message</span>
                   <p className="text-sm whitespace-pre-wrap">{fillMergeFields(message, previewSchool)}</p>
-                </div>
-                <div className="border-t border-secondary/20 pt-3">
-                  <span className="text-xs text-muted-foreground block mb-2">Signature (added automatically)</span>
-                  <EmailSignaturePreview cancellationPolicyUrl={emailStatus?.cancellationPolicyUrl} />
                 </div>
               </div>
             )}

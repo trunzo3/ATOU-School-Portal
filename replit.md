@@ -26,8 +26,14 @@ disability-awareness workshops at ~140 schools/year. Two surfaces:
 - **Airtable connection is switched OFF** in this build. Settings are stored
   and write/read functions exist in `artifacts/api-server/src/lib/airtable.ts`
   (with field IDs documented) but do nothing until config is filled in.
-- Resend email is NOT connected; the "send" page only prepares subject/body
-  for copy-paste.
+- Resend IS connected (`RESEND_API_KEY` secret); live school delivery is
+  gated by the Settings switch (`email_sending_enabled`). Emails are sent
+  exactly as composed: Pam's plain contact block lives at the end of every
+  template body and NOTHING is appended automatically at send time (no
+  cancellation-policy link, no badge images). Merge fields: `{{school_name}}`,
+  `{{workshop_date}}`, `{{link}}`, plus the legacy literal marker
+  `WORKSHOP DATE` — all resolve identically on the server
+  (`artifacts/api-server/src/lib/email.ts`) and in the Send-page preview.
 - School links are built from the `APP_BASE_URL` env var (falls back to the
   current Replit domain).
 - The root login page has a dev-only "log in as Pam" button

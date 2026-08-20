@@ -8,5 +8,4 @@
 
 export interface EmailSettingsInput {
   enabled: boolean;
-  cancellationPolicyUrl?: string;
 }

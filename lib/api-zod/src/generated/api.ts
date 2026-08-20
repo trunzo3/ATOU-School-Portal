@@ -401,8 +401,7 @@ export const SetSchoolLockResponse = zod.object({
 export const GetEmailStatusResponse = zod.object({
   "configured": zod.boolean(),
   "enabled": zod.boolean(),
-  "from": zod.string(),
-  "cancellationPolicyUrl": zod.string()
+  "from": zod.string()
 })
 
 
@@ -410,15 +409,13 @@ export const GetEmailStatusResponse = zod.object({
  * @summary Turn live school email delivery on or off
  */
 export const UpdateEmailSettingsBody = zod.object({
-  "enabled": zod.boolean(),
-  "cancellationPolicyUrl": zod.string().optional()
+  "enabled": zod.boolean()
 })
 
 export const UpdateEmailSettingsResponse = zod.object({
   "configured": zod.boolean(),
   "enabled": zod.boolean(),
-  "from": zod.string(),
-  "cancellationPolicyUrl": zod.string()
+  "from": zod.string()
 })
 
 

@@ -62,7 +62,9 @@ export async function sendEmail(args: {
   }
 }
 
-// Merge fields available in the subject and message templates.
+// Merge fields available in the subject and message templates. Besides the
+// canonical {{...}} fields, the literal "WORKSHOP DATE" marker (as typed in
+// Pam's original email wording) is also replaced with the formatted date.
 export function fillMergeFields(
   template: string,
   school: { name: string; workshopDate: string | null; link: string },
@@ -78,5 +80,64 @@ export function fillMergeFields(
   return template
     .replaceAll("{{school_name}}", school.name)
     .replaceAll("{{workshop_date}}", dateText)
+    .replaceAll("WORKSHOP DATE", dateText)
     .replaceAll("{{link}}", school.link);
+}
+
+// Pam's plain contact block. It lives inside the editable message body (every
+// template ends with it), so nothing is appended automatically at send time
+// and recipients see exactly one signature.
+export const PLAIN_SIGNATURE = [
+  "Pam Evers",
+  "Program Manager",
+  "A Touch of Understanding, Inc.",
+  "5280 Stirling Street, Suite 102",
+  "Granite Bay, CA 95746",
+  "916-791-4146",
+  "www.touchofunderstanding.org",
+].join("\n");
+
+// A body already carries a typed contact block when a line is exactly
+// "Pam Evers" — that also matches wording Pam migrated from her old emails.
+export function hasPlainSignature(body: string): boolean {
+  return /^[ \t]*Pam Evers[ \t]*$/m.test(body);
+}
+
+// Append the plain contact block to a body that lacks one, leaving bodies
+// that already carry their own (possibly differently worded) block untouched.
+export function ensurePlainSignature(body: string): string {
+  if (hasPlainSignature(body)) return body;
+  return `${body.replace(/\s+$/, "")}\n\n${PLAIN_SIGNATURE}`;
+}
+
+const LINK_COLOR = "#0563c1";
+
+export function escapeHtml(text: string): string {
+  return text
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#39;");
+}
+
+// Full HTML email: the (plain-text) message body converted to simple HTML
+// with URLs made clickable. Nothing is added beyond what the body says, so
+// the HTML part always matches the plain-text part.
+export function renderEmailHtml(body: string): string {
+  const escaped = escapeHtml(body.replace(/\s+$/, ""));
+  const linked = escaped.replace(
+    /(?:https?:\/\/|www\.)[^\s<]+/g,
+    (url) => {
+      const href = url.startsWith("www.") ? `https://${url}` : url;
+      return `<a href="${href}" style="color:${LINK_COLOR};">${url}</a>`;
+    },
+  );
+  const withBreaks = linked.replaceAll("\r\n", "\n").replaceAll("\n", "<br />");
+  return `<!DOCTYPE html>
+<html>
+<body style="margin:0;padding:24px;background-color:#ffffff;">
+<div style="max-width:640px;font-family:Arial,Helvetica,sans-serif;font-size:15px;color:#111111;line-height:1.5;">${withBreaks}</div>
+</body>
+</html>`;
 }

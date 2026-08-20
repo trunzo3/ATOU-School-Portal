@@ -47,6 +47,11 @@ import {
 } from "../lib/auth";
 import { appBaseUrl, schoolLink } from "../lib/appUrl";
 import { checkAirtableConnection, isAirtableConfigured } from "../lib/airtable";
+import {
+  airtableDevOverrideActive,
+  airtableSyncAllowed,
+  environmentName,
+} from "../lib/environment";
 import { getAirtableSyncStatus, runAirtableSyncNow } from "../lib/airtable-sync";
 import { getQuestionStates, missingCount, normalizeEmail } from "../lib/answers";
 import {
@@ -274,7 +279,9 @@ router.get("/admin/me", requireAdmin, async (req: AdminRequest, res): Promise<vo
     res.status(401).json({ error: "Not signed in" });
     return;
   }
-  res.json(adminOut(admin));
+  // The environment is server-reported so the sidebar indicator reflects
+  // which database this API server is actually using, not a build flag.
+  res.json({ ...adminOut(admin), environment: environmentName() });
 });
 
 // --- schools grid ---
@@ -1003,8 +1010,15 @@ router.delete("/admin/videos/:id", requireAdmin, async (req, res): Promise<void>
 
 async function airtableStatusOut() {
   const status = await getAirtableSyncStatus();
+  const syncAllowed = airtableSyncAllowed();
   return {
-    connected: await checkAirtableConnection(),
+    // When sync is disabled by environment, don't even probe Airtable —
+    // dev stays fully isolated, and the UI reports the environment gate
+    // instead of pretending the connector is active.
+    connected: syncAllowed ? await checkAirtableConnection() : false,
+    environment: environmentName(),
+    syncAllowed,
+    devOverrideActive: airtableDevOverrideActive(),
     syncing: status.runningSince !== null,
     lastSyncAt: status.lastSyncAt,
     lastSyncOk: status.lastSyncOk,
@@ -1017,6 +1031,13 @@ router.get("/admin/airtable/status", requireAdmin, async (_req, res): Promise<vo
 });
 
 router.post("/admin/airtable/sync", requireAdmin, async (_req, res): Promise<void> => {
+  if (!airtableSyncAllowed()) {
+    res.status(503).json({
+      error:
+        "Airtable sync is disabled in development — only the production app syncs. (To test sync from here, set AIRTABLE_SYNC_DEV_OVERRIDE=true.)",
+    });
+    return;
+  }
   if (!isAirtableConfigured()) {
     res.status(503).json({
       error: "The Airtable connection is not available in this environment.",

@@ -51,6 +51,7 @@ import {
   decideTeacherSync,
 } from "./airtable-merge";
 import { normalizeEmail } from "./answers";
+import { airtableSyncAllowed, environmentName } from "./environment";
 import { logger } from "./logger";
 import { parseTeachers } from "./parse-teachers";
 import { saveSetting, settingValue } from "./settings";
@@ -148,6 +149,17 @@ export type SyncRunResult = {
 
 /** Run one full sync pass now (used by the scheduler and by "Sync now"). */
 export async function runAirtableSyncNow(): Promise<SyncRunResult> {
+  if (!airtableSyncAllowed()) {
+    // Dev is isolated from Airtable by default; only production syncs
+    // (AIRTABLE_SYNC_DEV_OVERRIDE=true deliberately re-enables it in dev).
+    return {
+      ok: false,
+      busy: false,
+      skipped: true,
+      changed: false,
+      message: `Airtable sync is disabled in ${environmentName()}; only production syncs.`,
+    };
+  }
   if (!isAirtableConfigured()) {
     return {
       ok: false,

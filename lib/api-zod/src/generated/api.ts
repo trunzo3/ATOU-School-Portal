@@ -300,8 +300,9 @@ export const AdminLogoutResponse = zod.object({
 export const GetAdminMeResponse = zod.object({
   "id": zod.number(),
   "email": zod.string(),
-  "createdAt": zod.string()
-})
+  "createdAt": zod.string(),
+  "environment": zod.enum(['development', 'production'])
+}).describe('Current admin plus the server-reported environment.')
 
 
 /**
@@ -1094,6 +1095,9 @@ export const DeleteLearningLabVideoResponse = zod.object({
  */
 export const GetAirtableStatusResponse = zod.object({
   "connected": zod.boolean(),
+  "environment": zod.enum(['development', 'production']),
+  "syncAllowed": zod.boolean(),
+  "devOverrideActive": zod.boolean(),
   "syncing": zod.boolean(),
   "lastSyncAt": zod.string().nullable(),
   "lastSyncOk": zod.boolean().nullable(),
@@ -1106,6 +1110,9 @@ export const GetAirtableStatusResponse = zod.object({
  */
 export const SyncAirtableNowResponse = zod.object({
   "connected": zod.boolean(),
+  "environment": zod.enum(['development', 'production']),
+  "syncAllowed": zod.boolean(),
+  "devOverrideActive": zod.boolean(),
   "syncing": zod.boolean(),
   "lastSyncAt": zod.string().nullable(),
   "lastSyncOk": zod.boolean().nullable(),

@@ -7,11 +7,14 @@
  */
 
 export * from './adminCredentials';
+export * from './adminMe';
+export * from './adminMeEnvironment';
 export * from './adminSummary';
 export * from './adminUser';
 export * from './adminUserInput';
 export * from './adminUserUpdate';
 export * from './airtableStatus';
+export * from './airtableStatusEnvironment';
 export * from './answerInput';
 export * from './answerVersion';
 export * from './autoLogisticsInput';

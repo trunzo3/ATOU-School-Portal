@@ -3,6 +3,7 @@ import { useGetAdminMe, useAdminLogout, getGetAdminMeQueryKey } from "@workspace
 import { Users, FileText, Settings, LogOut, Send, LayoutDashboard, Menu, ClipboardList, GraduationCap } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { AtouLogo } from "@/components/shared/atou-logo"
+import { AirtableConnectionWatcher } from "@/components/shared/airtable-connection-watcher"
 import { useEffect, useState } from "react"
 import { cn } from "@/lib/utils"
 
@@ -42,6 +43,8 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="min-h-[100dvh] flex flex-col md:flex-row bg-background print:bg-white print:block">
+      {/* Pops a toast when the Airtable connection or sync health changes. */}
+      <AirtableConnectionWatcher />
       {/* Mobile Header */}
       <div className="md:hidden flex items-center justify-between p-4 border-b bg-card no-print shadow-sm z-50 relative">
         <a
@@ -106,7 +109,20 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
           })}
         </div>
         <div className="p-4 border-t border-sidebar-border bg-black/10">
-          <p className="text-xs text-sidebar-foreground/65 mb-3 px-2 break-all font-medium">{user.email}</p>
+          <p className="text-xs text-sidebar-foreground/65 mb-1.5 px-2 break-all font-medium">{user.email}</p>
+          {/* Server-reported environment: which database this portal is using. */}
+          <div className="mb-3 px-2">
+            {user.environment === "development" ? (
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-amber-400/50 bg-amber-400/15 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-amber-300">
+                <span className="h-1.5 w-1.5 rounded-full bg-amber-400" aria-hidden="true" />
+                Development database
+              </span>
+            ) : (
+              <span className="text-[10px] font-medium uppercase tracking-wider text-sidebar-foreground/45">
+                Production database
+              </span>
+            )}
+          </div>
           <Button variant="outline" className="w-full justify-start gap-2 border-white/20 bg-transparent text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground" onClick={handleLogout}>
             <LogOut className="h-4 w-4" />
             Sign Out

@@ -29,6 +29,7 @@
 import { ReplitConnectors } from "@replit/connectors-sdk";
 import { sql } from "drizzle-orm";
 import { db, type TeacherRowData } from "@workspace/db";
+import { airtableSyncAllowed } from "./environment";
 import { logger } from "./logger";
 
 export const AIRTABLE_BASE_ID = "app9RGanaWFp0BpLh";
@@ -111,6 +112,12 @@ export async function writeAnswersToAirtable(
   fields: Record<string, string | number>,
 ): Promise<boolean> {
   if (!airtableRecordId || Object.keys(fields).length === 0) return false;
+  if (!airtableSyncAllowed()) {
+    // Development is isolated from Airtable by default (see environment.ts).
+    // No baseline is advanced, so if this change matters it still looks
+    // "portal-changed" to a future production sync.
+    return false;
+  }
   if (!isAirtableConfigured()) {
     logger.info(
       { airtableRecordId, fields: Object.keys(fields) },

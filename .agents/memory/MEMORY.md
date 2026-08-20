@@ -1,6 +1,7 @@
 - [Orval codegen quirks](orval-codegen-quirks.md) — several OpenAPI constructs emit validators or types unsupported by this workspace.
 - [ATOU Airtable base](airtable-atou-base.md) — base/table ids, Workshops-only rule, all-text fields reject raw numbers, contact-name lookup returns record ids.
 - [Airtable two-way sync](airtable-two-way-sync.md) — portal-wins merge via per-field baselines; compare trimmed or fields re-push forever; DB-claimed runs.
+- [Airtable sync is production-only](airtable-env-gating.md) — every Airtable touchpoint goes through one env gate; dev is isolated unless AIRTABLE_SYNC_DEV_OVERRIDE=true.
 - [Email sending switch scope](email-sending-switch.md) — email_sending_enabled gates school mailings only; operational emails (password resets) check just the Resend key.
 - [Time-picker edit sessions](time-picker-edit-sessions.md) — amendId saves one history row per session; Radix portal focus quirks break naive outside-detection.
 - [School email signature policy](school-email-signature.md) — one body-authored signature, never append content at send time; legacy WORKSHOP DATE marker also merges.

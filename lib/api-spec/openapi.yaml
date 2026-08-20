@@ -267,7 +267,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/AdminUser"
+                $ref: "#/components/schemas/AdminMe"
         "401":
           description: Not signed in
           content:
@@ -1020,6 +1020,15 @@ components:
         email: { type: string }
         createdAt: { type: string }
       required: [id, email, createdAt]
+    AdminMe:
+      type: object
+      description: Current admin plus the server-reported environment.
+      properties:
+        id: { type: number }
+        email: { type: string }
+        createdAt: { type: string }
+        environment: { type: string, enum: [development, production] }
+      required: [id, email, createdAt, environment]
     ForgotPasswordInput:
       type: object
       properties:
@@ -1516,8 +1525,11 @@ components:
       type: object
       properties:
         connected: { type: boolean }
+        environment: { type: string, enum: [development, production] }
+        syncAllowed: { type: boolean }
+        devOverrideActive: { type: boolean }
         syncing: { type: boolean }
         lastSyncAt: { type: ["string", "null"] }
         lastSyncOk: { type: ["boolean", "null"] }
         lastSyncMessage: { type: ["string", "null"] }
-      required: [connected, syncing, lastSyncAt, lastSyncOk, lastSyncMessage]
+      required: [connected, environment, syncAllowed, devOverrideActive, syncing, lastSyncAt, lastSyncOk, lastSyncMessage]

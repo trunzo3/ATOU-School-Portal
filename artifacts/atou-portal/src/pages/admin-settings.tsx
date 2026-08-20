@@ -243,37 +243,65 @@ export function AdminSettings() {
               <div className="flex flex-col items-end gap-1">
                 <span
                   className={`flex items-center gap-1.5 text-sm font-medium ${
-                    airtable?.connected ? "text-primary" : "text-muted-foreground"
+                    airtable
+                      ? !airtable.syncAllowed
+                        ? "text-amber-600"
+                        : airtable.connected
+                          ? "text-primary"
+                          : "text-muted-foreground"
+                      : "text-muted-foreground"
                   }`}
                 >
                   {airtable ? (
-                    airtable.connected ? (
+                    !airtable.syncAllowed ? (
+                      <XCircle className="h-4 w-4" />
+                    ) : airtable.connected ? (
                       <CheckCircle2 className="h-4 w-4" />
                     ) : (
                       <XCircle className="h-4 w-4" />
                     )
                   ) : null}
                   {airtable
-                    ? airtable.connected
-                      ? "Connected"
-                      : "Not connected"
+                    ? !airtable.syncAllowed
+                      ? "Disabled in development"
+                      : airtable.connected
+                        ? "Connected"
+                        : "Not connected"
                     : "Checking…"}
                 </span>
                 <span className="text-xs text-muted-foreground">
-                  via the Replit Airtable connection
+                  {airtable && !airtable.syncAllowed
+                    ? "sync runs in production only"
+                    : "via the Replit Airtable connection"}
                 </span>
               </div>
             </div>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="rounded-xl border bg-muted/40 p-4 text-sm text-muted-foreground">
-              <p>
-                Answers saved in the portal are written to Airtable right away,
-                and changes made in Airtable are picked up automatically about
-                every 15 minutes. No API key is needed — the connection is
-                managed by Replit.
-              </p>
-            </div>
+            {airtable && !airtable.syncAllowed ? (
+              <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-4 text-sm text-foreground">
+                <p>
+                  This portal is running on the <strong>development database</strong>, so
+                  Airtable sync is switched off: nothing here is read from or written to
+                  Airtable. The production app keeps syncing normally.
+                </p>
+              </div>
+            ) : (
+              <div className="rounded-xl border bg-muted/40 p-4 text-sm text-muted-foreground">
+                <p>
+                  Answers saved in the portal are written to Airtable right away,
+                  and changes made in Airtable are picked up automatically about
+                  every 15 minutes. No API key is needed — the connection is
+                  managed by Replit.
+                </p>
+                {airtable?.devOverrideActive ? (
+                  <p className="mt-2 font-medium text-amber-700">
+                    Development override is active: this development workspace is
+                    deliberately syncing with the live Airtable base.
+                  </p>
+                ) : null}
+              </div>
+            )}
 
             {airtable?.lastSyncAt ? (
               <div
@@ -298,16 +326,31 @@ export function AdminSettings() {
               <p className="text-sm text-muted-foreground">No sync has run yet.</p>
             )}
           </CardContent>
-          <CardFooter className="border-t bg-muted/10 justify-end pt-6">
-            <Button
-              onClick={handleSyncNow}
-              disabled={!airtable?.connected || syncAirtable.isPending}
+          <CardFooter className="border-t bg-muted/10 justify-end gap-3 pt-6">
+            {airtable && !airtable.syncAllowed ? (
+              <span className="text-xs text-muted-foreground">
+                Sync is production-only, so it can't be run from here.
+              </span>
+            ) : null}
+            <span
+              title={
+                airtable && !airtable.syncAllowed
+                  ? "Airtable sync is disabled in development — only the production app syncs."
+                  : undefined
+              }
             >
-              <RefreshCw
-                className={`h-4 w-4 mr-2 ${syncAirtable.isPending ? "animate-spin" : ""}`}
-              />
-              {syncAirtable.isPending ? "Syncing…" : "Sync Now"}
-            </Button>
+              <Button
+                onClick={handleSyncNow}
+                disabled={
+                  !airtable?.connected || !airtable?.syncAllowed || syncAirtable.isPending
+                }
+              >
+                <RefreshCw
+                  className={`h-4 w-4 mr-2 ${syncAirtable.isPending ? "animate-spin" : ""}`}
+                />
+                {syncAirtable.isPending ? "Syncing…" : "Sync Now"}
+              </Button>
+            </span>
           </CardFooter>
         </Card>
       </div>

@@ -5,9 +5,13 @@
  * ATOU workshop logistics API
  * OpenAPI spec version: 0.1.0
  */
+import type { AirtableStatusEnvironment } from './airtableStatusEnvironment';
 
 export interface AirtableStatus {
   connected: boolean;
+  environment: AirtableStatusEnvironment;
+  syncAllowed: boolean;
+  devOverrideActive: boolean;
   syncing: boolean;
   /** @nullable */
   lastSyncAt: string | null;

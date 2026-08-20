@@ -109,6 +109,24 @@ export interface AdminUser {
   createdAt: string;
 }
 
+export type AdminMeEnvironment = typeof AdminMeEnvironment[keyof typeof AdminMeEnvironment];
+
+
+export const AdminMeEnvironment = {
+  development: 'development',
+  production: 'production',
+} as const;
+
+/**
+ * Current admin plus the server-reported environment.
+ */
+export interface AdminMe {
+  id: number;
+  email: string;
+  createdAt: string;
+  environment: AdminMeEnvironment;
+}
+
 export interface ForgotPasswordInput {
   /** @minLength 3 */
   email: string;
@@ -545,8 +563,19 @@ export interface SummaryReport {
   sinceLastWeek: SummaryReportSinceLastWeek;
 }
 
+export type AirtableStatusEnvironment = typeof AirtableStatusEnvironment[keyof typeof AirtableStatusEnvironment];
+
+
+export const AirtableStatusEnvironment = {
+  development: 'development',
+  production: 'production',
+} as const;
+
 export interface AirtableStatus {
   connected: boolean;
+  environment: AirtableStatusEnvironment;
+  syncAllowed: boolean;
+  devOverrideActive: boolean;
   syncing: boolean;
   /** @nullable */
   lastSyncAt: string | null;

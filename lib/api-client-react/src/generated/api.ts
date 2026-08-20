@@ -21,6 +21,7 @@ import type {
 
 import type {
   AdminCredentials,
+  AdminMe,
   AdminSummary,
   AdminUser,
   AdminUserInput,
@@ -902,9 +903,9 @@ export const getGetAdminMeUrl = () => {
 /**
  * @summary Current signed-in admin
  */
-export const getAdminMe = async ( options?: Parameters<typeof customFetch>[1]): Promise<AdminUser> => {
+export const getAdminMe = async ( options?: Parameters<typeof customFetch>[1]): Promise<AdminMe> => {
 
-  return customFetch<AdminUser>(getGetAdminMeUrl(),
+  return customFetch<AdminMe>(getGetAdminMeUrl(),
   {
     ...options,
     method: 'GET'

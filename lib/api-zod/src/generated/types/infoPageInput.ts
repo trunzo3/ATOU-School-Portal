@@ -10,7 +10,7 @@ export interface InfoPageInput {
   /** @minLength 1 */
   title: string;
   /** @minLength 1 */
-  slug: string;
+  slug?: string;
   body: string;
   sortOrder?: number;
   published?: boolean;

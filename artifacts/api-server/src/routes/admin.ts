@@ -748,17 +748,41 @@ router.get("/admin/pages", requireAdmin, async (_req, res): Promise<void> => {
   res.json(pages.map(pageOut));
 });
 
+// Build a web address slug from a page title: lowercase, spaces become
+// hyphens, punctuation dropped. Falls back to "page" if nothing survives.
+function slugifyTitle(title: string): string {
+  return (
+    title
+      .toLowerCase()
+      .replace(/[^a-z0-9\s-]/g, "")
+      .trim()
+      .replace(/[\s-]+/g, "-") || "page"
+  );
+}
+
 router.post("/admin/pages", requireAdmin, async (req, res): Promise<void> => {
   const parsed = CreatePageBody.safeParse(req.body);
   if (!parsed.success) {
-    res.status(400).json({ error: "Title, web address, and body are required." });
+    res.status(400).json({ error: "Title and body are required." });
     return;
+  }
+  // Slug is server-generated from the title (admins never see it); a
+  // number is appended if the slug is already taken. Existing pages keep
+  // their slugs forever so shared links don't break.
+  let slug = parsed.data.slug;
+  if (!slug) {
+    const existing = new Set(
+      (await db.select({ slug: infoPagesTable.slug }).from(infoPagesTable)).map((r) => r.slug),
+    );
+    const base = slugifyTitle(parsed.data.title);
+    slug = base;
+    for (let n = 2; existing.has(slug); n++) slug = `${base}-${n}`;
   }
   const [page] = await db
     .insert(infoPagesTable)
     .values({
       title: parsed.data.title,
-      slug: parsed.data.slug,
+      slug,
       body: parsed.data.body,
       sortOrder: parsed.data.sortOrder ?? 0,
       published: parsed.data.published ?? false,

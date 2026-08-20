@@ -301,6 +301,7 @@ export function AdminDashboard() {
                 <TableHead className="w-[230px] font-semibold text-foreground">School</TableHead>
                 <TableHead className="w-[110px]">Date</TableHead>
                 <TableHead className="w-[130px]">Send Status</TableHead>
+                <TableHead className="w-[110px]">Approx # Students</TableHead>
                 {questions.map(q => (
                   <TableHead key={q.key} className="min-w-[110px]">{q.label}</TableHead>
                 ))}
@@ -310,7 +311,7 @@ export function AdminDashboard() {
             <TableBody>
               {filteredSchools?.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={10} className="text-center py-16">
+                  <TableCell colSpan={11} className="text-center py-16">
                     <div className="flex flex-col items-center justify-center space-y-3">
                       <div className="h-12 w-12 rounded-full bg-muted flex items-center justify-center">
                         <Search className="h-6 w-6 text-muted-foreground/60" />
@@ -366,6 +367,10 @@ export function AdminDashboard() {
                         </div>
                       )}
                     </div>
+                  </TableCell>
+                  <TableCell>
+                    {/* Read-only copy of the Airtable "Approx # Students" field — display only */}
+                    <span className="text-sm text-muted-foreground">{school.approxStudents || "—"}</span>
                   </TableCell>
                   {questions.map(q => {
                     const state = school.questionStates.find(s => s.questionKey === q.key)

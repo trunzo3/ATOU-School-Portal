@@ -1025,11 +1025,12 @@ components:
       type: object
       properties:
         title: { type: string, minLength: 1 }
+        # Optional: when omitted, the server generates a unique slug from the title.
         slug: { type: string, minLength: 1 }
         body: { type: string }
         sortOrder: { type: number }
         published: { type: boolean }
-      required: [title, slug, body]
+      required: [title, body]
     InfoPageUpdate:
       type: object
       properties:

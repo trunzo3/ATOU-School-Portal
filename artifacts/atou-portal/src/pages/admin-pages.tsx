@@ -88,14 +88,12 @@ export function AdminPages() {
   
   // Editor state
   const [title, setTitle] = useState("")
-  const [slug, setSlug] = useState("")
   const [body, setBody] = useState("")
   const [published, setPublished] = useState(false)
 
   const handleOpenNew = () => {
     setEditingId(null)
     setTitle("")
-    setSlug("")
     setBody("")
     setPublished(false)
     setEditorOpen(true)
@@ -104,19 +102,21 @@ export function AdminPages() {
   const handleOpenEdit = (page: any) => {
     setEditingId(page.id)
     setTitle(page.title)
-    setSlug(page.slug)
     setBody(page.body)
     setPublished(page.published)
     setEditorOpen(true)
   }
 
   const handleSave = () => {
-    if (!title || !slug) {
-      toast({ title: "Title and slug are required", variant: "destructive" })
+    if (!title) {
+      toast({ title: "Title is required", variant: "destructive" })
       return
     }
 
-    const payload = { title, slug, body, published }
+    // No slug here: new pages get one generated from the title on the
+    // server, and edited pages keep their existing slug so shared links
+    // don't break.
+    const payload = { title, body, published }
 
     if (editingId) {
       updatePage.mutate({ id: editingId, data: payload }, {
@@ -195,7 +195,6 @@ export function AdminPages() {
             <TableHeader>
               <TableRow>
                 <TableHead>Title</TableHead>
-                <TableHead>Path / Slug</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead>Last Updated</TableHead>
                 <TableHead className="text-right">Actions</TableHead>
@@ -204,7 +203,7 @@ export function AdminPages() {
             <TableBody>
               {pages?.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={5} className="text-center py-12">
+                  <TableCell colSpan={4} className="text-center py-12">
                     <div className="flex flex-col items-center justify-center space-y-3">
                       <div className="h-12 w-12 rounded-full bg-muted flex items-center justify-center">
                         <FileText className="h-6 w-6 text-muted-foreground/60" />
@@ -219,7 +218,6 @@ export function AdminPages() {
               ) : pages?.map(page => (
                 <TableRow key={page.id} className="group hover:bg-muted/30 transition-colors">
                   <TableCell className="font-bold text-foreground">{page.title}</TableCell>
-                  <TableCell className="text-muted-foreground font-mono text-xs">/s/CODE/pages/{page.slug}</TableCell>
                   <TableCell>
                     <div className="flex items-center gap-2">
                       <Switch 
@@ -268,28 +266,13 @@ export function AdminPages() {
             </DialogHeader>
             
             <div className="flex-1 overflow-y-auto py-4 space-y-4 pr-2">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label>Page Title</Label>
-                  <Input 
-                    value={title} 
-                    onChange={e => {
-                      setTitle(e.target.value)
-                      if (!editingId && !slug) {
-                        setSlug(e.target.value.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, ''))
-                      }
-                    }} 
-                    placeholder="e.g. Workshop Expectations" 
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label>URL Slug</Label>
-                  <Input 
-                    value={slug} 
-                    onChange={e => setSlug(e.target.value)} 
-                    placeholder="e.g. workshop-expectations" 
-                  />
-                </div>
+              <div className="space-y-2">
+                <Label>Page Title</Label>
+                <Input 
+                  value={title} 
+                  onChange={e => setTitle(e.target.value)} 
+                  placeholder="e.g. Workshop Expectations" 
+                />
               </div>
               
               <div className="space-y-2 flex-1 flex flex-col min-h-0">

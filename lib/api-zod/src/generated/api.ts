@@ -619,7 +619,7 @@ export const GetAdminPagesResponse = zod.array(GetAdminPagesResponseItem)
 
 export const CreatePageBody = zod.object({
   "title": zod.string().min(1),
-  "slug": zod.string().min(1),
+  "slug": zod.string().min(1).optional(),
   "body": zod.string(),
   "sortOrder": zod.number().optional(),
   "published": zod.boolean().optional()

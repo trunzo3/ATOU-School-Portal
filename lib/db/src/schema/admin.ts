@@ -1,4 +1,4 @@
-import { pgTable, serial, text, integer, boolean, timestamp } from "drizzle-orm/pg-core";
+import { pgTable, serial, text, integer, boolean, timestamp, date } from "drizzle-orm/pg-core";
 
 export const adminUsersTable = pgTable("admin_users", {
   id: serial("id").primaryKey(),
@@ -45,6 +45,24 @@ export const appSettingsTable = pgTable("app_settings", {
     .$onUpdate(() => new Date()),
 });
 
+// Learning Lab walkthrough videos: links to YouTube/Vimeo recordings that
+// guide admins through common workflows. Only the link is stored — the
+// video itself stays on the hosting service.
+export const learningLabVideosTable = pgTable("learning_lab_videos", {
+  id: serial("id").primaryKey(),
+  title: text("title").notNull(),
+  videoUrl: text("video_url").notNull(),
+  publishedOn: date("published_on", { mode: "string" }).notNull(),
+  description: text("description").notNull().default(""),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true })
+    .notNull()
+    .defaultNow()
+    .$onUpdate(() => new Date()),
+});
+
 // Single-use, time-limited password reset tokens. Only the SHA-256 hash of
 // the token is stored; the raw token exists only inside the emailed link.
 export const passwordResetTokensTable = pgTable("password_reset_tokens", {
@@ -63,5 +81,6 @@ export const passwordResetTokensTable = pgTable("password_reset_tokens", {
 export type AdminUser = typeof adminUsersTable.$inferSelect;
 export type PasswordResetToken = typeof passwordResetTokensTable.$inferSelect;
 export type InfoPage = typeof infoPagesTable.$inferSelect;
+export type LearningLabVideoRow = typeof learningLabVideosTable.$inferSelect;
 
 export type EmailTemplateRow = typeof emailTemplatesTable.$inferSelect;

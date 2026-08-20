@@ -338,6 +338,36 @@ export interface PagesExport {
   pages: InfoPage[];
 }
 
+export interface LearningLabVideo {
+  id: number;
+  title: string;
+  videoUrl: string;
+  embedUrl: string;
+  publishedOn: string;
+  description: string;
+  updatedAt: string;
+}
+
+export interface LearningLabVideoInput {
+  /** @minLength 1 */
+  title: string;
+  /** @minLength 1 */
+  videoUrl: string;
+  /** @pattern ^\d{4}-\d{2}-\d{2}$ */
+  publishedOn: string;
+  description?: string;
+}
+
+export interface LearningLabVideoUpdate {
+  /** @minLength 1 */
+  title?: string;
+  /** @minLength 1 */
+  videoUrl?: string;
+  /** @pattern ^\d{4}-\d{2}-\d{2}$ */
+  publishedOn?: string;
+  description?: string;
+}
+
 export interface LogisticsRule {
   /** @minLength 1 */
   templateId: string;
@@ -525,3 +555,4 @@ export interface AirtableStatus {
   /** @nullable */
   lastSyncMessage: string | null;
 }
+

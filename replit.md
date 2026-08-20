@@ -11,7 +11,10 @@ disability-awareness workshops at ~140 schools/year. Two surfaces:
 - **Admin dashboard** (`/` → login, `/admin`): grid of schools × questions with
   missing flags, copy-link buttons, per-school form reusing the same shared
   form component, edit locks, email-send prep, rich-text info pages with
-  export, admin account management, Airtable sync status + "Sync now".
+  export, admin account management, Learning Lab video tutorials (embedded
+  YouTube/Vimeo links only, validated server-side in
+  `artifacts/api-server/src/lib/video-embed.ts`), Airtable sync status +
+  "Sync now".
 
 ## Key business rules
 - Pam's email `programcoordinator@touchofunderstanding.org` is authorized for

@@ -15,6 +15,7 @@ import { AdminSchoolDetail } from "@/pages/admin-school-detail"
 import { AdminSend } from "@/pages/admin-send"
 import { AdminPages } from "@/pages/admin-pages"
 import { AdminUsers } from "@/pages/admin-users"
+import { AdminLearningLab } from "@/pages/admin-learning-lab"
 import { AdminSettings } from "@/pages/admin-settings"
 import { PortalEntry } from "@/pages/portal-entry"
 import { PortalDone } from "@/pages/portal-done"
@@ -36,6 +37,7 @@ function Router() {
         <Route path="/admin/send" component={AdminSend} />
         <Route path="/admin/pages" component={AdminPages} />
         <Route path="/admin/admins" component={AdminUsers} />
+        <Route path="/admin/learning-lab" component={AdminLearningLab} />
         <Route path="/admin/settings" component={AdminSettings} />
         
         {/* Portal Routes */}

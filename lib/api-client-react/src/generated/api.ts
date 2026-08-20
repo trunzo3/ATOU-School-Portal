@@ -43,6 +43,9 @@ import type {
   InfoPage,
   InfoPageInput,
   InfoPageUpdate,
+  LearningLabVideo,
+  LearningLabVideoInput,
+  LearningLabVideoUpdate,
   OkStatus,
   PagesExport,
   PortalIdentity,
@@ -2881,6 +2884,297 @@ export function useExportPages<TData = Awaited<ReturnType<typeof exportPages>>, 
 
 
 
+
+export const getGetLearningLabVideosUrl = () => {
+
+
+
+
+  return `/api/admin/videos`
+}
+
+/**
+ * @summary All Learning Lab walkthrough videos, newest publication first
+ */
+export const getLearningLabVideos = async ( options?: Parameters<typeof customFetch>[1]): Promise<LearningLabVideo[]> => {
+
+  return customFetch<LearningLabVideo[]>(getGetLearningLabVideosUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetLearningLabVideosQueryKey = () => {
+    return [
+    `/api/admin/videos`
+    ] as const;
+    }
+
+
+export const getGetLearningLabVideosQueryOptions = <TData = Awaited<ReturnType<typeof getLearningLabVideos>>, TError = ErrorType<unknown>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getLearningLabVideos>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetLearningLabVideosQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getLearningLabVideos>>> = ({ signal }) => getLearningLabVideos({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getLearningLabVideos>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetLearningLabVideosQueryResult = NonNullable<Awaited<ReturnType<typeof getLearningLabVideos>>>
+export type GetLearningLabVideosQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary All Learning Lab walkthrough videos, newest publication first
+ */
+
+export function useGetLearningLabVideos<TData = Awaited<ReturnType<typeof getLearningLabVideos>>, TError = ErrorType<unknown>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getLearningLabVideos>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetLearningLabVideosQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getCreateLearningLabVideoUrl = () => {
+
+
+
+
+  return `/api/admin/videos`
+}
+
+/**
+ * @summary Add a Learning Lab video (YouTube or Vimeo link only)
+ */
+export const createLearningLabVideo = async (learningLabVideoInput: LearningLabVideoInput, options?: Parameters<typeof customFetch>[1]): Promise<LearningLabVideo> => {
+
+  return customFetch<LearningLabVideo>(getCreateLearningLabVideoUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(learningLabVideoInput)
+  }
+);}
+
+
+
+
+
+export const getCreateLearningLabVideoMutationOptions = <TError = ErrorType<ErrorMessage>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createLearningLabVideo>>, TError,{data: BodyType<LearningLabVideoInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof createLearningLabVideo>>, TError,{data: BodyType<LearningLabVideoInput>}, TContext> => {
+
+const mutationKey = ['createLearningLabVideo'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createLearningLabVideo>>, {data: BodyType<LearningLabVideoInput>}> = (props) => {
+          const {data} = props ?? {};
+
+          return  createLearningLabVideo(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CreateLearningLabVideoMutationResult = NonNullable<Awaited<ReturnType<typeof createLearningLabVideo>>>
+    export type CreateLearningLabVideoMutationBody = BodyType<LearningLabVideoInput>
+    export type CreateLearningLabVideoMutationError = ErrorType<ErrorMessage>
+
+    /**
+ * @summary Add a Learning Lab video (YouTube or Vimeo link only)
+ */
+export const useCreateLearningLabVideo = <TError = ErrorType<ErrorMessage>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createLearningLabVideo>>, TError,{data: BodyType<LearningLabVideoInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof createLearningLabVideo>>,
+        TError,
+        {data: BodyType<LearningLabVideoInput>},
+        TContext
+      > => {
+      return useMutation(getCreateLearningLabVideoMutationOptions(options));
+    }
+
+export const getUpdateLearningLabVideoUrl = (id: number,) => {
+
+
+
+
+  return `/api/admin/videos/${id}`
+}
+
+/**
+ * @summary Update a Learning Lab video
+ */
+export const updateLearningLabVideo = async (id: number,
+    learningLabVideoUpdate: LearningLabVideoUpdate, options?: Parameters<typeof customFetch>[1]): Promise<LearningLabVideo> => {
+
+  return customFetch<LearningLabVideo>(getUpdateLearningLabVideoUrl(id),
+  {
+    ...options,
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(learningLabVideoUpdate)
+  }
+);}
+
+
+
+
+
+export const getUpdateLearningLabVideoMutationOptions = <TError = ErrorType<ErrorMessage>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateLearningLabVideo>>, TError,{id: number;data: BodyType<LearningLabVideoUpdate>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof updateLearningLabVideo>>, TError,{id: number;data: BodyType<LearningLabVideoUpdate>}, TContext> => {
+
+const mutationKey = ['updateLearningLabVideo'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof updateLearningLabVideo>>, {id: number;data: BodyType<LearningLabVideoUpdate>}> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  updateLearningLabVideo(id,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type UpdateLearningLabVideoMutationResult = NonNullable<Awaited<ReturnType<typeof updateLearningLabVideo>>>
+    export type UpdateLearningLabVideoMutationBody = BodyType<LearningLabVideoUpdate>
+    export type UpdateLearningLabVideoMutationError = ErrorType<ErrorMessage>
+
+    /**
+ * @summary Update a Learning Lab video
+ */
+export const useUpdateLearningLabVideo = <TError = ErrorType<ErrorMessage>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateLearningLabVideo>>, TError,{id: number;data: BodyType<LearningLabVideoUpdate>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof updateLearningLabVideo>>,
+        TError,
+        {id: number;data: BodyType<LearningLabVideoUpdate>},
+        TContext
+      > => {
+      return useMutation(getUpdateLearningLabVideoMutationOptions(options));
+    }
+
+export const getDeleteLearningLabVideoUrl = (id: number,) => {
+
+
+
+
+  return `/api/admin/videos/${id}`
+}
+
+/**
+ * @summary Delete a Learning Lab video
+ */
+export const deleteLearningLabVideo = async (id: number, options?: Parameters<typeof customFetch>[1]): Promise<OkStatus> => {
+
+  return customFetch<OkStatus>(getDeleteLearningLabVideoUrl(id),
+  {
+    ...options,
+    method: 'DELETE'
+
+
+  }
+);}
+
+
+
+
+
+export const getDeleteLearningLabVideoMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteLearningLabVideo>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof deleteLearningLabVideo>>, TError,{id: number}, TContext> => {
+
+const mutationKey = ['deleteLearningLabVideo'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteLearningLabVideo>>, {id: number}> = (props) => {
+          const {id} = props ?? {};
+
+          return  deleteLearningLabVideo(id,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type DeleteLearningLabVideoMutationResult = NonNullable<Awaited<ReturnType<typeof deleteLearningLabVideo>>>
+
+    export type DeleteLearningLabVideoMutationError = ErrorType<unknown>
+
+    /**
+ * @summary Delete a Learning Lab video
+ */
+export const useDeleteLearningLabVideo = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteLearningLabVideo>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof deleteLearningLabVideo>>,
+        TError,
+        {id: number},
+        TContext
+      > => {
+      return useMutation(getDeleteLearningLabVideoMutationOptions(options));
+    }
 
 export const getGetAirtableStatusUrl = () => {
 

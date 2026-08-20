@@ -746,6 +746,88 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/PagesExport"
+  /admin/videos:
+    get:
+      operationId: getLearningLabVideos
+      tags: [admin]
+      summary: All Learning Lab walkthrough videos, newest publication first
+      responses:
+        "200":
+          description: Videos
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/LearningLabVideo"
+    post:
+      operationId: createLearningLabVideo
+      tags: [admin]
+      summary: Add a Learning Lab video (YouTube or Vimeo link only)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LearningLabVideoInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LearningLabVideo"
+        "400":
+          description: Invalid input (e.g. not a YouTube/Vimeo link)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorMessage"
+  /admin/videos/{id}:
+    patch:
+      operationId: updateLearningLabVideo
+      tags: [admin]
+      summary: Update a Learning Lab video
+      parameters:
+        - $ref: "#/components/parameters/VideoId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LearningLabVideoUpdate"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LearningLabVideo"
+        "400":
+          description: Invalid update (e.g. not a YouTube/Vimeo link)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorMessage"
+        "404":
+          description: Video not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorMessage"
+    delete:
+      operationId: deleteLearningLabVideo
+      tags: [admin]
+      summary: Delete a Learning Lab video
+      parameters:
+        - $ref: "#/components/parameters/VideoId"
+      responses:
+        "200":
+          description: Deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OkStatus"
   /admin/airtable/status:
     get:
       operationId: getAirtableStatus
@@ -797,6 +879,11 @@ components:
       in: path
       required: true
       schema: { type: string }
+    VideoId:
+      name: id
+      in: path
+      required: true
+      schema: { type: number }
   schemas:
     HealthStatus:
       type: object
@@ -1186,6 +1273,36 @@ components:
           items:
             $ref: "#/components/schemas/InfoPage"
       required: [exportedAt, pages]
+    LearningLabVideo:
+      type: object
+      properties:
+        id: { type: number }
+        title: { type: string }
+        # The pasted YouTube/Vimeo link, exactly as saved.
+        videoUrl: { type: string }
+        # Embeddable player URL derived from videoUrl on the server
+        # (keeps Vimeo privacy hashes intact).
+        embedUrl: { type: string }
+        # Publication date as a plain YYYY-MM-DD calendar date.
+        publishedOn: { type: string }
+        description: { type: string }
+        updatedAt: { type: string }
+      required: [id, title, videoUrl, embedUrl, publishedOn, description, updatedAt]
+    LearningLabVideoInput:
+      type: object
+      properties:
+        title: { type: string, minLength: 1 }
+        videoUrl: { type: string, minLength: 1 }
+        publishedOn: { type: string, pattern: "^\\d{4}-\\d{2}-\\d{2}$" }
+        description: { type: string }
+      required: [title, videoUrl, publishedOn]
+    LearningLabVideoUpdate:
+      type: object
+      properties:
+        title: { type: string, minLength: 1 }
+        videoUrl: { type: string, minLength: 1 }
+        publishedOn: { type: string, pattern: "^\\d{4}-\\d{2}-\\d{2}$" }
+        description: { type: string }
     LogisticsRule:
       type: object
       properties:

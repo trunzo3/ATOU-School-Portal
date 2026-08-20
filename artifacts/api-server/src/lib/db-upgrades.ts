@@ -26,5 +26,17 @@ export async function ensureDatabaseUpgrades(): Promise<void> {
       end if;
     end $$
   `);
+  // Learning Lab walkthrough videos (YouTube/Vimeo links, no file storage).
+  await db.execute(sql`
+    create table if not exists learning_lab_videos (
+      id serial primary key,
+      title text not null,
+      video_url text not null,
+      published_on date not null,
+      description text not null default '',
+      created_at timestamptz not null default now(),
+      updated_at timestamptz not null default now()
+    )
+  `);
   logger.info("Database schema upgrades verified");
 }

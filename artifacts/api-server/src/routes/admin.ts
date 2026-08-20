@@ -10,6 +10,8 @@ import {
   emailTemplatesTable,
   type EmailTemplateRow,
   infoPagesTable,
+  learningLabVideosTable,
+  type LearningLabVideoRow,
   schoolsTable,
   teacherSnapshotsTable,
 } from "@workspace/db";
@@ -29,6 +31,8 @@ import {
   UpdateAdminUserBody,
   CreatePageBody,
   UpdatePageBody,
+  CreateLearningLabVideoBody,
+  UpdateLearningLabVideoBody,
   UpdateEmailSettingsBody,
   SendTestEmailBody,
 } from "@workspace/api-zod";
@@ -72,6 +76,7 @@ import {
   ensureEmailTemplates,
 } from "../lib/templates";
 import { schoolSendStatus } from "../lib/send-status";
+import { parseVideoUrl } from "../lib/video-embed";
 import { buildSummaryReport, renderWeeklyEmail } from "../lib/summary";
 import { addDays, pacificToday } from "../lib/dates";
 
@@ -909,6 +914,89 @@ router.get("/admin/pages/export", requireAdmin, async (_req, res): Promise<void>
     .from(infoPagesTable)
     .orderBy(asc(infoPagesTable.sortOrder), asc(infoPagesTable.id));
   res.json({ exportedAt: new Date().toISOString(), pages: pages.map(pageOut) });
+});
+
+// --- Learning Lab videos ---
+
+const BAD_VIDEO_URL_MESSAGE =
+  "That doesn't look like a YouTube or Vimeo video link. Paste the full URL of a single video (for example https://www.youtube.com/watch?v=... or https://vimeo.com/...).";
+
+function videoOut(v: LearningLabVideoRow) {
+  return {
+    id: v.id,
+    title: v.title,
+    videoUrl: v.videoUrl,
+    // Derived fresh from the stored link so embed logic lives in one place
+    // (and Vimeo privacy hashes survive).
+    embedUrl: parseVideoUrl(v.videoUrl)?.embedUrl ?? "",
+    publishedOn: v.publishedOn,
+    description: v.description,
+    updatedAt: v.updatedAt.toISOString(),
+  };
+}
+
+router.get("/admin/videos", requireAdmin, async (_req, res): Promise<void> => {
+  const videos = await db
+    .select()
+    .from(learningLabVideosTable)
+    .orderBy(desc(learningLabVideosTable.publishedOn), desc(learningLabVideosTable.id));
+  res.json(videos.map(videoOut));
+});
+
+router.post("/admin/videos", requireAdmin, async (req, res): Promise<void> => {
+  const parsed = CreateLearningLabVideoBody.safeParse(req.body);
+  if (!parsed.success) {
+    res.status(400).json({
+      error: "A title, a video link, and a publication date are required.",
+    });
+    return;
+  }
+  if (!parseVideoUrl(parsed.data.videoUrl)) {
+    res.status(400).json({ error: BAD_VIDEO_URL_MESSAGE });
+    return;
+  }
+  const [video] = await db
+    .insert(learningLabVideosTable)
+    .values({
+      title: parsed.data.title,
+      videoUrl: parsed.data.videoUrl.trim(),
+      publishedOn: parsed.data.publishedOn,
+      description: parsed.data.description ?? "",
+    })
+    .returning();
+  res.status(201).json(videoOut(video!));
+});
+
+router.patch("/admin/videos/:id", requireAdmin, async (req, res): Promise<void> => {
+  const parsed = UpdateLearningLabVideoBody.safeParse(req.body);
+  if (!parsed.success) {
+    res.status(400).json({ error: "Invalid video update." });
+    return;
+  }
+  if (parsed.data.videoUrl !== undefined && !parseVideoUrl(parsed.data.videoUrl)) {
+    res.status(400).json({ error: BAD_VIDEO_URL_MESSAGE });
+    return;
+  }
+  const updates: Record<string, unknown> = {};
+  if (parsed.data.title !== undefined) updates["title"] = parsed.data.title;
+  if (parsed.data.videoUrl !== undefined) updates["videoUrl"] = parsed.data.videoUrl.trim();
+  if (parsed.data.publishedOn !== undefined) updates["publishedOn"] = parsed.data.publishedOn;
+  if (parsed.data.description !== undefined) updates["description"] = parsed.data.description;
+  const [video] = await db
+    .update(learningLabVideosTable)
+    .set(updates)
+    .where(eq(learningLabVideosTable.id, idParam(req)))
+    .returning();
+  if (!video) {
+    res.status(404).json({ error: "Video not found." });
+    return;
+  }
+  res.json(videoOut(video));
+});
+
+router.delete("/admin/videos/:id", requireAdmin, async (req, res): Promise<void> => {
+  await db.delete(learningLabVideosTable).where(eq(learningLabVideosTable.id, idParam(req)));
+  res.json({ ok: true });
 });
 
 // --- Airtable connection & sync (live, via the Replit Airtable connection) ---
